@@ -15,5 +15,5 @@ python -m venv venv
 venv\Scripts\activate
 pip install flask
 python app.py
-
+```
 🚀 More coming every day!
