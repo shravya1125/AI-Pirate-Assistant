@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -49,5 +49,51 @@
     </div>
 
     <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
+ -->
+
+ <!DOCTYPE html>
+<html>
+<head>
+    <title>Voice Agent - Day 2</title>
+</head>
+<body>
+    <h1>Text to Speech Generator</h1>
+    <form id="ttsForm">
+        <textarea id="textInput" rows="4" cols="50" placeholder="Enter text here..."></textarea><br><br>
+        <label for="voice">Voice ID: </label>
+        <input type="text" id="voice" value="en-US-1" /><br><br>
+        <button type="submit">Generate Audio</button>
+    </form>
+    <br>
+    <audio id="audioPlayer" controls style="display:none;"></audio>
+
+    <script>
+        document.getElementById('ttsForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const text = document.getElementById('textInput').value;
+            const voiceId = document.getElementById('voice').value;
+
+            const response = await fetch(`/generate-audio?voice_id=${voiceId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ text })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                const audioUrl = data.audio_url; // Assumes Murf returns this
+                const player = document.getElementById('audioPlayer');
+                player.src = audioUrl;
+                player.style.display = 'block';
+                player.play();
+            } else {
+                alert("Error: " + (await response.text()));
+            }
+        });
+    </script>
 </body>
 </html>
