@@ -1,4 +1,4 @@
-<!-- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -32,68 +32,55 @@
 
         p {
             font-size: 1.2rem;
+            color:black;
         }
 
+        button{
+            background-color: #fff;
+            font-size: 1rem;
+        }
         footer {
             margin-top: 20px;
-            font-size: 0.9rem;
+            font-size: 1rem;
             opacity: 0.8;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🚀 30 Days of Voice Agents</h1>
-        <p>Welcome to Day 1: Project Setup</p>
-        <footer>Made with ❤️ using Flask + JS</footer>
+        <h1>🚀 AI Voice Agent - TTS Playback</h1>
+        <p>Hello! Welcome here</p>
+        <textarea id="textInput" rows="10" cols="80" placeholder="Enter your text here..."></textarea><br>
+        <button onclick="generateAudio()">Generate & Play</button>
+        <br><br>
+        <audio id="audioPlayer" controls style="display: none;"></audio>
+        <footer>Made with ❤️ by Shreya</footer>
     </div>
+    
+  <script>
+    async function generateAudio() {
+      const text = document.getElementById('textInput').value;
 
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
-</body>
-</html>
- -->
+      const response = await fetch('http://127.0.0.1:8000/generate-audio?voice_id=en-AU-kylie', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ text: text })
+      });
 
- <!DOCTYPE html>
-<html>
-<head>
-    <title>Voice Agent - Day 2</title>
-</head>
-<body>
-    <h1>Text to Speech Generator</h1>
-    <form id="ttsForm">
-        <textarea id="textInput" rows="4" cols="50" placeholder="Enter text here..."></textarea><br><br>
-        <label for="voice">Voice ID: </label>
-        <input type="text" id="voice" value="en-US-1" /><br><br>
-        <button type="submit">Generate Audio</button>
-    </form>
-    <br>
-    <audio id="audioPlayer" controls style="display:none;"></audio>
+      const data = await response.json();
 
-    <script>
-        document.getElementById('ttsForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const text = document.getElementById('textInput').value;
-            const voiceId = document.getElementById('voice').value;
+      if (data.audioFile) {
+        const audio = document.getElementById('audioPlayer');
+        audio.src = data.audioFile;
+        audio.style.display = 'block';
+        audio.play();
+      } else {
+        alert("Failed to generate audio. Try again.");
+      }
+    }
+  </script>
 
-            const response = await fetch(`/generate-audio?voice_id=${voiceId}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ text })
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                const audioUrl = data.audio_url; // Assumes Murf returns this
-                const player = document.getElementById('audioPlayer');
-                player.src = audioUrl;
-                player.style.display = 'block';
-                player.play();
-            } else {
-                alert("Error: " + (await response.text()));
-            }
-        });
-    </script>
 </body>
 </html>
