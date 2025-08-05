@@ -24,7 +24,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
 # POST endpoint to generate audio
 @app.post("/generate-audio")
 def generate_audio(input_data: TextInput, voice_id: str = Query(default="en-AU-kylie")):
