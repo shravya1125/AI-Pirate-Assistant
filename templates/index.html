@@ -590,7 +590,7 @@
         }
 
         .footer strong {
-            background: linear-gradient(135deg, #ffffff);
+            background: linear-gradient(135deg, #ff006e, #8338ec);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -644,7 +644,66 @@
             }
         }
 
-        /* Scrollbar Styling */
+        /* Transcription Display */
+        .transcription-section {
+            margin-top: 25px;
+            padding: 20px;
+            background: linear-gradient(135deg, 
+                rgba(58, 134, 255, 0.1) 0%,
+                rgba(131, 56, 236, 0.05) 100%);
+            border-radius: 15px;
+            border: 1px solid rgba(58, 134, 255, 0.2);
+            display: none;
+        }
+
+        .transcription-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #3a86ff;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .transcription-content {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            color: #ffffff;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            min-height: 60px;
+            max-height: 200px;
+            overflow-y: auto;
+            backdrop-filter: blur(10px);
+            word-wrap: break-word;
+        }
+
+        .transcription-content:empty::before {
+            content: "Transcription will appear here...";
+            color: rgba(255, 255, 255, 0.5);
+            font-style: italic;
+        }
+
+        .transcription-loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            color: #3a86ff;
+            font-weight: 500;
+        }
+
+        .transcription-error {
+            color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
         ::-webkit-scrollbar {
             width: 8px;
         }
@@ -676,7 +735,7 @@
     <div class="shape shape-3"></div>
 
     <div class="container">
-        <h1 class="main-title">AI VOICE AGENT</h1>
+        <h1 class="main-title">🚀 AI VOICE AGENT</h1>
         <p class="subtitle">Experience the Next Generation of Voice Technology</p>
 
         <div class="section">
@@ -708,6 +767,9 @@
                 <button class="btn btn-danger" onclick="stopRecording()">
                     Stop Recording
                 </button>
+                <button class="btn btn-primary" onclick="transcribeCurrentAudio()">
+                    📝 Transcribe Audio
+                </button>
             </div>
             <div class="recording-indicator" id="recordingIndicator">
                 <div class="recording-dot"></div>
@@ -715,6 +777,15 @@
             </div>
             <div id="echoStatus" class="status-message"></div>
             <audio id="echoAudio" controls></audio>
+            
+            <!-- Transcription Display Section -->
+            <div class="transcription-section" id="transcriptionSection">
+                <h3 class="transcription-title">
+                    <span>📝</span>
+                    Transcription
+                </h3>
+                <div class="transcription-content" id="transcriptionContent"></div>
+            </div>
         </div>
 
         <div class="footer">
@@ -756,6 +827,9 @@
             }
         }
 
+        // Global variables for audio management
+        let currentAudioBlob = null;
+
         // Enhanced Echo Bot Functions
         function startRecording() {
             navigator.mediaDevices.getUserMedia({ 
@@ -787,12 +861,13 @@
                     document.getElementById('recordingIndicator').style.display = 'none';
                     
                     const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                    currentAudioBlob = audioBlob; // Store for upload
                     const audioUrl = URL.createObjectURL(audioBlob);
                     const echoAudio = document.getElementById("echoAudio");
                     echoAudio.src = audioUrl;
                     echoAudio.style.display = 'block';
                     
-                    showStatus('echoStatus', 'Recording complete! Your voice is ready for playback...', 'success');
+                    showStatus('echoStatus', 'Recording complete! Processing transcription...', 'success');
                     
                     // Smooth audio reveal and play
                     setTimeout(() => {
@@ -807,6 +882,9 @@
                             });
                         }, 100);
                     }, 500);
+
+                    // Transcribe the audio instead of just uploading
+                    transcribeAudioFile(audioBlob);
                 });
             })
             .catch(error => {
@@ -826,6 +904,146 @@
             }
         }
 
+        // New function to upload audio file to server
+        async function uploadAudioFile(audioBlob) {
+            try {
+                // Show upload progress
+                showStatus('echoStatus', '📤 Uploading audio to server...', 'success');
+                
+                // Create FormData for file upload
+                const formData = new FormData();
+                const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+                const filename = `recording_${timestamp}.webm`;
+                formData.append('audio', audioBlob, filename);
+
+                // Upload to server
+                const response = await fetch('http://127.0.0.1:8000/upload-audio', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || response.statusText);
+                }
+
+                const result = await response.json();
+                
+                // Display successful upload information
+                const uploadInfo = `✅ Upload successful! 
+                📁 File: ${result.filename} 
+                📊 Size: ${formatFileSize(result.size)} 
+                🎵 Type: ${result.content_type}`;
+                
+                showStatus('echoStatus', uploadInfo, 'success');
+                
+                console.log('Upload successful:', result);
+                
+            } catch (error) {
+                console.error('Upload failed:', error);
+                showStatus('echoStatus', `❌ Upload failed: ${error.message}`, 'error');
+            }
+        }
+
+        // Helper function to format file size
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // New function to transcribe audio file
+        async function transcribeAudioFile(audioBlob) {
+            try {
+                // Show transcription section and loading state
+                const transcriptionSection = document.getElementById('transcriptionSection');
+                const transcriptionContent = document.getElementById('transcriptionContent');
+                
+                transcriptionSection.style.display = 'block';
+                transcriptionSection.style.opacity = '0';
+                transcriptionSection.style.transform = 'translateY(20px)';
+                transcriptionSection.style.transition = 'all 0.5s ease';
+                
+                setTimeout(() => {
+                    transcriptionSection.style.opacity = '1';
+                    transcriptionSection.style.transform = 'translateY(0)';
+                }, 100);
+
+                transcriptionContent.innerHTML = `
+                    <div class="transcription-loading">
+                        <div class="loading"></div>
+                        <span>Transcribing audio using AI...</span>
+                    </div>
+                `;
+
+                showStatus('echoStatus', '🎤 Transcribing audio with AssemblyAI...', 'success');
+                
+                // Create FormData for file upload
+                const formData = new FormData();
+                const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+                const filename = `recording_${timestamp}.webm`;
+                formData.append('file', audioBlob, filename);
+
+                // Send to transcription endpoint
+                const response = await fetch('http://127.0.0.1:8000/transcribe/file', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || response.statusText);
+                }
+
+                const result = await response.json();
+                
+                // Display transcription result
+                if (result.transcription) {
+                    transcriptionContent.innerHTML = `
+                        <div style="margin-bottom: 15px;">
+                            <strong style="color: #3a86ff;">Transcription:</strong>
+                        </div>
+                        <div style="font-size: 1.1rem; line-height: 1.8;">
+                            "${result.transcription}"
+                        </div>
+                        <div style="margin-top: 15px; font-size: 0.9rem; color: rgba(255,255,255,0.6);">
+                            <span>📊 Confidence: ${(result.confidence * 100).toFixed(1)}%</span> | 
+                            <span>⏱️ Duration: ${result.audio_duration}s</span> |
+                            <span>📝 Words: ${result.words || 'N/A'}</span>
+                        </div>
+                    `;
+                    
+                    showStatus('echoStatus', '✅ Transcription completed successfully!', 'success');
+                } else {
+                    throw new Error('No transcription received from server');
+                }
+                
+            } catch (error) {
+                console.error('Transcription failed:', error);
+                
+                const transcriptionContent = document.getElementById('transcriptionContent');
+                transcriptionContent.innerHTML = `
+                    <div class="transcription-error">
+                        <strong>❌ Transcription Failed</strong><br>
+                        ${error.message}
+                    </div>
+                `;
+                
+                showStatus('echoStatus', `❌ Transcription failed: ${error.message}`, 'error');
+            }
+        }
+
+        // Manual transcription function
+        function transcribeCurrentAudio() {
+            if (currentAudioBlob) {
+                transcribeAudioFile(currentAudioBlob);
+            } else {
+                showStatus('echoStatus', 'No audio recording available to transcribe. Please record something first.', 'error');
+            }
+        }
+
         // Enhanced Text-to-Speech Function
         async function generateAudio() {
             const textInput = document.getElementById('textInput');
@@ -835,16 +1053,16 @@
                 showStatus('ttsStatus', 'Please enter some text to convert to speech.', 'error');
                 textInput.focus();
                 textInput.style.animation = 'shake 0.5s ease-in-out';
-                setTimeout(() => textInput.style.animation = '', 200);
+                setTimeout(() => textInput.style.animation = '', 500);
                 return;
             }
 
-            if (text.length > 500) {
-                showStatus('ttsStatus', 'Text is too long. Please keep it under 500 characters.', 'error');
+            if (text.length > 1000) {
+                showStatus('ttsStatus', 'Text is too long. Please keep it under 1000 characters.', 'error');
                 return;
             }
 
-            // setButtonLoading('ttsButtonText', true, 'Generate Audio');
+            setButtonLoading('ttsButtonText', true, 'Generate Audio');
             showStatus('ttsStatus', 'AI is processing your text... Please wait.', 'success');
 
             try {
@@ -864,11 +1082,12 @@
                 const data = await response.json();
 
                 if (data.audioFile) {
+                    // Server provided audio data
                     const audio = document.getElementById('audioPlayer');
                     audio.src = data.audioFile;
                     audio.style.display = 'block';
                     
-                    showStatus('ttsStatus', 'Audio generated successfully! Click play to listen to your AI voice.', 'success');
+                    showStatus('ttsStatus', `Audio generated successfully using ${data.service || 'TTS'}! Click play to listen.`, 'success');
                     
                     // Smooth audio reveal with animation
                     audio.style.opacity = '0';
@@ -887,14 +1106,69 @@
                             });
                         }, 300);
                     }, 200);
+                } else if (data.use_browser_tts) {
+                    // Fallback to browser's speech synthesis
+                    useBrowserTTS(text);
+                    showStatus('ttsStatus', 'Using browser speech synthesis...', 'success');
                 } else {
-                    throw new Error("No audio file received from server.");
+                    throw new Error("No audio file received from server and no fallback available.");
                 }
             } catch (err) {
                 console.error("TTS request failed:", err);
-                showStatus('ttsStatus', `Error generating audio: ${err.message}`, 'error');
+                // Fallback to browser TTS if server fails
+                try {
+                    useBrowserTTS(text);
+                    showStatus('ttsStatus', 'Server TTS unavailable. Using browser speech synthesis.', 'success');
+                } catch (fallbackErr) {
+                    showStatus('ttsStatus', `Error generating audio: ${err.message}`, 'error');
+                }
             } finally {
                 setButtonLoading('ttsButtonText', false, 'Generate Audio');
+            }
+        }
+
+        // Browser TTS fallback function
+        function useBrowserTTS(text) {
+            if ('speechSynthesis' in window) {
+                // Stop any ongoing speech
+                speechSynthesis.cancel();
+                
+                // Create speech utterance
+                const utterance = new SpeechSynthesisUtterance(text);
+                
+                // Configure speech settings
+                utterance.rate = 1.0;
+                utterance.pitch = 1.0;
+                utterance.volume = 1.0;
+                
+                // Try to use a good voice
+                const voices = speechSynthesis.getVoices();
+                const preferredVoice = voices.find(voice => 
+                    voice.lang.startsWith('en') && 
+                    (voice.name.includes('Google') || voice.name.includes('Microsoft'))
+                );
+                
+                if (preferredVoice) {
+                    utterance.voice = preferredVoice;
+                }
+                
+                // Set up event handlers
+                utterance.onstart = () => {
+                    showStatus('ttsStatus', '🔊 Speaking...', 'success');
+                };
+                
+                utterance.onend = () => {
+                    showStatus('ttsStatus', '✅ Speech completed!', 'success');
+                };
+                
+                utterance.onerror = (event) => {
+                    showStatus('ttsStatus', `Speech synthesis error: ${event.error}`, 'error');
+                };
+                
+                // Speak the text
+                speechSynthesis.speak(utterance);
+            } else {
+                throw new Error('Speech synthesis not supported in this browser');
             }
         }
 

@@ -17,12 +17,6 @@ An interactive voice bot web application that supports both:
 
 ---
 
-## 📸 Preview
-
-![screenshot](preview.png) 
-
----
-
 ## ⚙️ Tech Stack
 
 | Layer       | Tech Used                 |
@@ -57,17 +51,40 @@ python app.py
 - Swagger UI (localhost:8000/docs)
 
 Day 3: Play TTS Audio on Web UI
+
 Today’s task was all about creating a seamless voice experience on the frontend! 🗣️✨
  🔹 I built a simple HTML page with a text input and a button.
  🔹 When the user submits text, it makes a POST request to my FastAPI /generate-audio endpoint.
  🔹 The backend calls Murf’s REST TTS API to generate audio and sends back a playable URL.
  🔹 The frontend receives that URL and plays the audio in an <audio> player element – all dynamically handled using JavaScript!
-🧠 Skills Applied:
-RESTful API Integration (Murf TTS)
-FastAPI backend
-CORS handling
-Fetch API in JS
-Audio playback on frontend
+
+🧠 Skills Applied: RESTful API Integration (Murf TTS), FastAPI backend, CORS handling, Fetch API in JS,Audio playback on frontend
 🔐 API keys stored securely in .env, keeping best practices in mind!
-Thanks to the hashtag#MurfAI team for this hands-on learning experience 🙌
 Can’t wait to take this further with more advanced voice features!
+
+Day 4 of the hashtag#30DaysOfAIVoiceAgents challenge is complete!
+Today’s task: Build an Echo Bot using the MediaRecorder API!
+Now my bot can record my voice and instantly play it back!🎙️
+I created a full-stack application that:
+🔹 Accepts voice or text input 
+🔹 Uses Murf API to generate realistic TTS audio 
+🔹 Echoes back recorded audio via MediaRecorder 
+🔹 Built with FastAPI, JavaScript, and HTML/CSS 
+🔹 Fully interactive and plays audio directly in the browser!
+
+Day 5: Send Audio to the Server 
+Today’s task was about building a complete voice upload pipeline. After recording my voice using the Echo Bot I built earlier, I now upload that audio to my FastAPI backend using a new /upload-audio endpoint! 
+hashtag#MurfAI hashtag#BuildWithMurf
+📌 Features:
+ ✅ Uses MediaRecorder to capture audio
+ ✅ Uploads audio to backend after recording
+ ✅ Stores audio in an /uploads directory
+ ✅ Displays upload status and file details in the UI
+
+Day 6: Transcribe Audio with AssemblyAI
+Today, I integrated audio transcription into my voice agent! 🔊➡️✍️
+ ✅ Recorded audio using the browser
+ ✅ Sent it to my FastAPI server
+ ✅ Used AssemblyAI to transcribe audio in real time
+ ✅ Displayed the transcription in the UI
+🔧Tools Used: FastAPI, AssemblyAI Python SDK, JavaScript (MediaRecorder API), HTML/CSS
