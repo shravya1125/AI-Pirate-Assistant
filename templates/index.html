@@ -180,6 +180,7 @@
             border: 1px solid rgba(255, 255, 255, 0.15);
             padding: 60px 50px;
             border-radius: 30px;
+            
             box-shadow: 
                 0 40px 80px rgba(0, 0, 0, 0.3),
                 0 20px 40px rgba(255, 0, 110, 0.1),
@@ -734,7 +735,7 @@
     <div class="shape shape-2"></div>
     <div class="shape shape-3"></div>
 
-    <div class="container">
+    <div class="container" >
         <h1 class="main-title">🚀 AI VOICE AGENT</h1>
         <p class="subtitle">Experience the Next Generation of Voice Technology</p>
 
@@ -755,12 +756,24 @@
 
         <div class="divider"></div>
 
+
+</div>
+
+
         <div class="section">
             <h2 class="section-title">
                 <span class="icon">🔊</span>
                 Echo Bot
             </h2>
-            <div class="btn-group">
+                    <div style="margin-bottom: 15px;">
+    <label for="voiceSelect" style="color:white;">Choose Voice:</label>
+    <select id="voiceSelect">
+        <option value="en-US-natalie">Natalie (US Female)</option>
+        <option value="en-US-marcus">Marcus (US Male)</option>
+        <option value="en-GB-sarah">Sarah (UK Female)</option>
+        <option value="en-US-guy">Guy (US Male)</option>
+    </select>
+            <div class="btn-group" style="margin-top: 15px;">
                 <button class="btn btn-secondary" onclick="startRecording()">
                     Start Recording
                 </button>
@@ -778,7 +791,7 @@
             <div id="echoStatus" class="status-message"></div>
             <audio id="echoAudio" controls></audio>
             
-            <!-- Transcription Display Section -->
+
             <div class="transcription-section" id="transcriptionSection">
                 <h3 class="transcription-title">
                     <span>📝</span>
@@ -884,7 +897,8 @@
                     }, 500);
 
                     // Transcribe the audio instead of just uploading
-                    transcribeAudioFile(audioBlob);
+                   // transcribeAudioFile(audioBlob);
+                   processEchoBotV2(audioBlob)
                 });
             })
             .catch(error => {
@@ -955,85 +969,142 @@
         }
 
         // New function to transcribe audio file
-        async function transcribeAudioFile(audioBlob) {
-            try {
-                // Show transcription section and loading state
-                const transcriptionSection = document.getElementById('transcriptionSection');
-                const transcriptionContent = document.getElementById('transcriptionContent');
+        // async function transcribeAudioFile(audioBlob) {
+        //     try {
+        //         // Show transcription section and loading state
+        //         const transcriptionSection = document.getElementById('transcriptionSection');
+        //         const transcriptionContent = document.getElementById('transcriptionContent');
                 
-                transcriptionSection.style.display = 'block';
-                transcriptionSection.style.opacity = '0';
-                transcriptionSection.style.transform = 'translateY(20px)';
-                transcriptionSection.style.transition = 'all 0.5s ease';
+        //         transcriptionSection.style.display = 'block';
+        //         transcriptionSection.style.opacity = '0';
+        //         transcriptionSection.style.transform = 'translateY(20px)';
+        //         transcriptionSection.style.transition = 'all 0.5s ease';
                 
-                setTimeout(() => {
-                    transcriptionSection.style.opacity = '1';
-                    transcriptionSection.style.transform = 'translateY(0)';
-                }, 100);
+        //         setTimeout(() => {
+        //             transcriptionSection.style.opacity = '1';
+        //             transcriptionSection.style.transform = 'translateY(0)';
+        //         }, 100);
 
-                transcriptionContent.innerHTML = `
-                    <div class="transcription-loading">
-                        <div class="loading"></div>
-                        <span>Transcribing audio using AI...</span>
-                    </div>
-                `;
+        //         transcriptionContent.innerHTML = `
+        //             <div class="transcription-loading">
+        //                 <div class="loading"></div>
+        //                 <span>Transcribing audio using AI...</span>
+        //             </div>
+        //         `;
 
-                showStatus('echoStatus', '🎤 Transcribing audio with AssemblyAI...', 'success');
+        //         showStatus('echoStatus', '🎤 Transcribing audio with AssemblyAI...', 'success');
                 
-                // Create FormData for file upload
-                const formData = new FormData();
-                const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-                const filename = `recording_${timestamp}.webm`;
-                formData.append('file', audioBlob, filename);
+        //         // Create FormData for file upload
+        //         const formData = new FormData();
+        //         const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        //         const filename = `recording_${timestamp}.webm`;
+        //         formData.append('file', audioBlob, filename);
 
-                // Send to transcription endpoint
-                const response = await fetch('http://127.0.0.1:8000/transcribe/file', {
-                    method: 'POST',
-                    body: formData
-                });
+        //         // Send to transcription endpoint
+        //         const response = await fetch('http://127.0.0.1:8000/transcribe/file', {
+        //             method: 'POST',
+        //             body: formData
+        //         });
 
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.detail || response.statusText);
-                }
+        //         if (!response.ok) {
+        //             const errorData = await response.json();
+        //             throw new Error(errorData.detail || response.statusText);
+        //         }
 
-                const result = await response.json();
+        //         const result = await response.json();
                 
-                // Display transcription result
-                if (result.transcription) {
-                    transcriptionContent.innerHTML = `
-                        <div style="margin-bottom: 15px;">
-                            <strong style="color: #3a86ff;">Transcription:</strong>
-                        </div>
-                        <div style="font-size: 1.1rem; line-height: 1.8;">
-                            "${result.transcription}"
-                        </div>
-                        <div style="margin-top: 15px; font-size: 0.9rem; color: rgba(255,255,255,0.6);">
-                            <span>📊 Confidence: ${(result.confidence * 100).toFixed(1)}%</span> | 
-                            <span>⏱️ Duration: ${result.audio_duration}s</span> |
-                            <span>📝 Words: ${result.words || 'N/A'}</span>
-                        </div>
-                    `;
+        //         // Display transcription result
+        //         if (result.transcription) {
+        //             transcriptionContent.innerHTML = `
+        //                 <div style="margin-bottom: 15px;">
+        //                     <strong style="color: #3a86ff;">Transcription:</strong>
+        //                 </div>
+        //                 <div style="font-size: 1.1rem; line-height: 1.8;">
+        //                     "${result.transcription}"
+        //                 </div>
+        //                 <div style="margin-top: 15px; font-size: 0.9rem; color: rgba(255,255,255,0.6);">
+        //                     <span>📊 Confidence: ${(result.confidence * 100).toFixed(1)}%</span> | 
+        //                     <span>⏱️ Duration: ${result.audio_duration}s</span> |
+        //                     <span>📝 Words: ${result.words || 'N/A'}</span>
+        //                 </div>
+        //             `;
                     
-                    showStatus('echoStatus', '✅ Transcription completed successfully!', 'success');
-                } else {
-                    throw new Error('No transcription received from server');
-                }
+        //             showStatus('echoStatus', '✅ Transcription completed successfully!', 'success');
+        //         } else {
+        //             throw new Error('No transcription received from server');
+        //         }
                 
-            } catch (error) {
-                console.error('Transcription failed:', error);
+        //     } catch (error) {
+        //         console.error('Transcription failed:', error);
                 
-                const transcriptionContent = document.getElementById('transcriptionContent');
-                transcriptionContent.innerHTML = `
-                    <div class="transcription-error">
-                        <strong>❌ Transcription Failed</strong><br>
-                        ${error.message}
-                    </div>
-                `;
+        //         const transcriptionContent = document.getElementById('transcriptionContent');
+        //         transcriptionContent.innerHTML = `
+        //             <div class="transcription-error">
+        //                 <strong>❌ Transcription Failed</strong><br>
+        //                 ${error.message}
+        //             </div>
+        //         `;
                 
-                showStatus('echoStatus', `❌ Transcription failed: ${error.message}`, 'error');
-            }
+        //         showStatus('echoStatus', `❌ Transcription failed: ${error.message}`, 'error');
+        //     }
+        // }
+
+        async function processEchoBotV2(audioBlob) {
+    try {
+        // Show transcription section with loading
+        const transcriptionSection = document.getElementById('transcriptionSection');
+        const transcriptionContent = document.getElementById('transcriptionContent');
+        transcriptionSection.style.display = 'block';
+        transcriptionContent.innerHTML = `
+            <div class="transcription-loading">
+                <div class="loading"></div>
+                <span>Processing audio with Echo Bot v2...</span>
+            </div>
+        `;
+        showStatus('echoStatus', '🎤 Sending to Echo Bot v2...', 'success');
+
+        // Prepare FormData
+        const formData = new FormData();
+        formData.append('file', audioBlob, 'recording.webm');
+
+        // Send to /tts/echo
+        const response = await fetch('http://127.0.0.1:8000/tts/echo', {
+            method: 'POST',
+            body: formData
+        });
+
+        if (!response.ok) {
+            const errData = await response.json();
+            throw new Error(errData.detail || response.statusText);
         }
+
+        const result = await response.json();
+
+        // Show transcription
+        transcriptionContent.innerHTML = `
+            <div><strong style="color:#3a86ff;">Transcription:</strong></div>
+            <div style="margin-top:8px;">"${result.transcription}"</div>
+        `;
+
+        // Play Murf audio
+        if (result.murf_audio_url) {
+            const echoAudio = document.getElementById('echoAudio');
+            echoAudio.src = result.murf_audio_url;
+            echoAudio.style.display = 'block';
+            echoAudio.play().catch(() => {
+                console.log("Autoplay blocked — click play manually");
+            });
+            showStatus('echoStatus', '✅ Murf audio ready! Playing...', 'success');
+        } else {
+            showStatus('echoStatus', '⚠️ No audio URL returned from server', 'error');
+        }
+
+    } catch (error) {
+        console.error(error);
+        showStatus('echoStatus', `❌ Echo Bot v2 failed: ${error.message}`, 'error');
+    }
+}
+
 
         // Manual transcription function
         function transcribeCurrentAudio() {
@@ -1044,6 +1115,7 @@
             }
         }
 
+        
         // Enhanced Text-to-Speech Function
         async function generateAudio() {
             const textInput = document.getElementById('textInput');
@@ -1268,5 +1340,484 @@
             document.head.appendChild(reducedStyle);
         }
     </script>
+    <!-- <script>
+let mediaRecorder;
+let audioChunks = [];
+let currentAudioBlob = null;
+
+// ==========================
+// Utility: Show Status
+// ==========================
+function showStatus(elementId, message, type) {
+    const statusElem = document.getElementById(elementId);
+    if (!statusElem) return;
+    statusElem.innerHTML = message;
+    statusElem.className = type;
+}
+
+// ==========================
+// Populate Voice Selector from Backend
+// ==========================
+async function loadMurfVoices() {
+    try {
+        const res = await fetch("http://127.0.0.1:8000/murf/voices");
+        if (!res.ok) throw new Error("Failed to load voices");
+        const data = await res.json();
+        const voices = data.voices?.voices || [];
+
+        const voiceSelect = document.getElementById("voiceSelect");
+        voiceSelect.innerHTML = ""; // clear old
+
+        voices.forEach(v => {
+            const opt = document.createElement("option");
+            opt.value = v.voiceId;
+            opt.textContent = `${v.name} (${v.language})`;
+            voiceSelect.appendChild(opt);
+        });
+    } catch (err) {
+        console.error("Error loading voices:", err);
+        // fallback default
+        const voiceSelect = document.getElementById("voiceSelect");
+        voiceSelect.innerHTML = `
+            <option value="en-US-natalie">Natalie (US Female)</option>
+            <option value="en-US-marcus">Marcus (US Male)</option>
+        `;
+    }
+}
+
+// ==========================
+// Echo Bot v2 Processor
+// ==========================
+async function processEchoBotV2(audioBlob) {
+    try {
+        const transcriptionSection = document.getElementById('transcriptionSection');
+        const transcriptionContent = document.getElementById('transcriptionContent');
+        transcriptionSection.style.display = 'block';
+        transcriptionContent.innerHTML = `
+            <div class="transcription-loading">
+                <div class="loading"></div>
+                <span>Processing audio with Echo Bot v2...</span>
+            </div>
+        `;
+        showStatus('echoStatus', '🎤 Sending to Echo Bot v2...', 'success');
+
+        const formData = new FormData();
+        formData.append('file', audioBlob, 'recording.webm');
+
+        const voiceSelect = document.getElementById("voiceSelect");
+        if (voiceSelect) {
+            formData.append('voice_id', voiceSelect.value);
+        }
+
+        const response = await fetch('http://127.0.0.1:8000/tts/echo', {
+            method: 'POST',
+            body: formData
+        });
+
+        if (!response.ok) {
+            const errData = await response.json();
+            throw new Error(errData.detail || response.statusText);
+        }
+
+        const result = await response.json();
+
+        transcriptionContent.innerHTML = `
+            <div><strong style="color:#3a86ff;">Transcription:</strong></div>
+            <div style="margin-top:8px;">"${result.transcription}"</div>
+        `;
+
+        if (result.murf_audio_url) {
+            const echoAudio = document.getElementById('echoAudio');
+            echoAudio.src = result.murf_audio_url;
+            echoAudio.style.display = 'block';
+            echoAudio.play().catch(() => {
+                console.log("Autoplay blocked — click play manually");
+            });
+            showStatus('echoStatus', '✅ Murf audio ready! Playing...', 'success');
+        }
+    } catch (error) {
+        console.error(error);
+        showStatus('echoStatus', `❌ Echo Bot v2 failed: ${error.message}`, 'error');
+    }
+}
+
+// ==========================
+// Recording Controls
+// ==========================
+async function startRecording() {
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(stream);
+        audioChunks = [];
+
+        mediaRecorder.ondataavailable = event => {
+            if (event.data.size > 0) {
+                audioChunks.push(event.data);
+            }
+        };
+
+        mediaRecorder.onstop = () => {
+            document.getElementById('recordingIndicator').style.display = 'none';
+            const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+            currentAudioBlob = audioBlob;
+            processEchoBotV2(audioBlob);
+        };
+
+        mediaRecorder.start();
+        document.getElementById('recordingIndicator').style.display = 'block';
+        showStatus('echoStatus', 'Recording started...', 'success');
+    } catch (err) {
+        console.error("Mic access denied:", err);
+        showStatus('echoStatus', '❌ Microphone access denied.', 'error');
+    }
+}
+
+function stopRecording() {
+    if (mediaRecorder && mediaRecorder.state === 'recording') {
+        mediaRecorder.stop();
+        mediaRecorder.stream.getTracks().forEach(track => track.stop());
+        showStatus('echoStatus', 'Processing your recording...', 'success');
+    } else {
+        showStatus('echoStatus', 'No active recording session found.', 'error');
+    }
+}
+
+// ==========================
+// Init on Page Load
+// ==========================
+window.addEventListener("DOMContentLoaded", () => {
+    loadMurfVoices();
+});
+</script> -->
+
 </body>
 </html>
+
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Echo Bot v2 - Murf Voice</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎤 Echo Bot v2</h1>
+            <p>Speak and hear your voice transformed with Murf AI</p>
+        </div>
+
+        <div class="main-content">
+            <div class="recording-section">
+                <button id="recordBtn" class="record-btn">
+                    <span class="btn-icon">🎤</span>
+                    <span class="btn-text">Start Recording</span>
+                </button>
+                <div class="recording-indicator" id="recordingIndicator">
+                    <div class="pulse"></div>
+                    <span>Recording...</span>
+                </div>
+            </div>
+
+            <div class="status-section" id="statusSection">
+                <div class="status-item">
+                    <span class="status-label">Status:</span>
+                    <span class="status-value" id="statusText">Ready to record</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">Duration:</span>
+                    <span class="status-value" id="durationText">00:00</span>
+                </div>
+            </div>
+
+            <div class="transcription-section" id="transcriptionSection">
+                <h3>Transcription</h3>
+                <div class="transcription-box" id="transcriptionText">
+                    Your speech will appear here...
+                </div>
+            </div>
+
+            <div class="audio-section" id="audioSection">
+                <h3>Generated Audio</h3>
+                <audio id="generatedAudio" controls>
+                    Your browser does not support the audio element.
+                </audio>
+                <div class="audio-info" id="audioInfo">
+                    <span>Voice: Murf AI • Quality: High</span>
+                </div>
+            </div>
+
+            <div class="voice-selection" id="voiceSelection">
+                <h3>Select Voice</h3>
+                <select id="voiceSelect" class="voice-dropdown">
+                    <option value="en-US-aria">Aria (Female, US)</option>
+                    <option value="en-US-guy">Guy (Male, US)</option>
+                    <option value="en-US-jenny">Jenny (Female, US)</option>
+                    <option value="en-US-davis">Davis (Male, US)</option>
+                    <option value="en-GB-libby">Libby (Female, UK)</option>
+                    <option value="en-GB-ryan">Ryan (Male, UK)</option>
+                </select>
+            </div>
+
+            <div class="progress-section" id="progressSection">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="progress-text" id="progressText">Processing...</div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Powered by AssemblyAI & Murf API</p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> -->
+
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Echo Bot v2 - AI Voice Agent with Murf</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0a0a0a;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Animated Neural Network Background */
+        .neural-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            background: radial-gradient(circle at 20% 50%, #120a8f 0%, transparent 50%),
+                        radial-gradient(circle at 80% 20%, #ff006e 0%, transparent 50%),
+                        radial-gradient(circle at 40% 80%, #8338ec 0%, transparent 50%),
+                        radial-gradient(circle at 90% 90%, #3a86ff 0%, transparent 50%),
+                        linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            animation: bgShift 20s ease-in-out infinite;
+        }
+
+        @keyframes bgShift {
+            0%, 100% { filter: hue-rotate(0deg) brightness(0.8); }
+            25% { filter: hue-rotate(90deg) brightness(1); }
+            50% { filter: hue-rotate(180deg) brightness(0.9); }
+            75% { filter: hue-rotate(270deg) brightness(1.1); }
+        }
+
+        /* Floating Particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            background: linear-gradient(45deg, #ff006e, #8338ec, #3a86ff);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .particle:nth-child(1) {
+            width: 4px;
+            height: 4px;
+            top: 20%;
+            left: 20%;
+            animation-delay: -0.5s;
+            animation-duration: 8s;
+        }
+
+        .particle:nth-child(2) {
+            width: 6px;
+            height: 6px;
+            top: 60%;
+            left: 80%;
+            animation-delay: -2s;
+            animation-duration: 10s;
+        }
+
+        .particle:nth-child(3) {
+            width: 3px;
+            height: 3px;
+            top: 80%;
+            left: 10%;
+            animation-delay: -4s;
+            animation-duration: 7s;
+        }
+
+        .particle:nth-child(4) {
+            width: 5px;
+            height: 5px;
+            top: 10%;
+            left: 90%;
+            animation-delay: -1s;
+            animation-duration: 9s;
+        }
+
+        .particle:nth-child(5) {
+            width: 2px;
+            height: 2px;
+            top: 40%;
+            left: 60%;
+            animation-delay: -3s;
+            animation-duration: 11s;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px) rotate(0deg);
+                opacity: 0.4;
+            }
+            25% {
+                transform: translateY(-30px) rotate(90deg);
+                opacity: 0.8;
+            }
+            50% {
+                transform: translateY(-60px) rotate(180deg);
+                opacity: 1;
+            }
+            75% {
+                transform: translateY(-30px) rotate(270deg);
+                opacity: 0.6;
+            }
+        }
+
+        /* Geometric Shapes */
+        .shape {
+            position: fixed;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .shape-1 {
+            width: 200px;
+            height: 200px;
+            border: 2px solid rgba(255, 0, 110, 0.2);
+            border-radius: 50%;
+            top: 10%;
+            right: 10%;
+            animation: rotate 15s linear infinite;
+        }
+
+        .shape-2 {
+            width: 150px;
+            height: 150px;
+            border: 2px solid rgba(131, 56, 236, 0.3);
+            transform: rotate(45deg);
+            bottom: 20%;
+            left: 15%;
+            animation: rotate 20s linear infinite reverse;
+        }
+
+        .shape-3 {
+            width: 100px;
+            height: 100px;
+            border: 2px solid rgba(58, 134, 255, 0.4);
+            border-radius: 20px;
+            top: 50%;
+            left: 5%;
+            animation: float 8s ease-in-out infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Main Container */
+        .container {
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.1) 0%,
+                rgba(255, 255, 255, 0.05) 50%,
+                rgba(255, 255, 255, 0.02) 100%);
+            backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 60px 50px;
+            border-radius: 30px;
+            box-shadow: 
+                0 40px 80px rgba(0, 0, 0, 0.3),
+                0 20px 40px rgba(255, 0, 110, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            text-align: center;
+            max-width: 900px;
+            width: 90%;
+            position: relative;
+            overflow: hidden;
+            animation: containerEntrance 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, 
+                #ff006e, #8338ec, #3a86ff, #ff006e);
+            background-size: 400% 400%;
+            border-radius: 30px;
+            z-index: -1;
+            animation: gradientFlow 6s ease infinite;
+            opacity: 0.3;
+        }
+
+        @keyframes gradientFlow {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        @keyframes containerEntrance {
+            0% {
+                opacity: 0;
+                transform: translateY(100px) scale(0.8);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* Typography */
+        .main-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 3.5rem;
+            font-weight: 900;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, 
+                #ff006e 0%, 
+                #8338ec 30%, 
+                #3a86ff 60%, 
+                #ffffff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 50px rgba(255, 0, 110, 0.5);
+            animation: titleGlow 3s ease-in-out infinite alternate;
+            position: relative;
+        } -->
