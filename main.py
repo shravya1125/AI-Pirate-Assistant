@@ -1,3 +1,130 @@
+import asyncio
+import httpx
+from flask import Flask, jsonify, request
+from asgiref.wsgi import WsgiToAsgi
+
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+    """A basic homepage endpoint."""
+    return "<h1>Hello, Uvicorn!</h1><p>This is a Flask app running on an ASGI server.</p>"
+
+@app.route('/health')
+def health_check():
+    """A health check endpoint that returns a JSON response."""
+    return jsonify({"status": "healthy", "service": "main_app"})
+
+@app.route('/greet')
+def greet():
+    """An endpoint that greets a user based on a query parameter."""
+    name = request.args.get('name', 'World')
+    return f"Hello, {name}!"
+
+# -----------------------------------------------------------
+# Asynchronous LLM Test Endpoint
+# -----------------------------------------------------------
+
+@app.route('/llm/test')
+async def llm_test():
+    """
+    An asynchronous endpoint that simulates a call to an LLM.
+    
+    Using 'async def' allows Uvicorn to handle other requests while this
+    function 'awaits' a long-running task, like an external API call.
+    """
+    print("Received request for LLM test...")
+    
+    # Simulate a long-running API call to an LLM.
+    # In a real application, you would make an actual network request here.
+    await asyncio.sleep(3)  # This pauses the function for 3 seconds without blocking the server.
+
+    # Simulate the response from the LLM.
+    response_data = {
+        "status": "success",
+        "message": "This is a simulated response from the LLM.",
+        "request_id": "12345-abcde",
+        "generated_text": "The quick brown fox jumps over the lazy dog."
+    }
+    
+    print("LLM test complete. Sending response.")
+    return jsonify(response_data)
+
+
+# -----------------------------------------------------------
+# POST Endpoint for LLM Query
+# -----------------------------------------------------------
+@app.route('/llm/query', methods=['POST'])
+async def llm_query():
+    """
+    An async endpoint to query an LLM (e.g., Google Gemini API).
+    
+    This endpoint expects a JSON body with a 'text' field and returns a
+    JSON response with the generated text from the LLM.
+    """
+    try:
+        # Get the request body as JSON.
+        data = request.get_json()
+        if not data or 'text' not in data:
+            return jsonify({"error": "Invalid request body. 'text' field is required."}), 400
+
+        user_prompt = data['text']
+        print(f"Received LLM query: {user_prompt}")
+
+        # --- Gemini API Configuration ---
+        # NOTE: Replace 'YOUR_API_KEY' with your actual Google Gemini API key.
+        # It's recommended to load this from an environment variable.
+        GEMINI_API_KEY = "AIzaSyBZZeifBSpKxC1QPS88_2zCq8q-kBBZCos"
+        MODEL_NAME = "gemini-2.5-flash-preview-05-20"
+        API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL_NAME}:generateContent?key={GEMINI_API_KEY}"
+        
+        # --- API Request Payload ---
+        payload = {
+            "contents": [
+                {
+                    "parts": [{"text": user_prompt}]
+                }
+            ]
+        }
+        
+        # --- Make the Asynchronous API Call ---
+        # We use httpx, an async-compatible HTTP client, to make the request.
+        # You'll need to install it: pip install httpx
+        async with httpx.AsyncClient() as client:
+            response = await client.post(API_URL, json=payload, timeout=30)
+            response.raise_for_status()  # Raise an exception for bad status codes (4xx or 5xx).
+
+        # --- Process the API Response ---
+        api_response = response.json()
+        generated_text = api_response.get("candidates", [{}])[0].get("content", {}).get("parts", [{}])[0].get("text", "")
+        
+        # Handle cases where the LLM might have safety-related blocks.
+        if not generated_text:
+            return jsonify({"error": "LLM response was blocked or empty. Please try a different prompt."}), 400
+
+        print("LLM API call successful.")
+        return jsonify({"generated_text": generated_text})
+
+    except httpx.HTTPStatusError as e:
+        print(f"HTTP error during LLM call: {e}")
+        return jsonify({"error": f"LLM API returned an error: {e}"}), e.response.status_code
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return jsonify({"error": "An internal server error occurred."}), 500
+
+
+# -----------------------------------------------------------
+# ASGI Integration
+# -----------------------------------------------------------
+
+# This is the crucial step. We wrap the Flask WSGI application instance `app`
+# with WsgiToAsgi to create a new, ASGI-compatible application instance.
+# Uvicorn will now be able to run this `asgi_app` variable correctly.
+asgi_app = WsgiToAsgi(app)
+
+
+
+
 # from fastapi import FastAPI, File, UploadFile, HTTPException
 # from fastapi.middleware.cors import CORSMiddleware
 # from fastapi.responses import JSONResponse
@@ -898,77 +1025,77 @@
     
 #     uvicorn.run(app, host="127.0.0.1", port=8000, reload=True)
 
-from fastapi import FastAPI, File, UploadFile, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-import os
-import tempfile
-from pathlib import Path
-import assemblyai as aai
-import httpx
+# from fastapi import FastAPI, File, UploadFile, HTTPException
+# from fastapi.middleware.cors import CORSMiddleware
+# import os
+# import tempfile
+# from pathlib import Path
+# import assemblyai as aai
+# import httpx
 
-app = FastAPI(title="AI Voice Agent Server - Echo Bot v2", version="2.1.0")
+# app = FastAPI(title="AI Voice Agent Server - Echo Bot v2", version="2.1.0")
 
-# Replace with your actual API keys
-ASSEMBLYAI_API_KEY = "1facf73354b34dd68c40b02dd78d40aa"
-MURF_API_KEY = "ap2_65243dd8-74e5-42f7-aacc-c0de2533c137"
+# # Replace with your actual API keys
+# ASSEMBLYAI_API_KEY = "1facf73354b34dd68c40b02dd78d40aa"
+# MURF_API_KEY = "ap2_65243dd8-74e5-42f7-aacc-c0de2533c137"
 
-aai.settings.api_key = ASSEMBLYAI_API_KEY
+# aai.settings.api_key = ASSEMBLYAI_API_KEY
 
-# CORS
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# # CORS
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=["*"],
+#     allow_credentials=True,
+#     allow_methods=["*"],
+#     allow_headers=["*"],
+# )
 
-UPLOAD_DIRECTORY = "uploads"
-Path(UPLOAD_DIRECTORY).mkdir(exist_ok=True)
+# UPLOAD_DIRECTORY = "uploads"
+# Path(UPLOAD_DIRECTORY).mkdir(exist_ok=True)
 
-# ---------- Helper Functions ---------- #
-async def transcribe_with_assemblyai(audio_file_path: str) -> str:
-    """Transcribe audio using AssemblyAI"""
-    config = aai.TranscriptionConfig(
-        speaker_labels=False,
-        punctuate=True,
-        format_text=True,
-        language_code="en",
-    )
-    transcriber = aai.Transcriber(config=config)
-    transcript = transcriber.transcribe(audio_file_path)
+# # ---------- Helper Functions ---------- #
+# async def transcribe_with_assemblyai(audio_file_path: str) -> str:
+#     """Transcribe audio using AssemblyAI"""
+#     config = aai.TranscriptionConfig(
+#         speaker_labels=False,
+#         punctuate=True,
+#         format_text=True,
+#         language_code="en",
+#     )
+#     transcriber = aai.Transcriber(config=config)
+#     transcript = transcriber.transcribe(audio_file_path)
 
-    if transcript.status == aai.TranscriptStatus.error:
-        raise Exception(f"AssemblyAI transcription failed: {transcript.error}")
+#     if transcript.status == aai.TranscriptStatus.error:
+#         raise Exception(f"AssemblyAI transcription failed: {transcript.error}")
 
-    return transcript.text or ""
+#     return transcript.text or ""
 
 
-async def generate_murf_audio(text: str, voice_id: str = "en-US-natalie") -> str:
-    murf_api_url = "https://api.murf.ai/v1/speech/generate"
-    headers = {
-        "api-key": MURF_API_KEY,
-        "Content-Type": "application/json"
-    }
-    payload = {
-        "text": text,
-        "voiceId": voice_id,
-        "format": "mp3",
-        "speed": 1.0,
-        "pitch": 1.0,
-        "volume": 1.0,
-        "pauseAfter": 0,
-        "encodeAsBase64": False
-    }
+# async def generate_murf_audio(text: str, voice_id: str = "en-US-natalie") -> str:
+#     murf_api_url = "https://api.murf.ai/v1/speech/generate"
+#     headers = {
+#         "api-key": MURF_API_KEY,
+#         "Content-Type": "application/json"
+#     }
+#     payload = {
+#         "text": text,
+#         "voiceId": voice_id,
+#         "format": "mp3",
+#         "speed": 1.0,
+#         "pitch": 1.0,
+#         "volume": 1.0,
+#         "pauseAfter": 0,
+#         "encodeAsBase64": False
+#     }
 
-    async with httpx.AsyncClient(timeout=30.0) as client:
-        response = await client.post(murf_api_url, headers=headers, json=payload)
+#     async with httpx.AsyncClient(timeout=30.0) as client:
+#         response = await client.post(murf_api_url, headers=headers, json=payload)
 
-    if response.status_code != 200:
-        raise Exception(f"Murf API error: {response.text}")
+#     if response.status_code != 200:
+#         raise Exception(f"Murf API error: {response.text}")
 
-    result = response.json()
-    return result.get("audioFile") or result.get("url") or result.get("audioUrl")
+#     result = response.json()
+#     return result.get("audioFile") or result.get("url") or result.get("audioUrl")
 
 
 
@@ -1002,54 +1129,60 @@ async def generate_murf_audio(text: str, voice_id: str = "en-US-natalie") -> str
 #     return result.get("audioFile") or result.get("url") or result.get("audioUrl")
 
 
+
+
 # ---------- API Endpoints ---------- #
-@app.post("/tts/echo")
-async def echo_bot_v2(file: UploadFile = File(...), voice_id: str = "en-US-natalie"):
-    """
-    Echo Bot v2: Transcribe audio with AssemblyAI, generate speech with Murf API
-    """
-    if not file.content_type or not file.content_type.startswith("audio/"):
-        raise HTTPException(status_code=400, detail="Invalid file type. Must be audio.")
+# @app.post("/tts/echo")
+# async def echo_bot_v2(file: UploadFile = File(...), voice_id: str = "en-US-natalie"):
+#     """
+#     Echo Bot v2: Transcribe audio with AssemblyAI, generate speech with Murf API
+#     """
+#     if not file.content_type or not file.content_type.startswith("audio/"):
+#         raise HTTPException(status_code=400, detail="Invalid file type. Must be audio.")
 
-    with tempfile.NamedTemporaryFile(delete=False, suffix='.webm') as temp_file:
-        temp_file.write(await file.read())
-        temp_path = temp_file.name
+#     with tempfile.NamedTemporaryFile(delete=False, suffix='.webm') as temp_file:
+#         temp_file.write(await file.read())
+#         temp_path = temp_file.name
 
-    try:
-        transcription = await transcribe_with_assemblyai(temp_path)
-        if not transcription.strip():
-            raise HTTPException(status_code=400, detail="No speech detected in the audio.")
+#     try:
+#         transcription = await transcribe_with_assemblyai(temp_path)
+#         if not transcription.strip():
+#             raise HTTPException(status_code=400, detail="No speech detected in the audio.")
 
-        murf_audio_url = await generate_murf_audio(transcription, voice_id)
+#         murf_audio_url = await generate_murf_audio(transcription, voice_id)
 
-        return {
-            "status": "success",
-            "transcription": transcription,
-            "murf_audio_url": murf_audio_url,
-            "voice_id": voice_id
-        }
-    finally:
-        try:
-            os.unlink(temp_path)
-        except:
-            pass
-
-
-@app.get("/murf/voices")
-async def get_murf_voices():
-    murf_voices_url = "https://api.murf.ai/v1/speech/voices"
-    headers = {"api-key": MURF_API_KEY}
-
-    async with httpx.AsyncClient(timeout=15.0) as client:
-        response = await client.get(murf_voices_url, headers=headers)
-
-    if response.status_code != 200:
-        raise HTTPException(status_code=500, detail="Failed to fetch Murf voices.")
-
-    return {"voices": response.json()}
+#         return {
+#             "status": "success",
+#             "transcription": transcription,
+#             "murf_audio_url": murf_audio_url,
+#             "voice_id": voice_id
+#         }
+#     finally:
+#         try:
+#             os.unlink(temp_path)
+#         except:
+#             pass
 
 
+# @app.get("/murf/voices")
+# async def get_murf_voices():
+#     murf_voices_url = "https://api.murf.ai/v1/speech/voices"
+#     headers = {"api-key": MURF_API_KEY}
 
-@app.get("/health")
-async def health_check():
-    return {"status": "ok"}
+#     async with httpx.AsyncClient(timeout=15.0) as client:
+#         response = await client.get(murf_voices_url, headers=headers)
+
+#     if response.status_code != 200:
+#         raise HTTPException(status_code=500, detail="Failed to fetch Murf voices.")
+
+#     return {"voices": response.json()}
+
+
+
+# @app.get("/health")
+# async def health_check():
+#     return {"status": "ok"}
+
+
+
+# 
