@@ -74,7 +74,7 @@ async def llm_query():
         # --- Gemini API Configuration ---
         # NOTE: Replace 'YOUR_API_KEY' with your actual Google Gemini API key.
         # It's recommended to load this from an environment variable.
-        GEMINI_API_KEY = "AIzaSyBZZeifBSpKxC1QPS88_2zCq8q-kBBZCos"
+        GEMINI_API_KEY = "YOUR_API_KEY"
         MODEL_NAME = "gemini-2.5-flash-preview-05-20"
         API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL_NAME}:generateContent?key={GEMINI_API_KEY}"
         
