@@ -20,8 +20,8 @@ class EchoBotV2 {
         this.progressText = document.getElementById('progressText');
         this.voiceSelect = document.getElementById('voiceSelect');
         
-        // API endpoints - Update this to match your server
-        this.API_BASE_URL = 'http://localhost:3000';
+        // API base for FastAPI backend
+        this.API_BASE_URL = (window.API_BASE_URL) || 'http://127.0.0.1:8000';
         
         this.init();
     }
@@ -105,24 +105,37 @@ class EchoBotV2 {
         this.showProgress();
         
         try {
-            // Step 1: Upload and transcribe audio
-            this.updateProgress(20, 'Uploading audio...');
-            const transcription = await this.transcribeAudio(audioBlob);
-            
-            if (!transcription || transcription.trim() === '') {
-                throw new Error('No speech detected in the recording');
+            // Build multipart form data for /llm/query
+            this.updateProgress(25, 'Uploading audio...');
+            const form = new FormData();
+            form.append('file', audioBlob, 'recording.webm');
+            form.append('voice_id', this.voiceSelect.value || 'en-US-natalie');
+
+            // Send to backend which will transcribe -> LLM -> Murf
+            this.updateProgress(55, 'Transcribing and generating response...');
+            const response = await fetch(`${this.API_BASE_URL}/llm/query`, {
+                method: 'POST',
+                body: form,
+            });
+
+            if (!response.ok) {
+                throw new Error(`Server error: ${response.status}`);
             }
-            
-            // Step 2: Generate speech with Murf
-            this.updateProgress(60, 'Generating speech...');
-            const audioUrl = await this.generateSpeech(transcription);
-            
-            // Step 3: Complete
+
+            const result = await response.json();
+            const transcription = result.transcription || '';
+            const audioUrl = result.audioFile || result.audioUrl || '';
+
+            if (!audioUrl) {
+                throw new Error('No audio generated');
+            }
+
             this.updateProgress(100, 'Complete!');
             this.displayResults(transcription, audioUrl);
-            
-            setTimeout(() => this.hideProgress(), 1000);
-            
+            try { this.generatedAudio.play(); } catch (_) {}
+
+            setTimeout(() => this.hideProgress(), 800);
+
         } catch (error) {
             console.error('Error processing audio:', error);
             this.updateStatus(`Error: ${error.message}`);
@@ -130,65 +143,11 @@ class EchoBotV2 {
         }
     }
     
-    async transcribeAudio(audioBlob) {
-        try {
-            // Convert blob to base64 for API
-            const arrayBuffer = await audioBlob.arrayBuffer();
-            const base64Audio = this.arrayBufferToBase64(arrayBuffer);
-            
-            // Call your backend endpoint
-            const response = await fetch(`${this.API_BASE_URL}/tts/echo`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    audio: base64Audio,
-                    voice: this.voiceSelect.value
-                })
-            });
-            
-            if (!response.ok) {
-                throw new Error(`Server error: ${response.status}`);
-            }
-            
-            const result = await response.json();
-            return result.transcription;
-            
-        } catch (error) {
-            // Fallback for demo purposes - simulate transcription
-            console.warn('Using demo transcription fallback');
-            return this.getDemoTranscription();
-        }
-    }
+    // Legacy method no longer used; kept for reference
+    async transcribeAudio(_) { return this.getDemoTranscription(); }
     
-    async generateSpeech(text) {
-        try {
-            // This would call your backend endpoint that handles Murf API
-            const response = await fetch(`${this.API_BASE_URL}/tts/generate`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    text: text,
-                    voice: this.voiceSelect.value
-                })
-            });
-            
-            if (!response.ok) {
-                throw new Error(`Speech generation failed: ${response.status}`);
-            }
-            
-            const result = await response.json();
-            return result.audioUrl;
-            
-        } catch (error) {
-            // Fallback for demo purposes
-            console.warn('Using demo audio fallback');
-            return this.getDemoAudioUrl();
-        }
-    }
+    // Legacy method no longer used in consolidated pipeline
+    async generateSpeech(_) { return this.getDemoAudioUrl(); }
     
     displayResults(transcription, audioUrl) {
         // Display transcription

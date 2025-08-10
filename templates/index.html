@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>AI Voice Agent - TTS & Echo Bot</title>
+    <title>AI Voice Agent - Full LLM Pipeline</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600;700&display=swap');
         
@@ -186,7 +186,7 @@
                 0 20px 40px rgba(255, 0, 110, 0.1),
                 inset 0 1px 0 rgba(255, 255, 255, 0.2);
             text-align: center;
-            max-width: 800px;
+            max-width: 900px;
             width: 90%;
             position: relative;
             overflow: hidden;
@@ -398,6 +398,32 @@
             font-style: italic;
         }
 
+        /* Select Elements */
+        select {
+            padding: 15px 20px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.1) 0%,
+                rgba(255, 255, 255, 0.05) 100%);
+            color: #ffffff;
+            font-size: 1rem;
+            backdrop-filter: blur(15px);
+            transition: all 0.4s ease;
+            outline: none;
+            margin-left: 10px;
+        }
+
+        select:focus {
+            border-color: #8338ec;
+            box-shadow: 0 0 20px rgba(131, 56, 236, 0.3);
+        }
+
+        select option {
+            background: #1a1a2e;
+            color: #ffffff;
+        }
+
         /* Buttons */
         .btn {
             padding: 20px 35px;
@@ -475,6 +501,21 @@
             transform: translateY(-5px) scale(1.05);
             box-shadow: 
                 0 25px 50px rgba(255, 71, 87, 0.5),
+                0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-llm {
+            background: linear-gradient(135deg, #00d4ff, #00a8ff);
+            color: white;
+            box-shadow: 
+                0 15px 30px rgba(0, 212, 255, 0.4),
+                0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-llm:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 
+                0 25px 50px rgba(0, 212, 255, 0.5),
                 0 10px 25px rgba(0, 0, 0, 0.3);
         }
 
@@ -617,32 +658,43 @@
             to { transform: rotate(360deg); }
         }
 
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .container {
-                padding: 40px 25px;
-                margin: 20px;
-            }
-            
-            .main-title {
-                font-size: 2.5rem;
-            }
-            
-            .input-group {
-                flex-direction: column;
-            }
-            
-            input[type="text"] {
-                min-width: auto;
-            }
-            
-            .btn-group {
-                flex-direction: column;
-            }
+        /* Response Display */
+        .response-section {
+            margin-top: 25px;
+            padding: 20px;
+            background: linear-gradient(135deg, 
+                rgba(0, 212, 255, 0.1) 0%,
+                rgba(0, 168, 255, 0.05) 100%);
+            border-radius: 15px;
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            display: none;
+        }
 
-            .btn {
-                min-width: auto;
-            }
+        .response-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #00d4ff;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .response-content {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            color: #ffffff;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            min-height: 60px;
+            max-height: 300px;
+            overflow-y: auto;
+            backdrop-filter: blur(10px);
+            word-wrap: break-word;
+            margin-bottom: 15px;
         }
 
         /* Transcription Display */
@@ -705,6 +757,79 @@
             border-radius: 8px;
             border: 1px solid rgba(239, 68, 68, 0.2);
         }
+
+        /* Pipeline Status */
+        .pipeline-status {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 10px;
+            font-family: 'Orbitron', monospace;
+            font-size: 0.9rem;
+        }
+
+        .pipeline-step {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: rgba(255, 255, 255, 0.6);
+            transition: all 0.3s ease;
+        }
+
+        .pipeline-step.active {
+            color: #00d4ff;
+            animation: stepPulse 2s ease-in-out infinite;
+        }
+
+        .pipeline-step.completed {
+            color: #22c55e;
+        }
+
+        .pipeline-step.error {
+            color: #ef4444;
+        }
+
+        @keyframes stepPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 40px 25px;
+                margin: 20px;
+            }
+            
+            .main-title {
+                font-size: 2.5rem;
+            }
+            
+            .input-group {
+                flex-direction: column;
+            }
+            
+            input[type="text"] {
+                min-width: auto;
+            }
+            
+            .btn-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                min-width: auto;
+            }
+
+            .pipeline-status {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+
         ::-webkit-scrollbar {
             width: 8px;
         }
@@ -735,9 +860,9 @@
     <div class="shape shape-2"></div>
     <div class="shape shape-3"></div>
 
-    <div class="container" >
-        <h1 class="main-title">🚀 AI VOICE AGENT</h1>
-        <p class="subtitle">Experience the Next Generation of Voice Technology</p>
+    <div class="container">
+        <h1 class="main-title">🤖 AI VOICE AGENT</h1>
+        <p class="subtitle">Day 9: Complete LLM Pipeline | Audio → Transcription → AI → Speech</p>
 
         <div class="section">
             <h2 class="section-title">
@@ -756,1068 +881,523 @@
 
         <div class="divider"></div>
 
+        <div class="section">
+            <h2 class="section-title">
+                <span class="icon">🧠</span>
+                AI Voice Conversation
+            </h2>
+            <div style="margin-bottom: 20px;">
+                <label for="voiceSelect" style="color:white; font-weight: 500;">Choose AI Voice:</label>
+                <select id="voiceSelect">
+                    <option value="en-US-natalie">Natalie (US Female)</option>
+                    <option value="en-US-marcus">Marcus (US Male)</option>
+                    <option value="en-GB-sarah">Sarah (UK Female)</option>
+                    <option value="en-US-guy">Guy (US Male)</option>
+                </select>
+            </div>
 
-</div>
+            <div class="pipeline-status" id="pipelineStatus" style="display: none;">
+                <div class="pipeline-step" id="step1">
+                    <span>🎤</span> Recording
+                </div>
+                <div class="pipeline-step" id="step2">
+                    <span>📝</span> Transcribing
+                </div>
+                <div class="pipeline-step" id="step3">
+                    <span>🧠</span> AI Thinking
+                </div>
+                <div class="pipeline-step" id="step4">
+                    <span>🔊</span> Generating Speech
+                </div>
+            </div>
+            
+            <div class="btn-group" style="margin-top: 15px;">
+                <button class="btn btn-secondary" onclick="startRecording()">
+                    🎤 Start Recording
+                </button>
+                <button class="btn btn-danger" onclick="stopRecording()">
+                    ⏹️ Stop & Process
+                </button>
+                <button class="btn btn-llm" onclick="startLLMConversation()" id="llmButton">
+                    🤖 Talk to AI
+                </button>
+            </div>
+            
+            <div class="recording-indicator" id="recordingIndicator">
+                <div class="recording-dot"></div>
+                <span>RECORDING YOUR VOICE...</span>
+            </div>
+            
+            <div id="llmStatus" class="status-message"></div>
+            
+            <div class="transcription-section" id="transcriptionSection">
+                <h3 class="transcription-title">
+                    <span>📝</span>
+                    Your Words
+                </h3>
+                <div class="transcription-content" id="transcriptionContent"></div>
+            </div>
 
+            <div class="response-section" id="responseSection">
+                <h3 class="response-title">
+                    <span>🤖</span>
+                    AI Response
+                </h3>
+                <div class="response-content" id="responseContent"></div>
+                <audio id="llmAudio" controls></audio>
+            </div>
+        </div>
+
+        <div class="divider"></div>
 
         <div class="section">
             <h2 class="section-title">
                 <span class="icon">🔊</span>
-                Echo Bot
+                Simple Echo Bot
             </h2>
-                    <div style="margin-bottom: 15px;">
-    <label for="voiceSelect" style="color:white;">Choose Voice:</label>
-    <select id="voiceSelect">
-        <option value="en-US-natalie">Natalie (US Female)</option>
-        <option value="en-US-marcus">Marcus (US Male)</option>
-        <option value="en-GB-sarah">Sarah (UK Female)</option>
-        <option value="en-US-guy">Guy (US Male)</option>
-    </select>
-            <div class="btn-group" style="margin-top: 15px;">
-                <button class="btn btn-secondary" onclick="startRecording()">
-                    Start Recording
+            <div class="btn-group">
+                <button class="btn btn-secondary" onclick="startEchoRecording()">
+                    Start Echo
                 </button>
-                <button class="btn btn-danger" onclick="stopRecording()">
-                    Stop Recording
-                </button>
-                <button class="btn btn-primary" onclick="transcribeCurrentAudio()">
-                    📝 Transcribe Audio
+                <button class="btn btn-danger" onclick="stopEchoRecording()">
+                    Stop Echo
                 </button>
             </div>
-            <div class="recording-indicator" id="recordingIndicator">
+            <div class="recording-indicator" id="echoRecordingIndicator">
                 <div class="recording-dot"></div>
-                <span>RECORDING IN PROGRESS...</span>
+                <span>ECHO RECORDING...</span>
             </div>
             <div id="echoStatus" class="status-message"></div>
             <audio id="echoAudio" controls></audio>
-            
-
-            <div class="transcription-section" id="transcriptionSection">
-                <h3 class="transcription-title">
-                    <span>📝</span>
-                    Transcription
-                </h3>
-                <div class="transcription-content" id="transcriptionContent"></div>
-            </div>
         </div>
 
         <div class="footer">
-            Made with ❤️ by <strong>Shreya</strong>
+            Made with ❤️ by <strong>Shreya</strong> | Day 9: Full LLM Pipeline
         </div>
     </div>
-
     <script>
-        let mediaRecorder;
-        let audioChunks = [];
+    // Consolidated and fixed recording script for LLM pipeline
 
-        // Enhanced UI feedback functions
-        function showStatus(elementId, message, type) {
-            const statusEl = document.getElementById(elementId);
-            statusEl.textContent = message;
-            statusEl.className = `status-message status-${type}`;
-            statusEl.style.display = 'block';
-            
-            // Auto-hide after 5 seconds
-            setTimeout(() => {
-                statusEl.style.opacity = '0';
-                setTimeout(() => {
-                    statusEl.style.display = 'none';
-                    statusEl.style.opacity = '1';
-                }, 300);
-            }, 5000);
-        }
-
-        function setButtonLoading(buttonId, loading, originalText) {
-            const button = document.querySelector(`#${buttonId}`).parentElement;
-            if (loading) {
-                button.innerHTML = `<span class="loading"></span> Processing...`;
-                button.disabled = true;
-                button.style.opacity = '0.7';
-            } else {
-                button.innerHTML = originalText;
-                button.disabled = false;
-                button.style.opacity = '1';
-            }
-        }
-
-        // Global variables for audio management
-        let currentAudioBlob = null;
-
-        // Enhanced Echo Bot Functions
-        function startRecording() {
-            navigator.mediaDevices.getUserMedia({ 
-                audio: {
-                    echoCancellation: true,
-                    noiseSuppression: true,
-                    sampleRate: 44100
-                }
-            })
-            .then(stream => {
-                mediaRecorder = new MediaRecorder(stream, {
-                    mimeType: 'audio/webm;codecs=opus'
-                });
-                mediaRecorder.start();
-                audioChunks = [];
-
-                // Show recording indicator with animation
-                const indicator = document.getElementById('recordingIndicator');
-                indicator.style.display = 'flex';
-                indicator.style.animation = 'fadeInDelay 0.5s ease-out';
-                
-                showStatus('echoStatus', 'Recording started! Speak clearly into your microphone...', 'success');
-
-                mediaRecorder.addEventListener("dataavailable", event => {
-                    audioChunks.push(event.data);
-                });
-
-                mediaRecorder.addEventListener("stop", () => {
-                    document.getElementById('recordingIndicator').style.display = 'none';
-                    
-                    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-                    currentAudioBlob = audioBlob; // Store for upload
-                    const audioUrl = URL.createObjectURL(audioBlob);
-                    const echoAudio = document.getElementById("echoAudio");
-                    echoAudio.src = audioUrl;
-                    echoAudio.style.display = 'block';
-                    
-                    showStatus('echoStatus', 'Recording complete! Processing transcription...', 'success');
-                    
-                    // Smooth audio reveal and play
-                    setTimeout(() => {
-                        echoAudio.style.opacity = '0';
-                        echoAudio.style.transform = 'translateY(20px)';
-                        echoAudio.style.transition = 'all 0.5s ease';
-                        setTimeout(() => {
-                            echoAudio.style.opacity = '1';
-                            echoAudio.style.transform = 'translateY(0)';
-                            echoAudio.play().catch(e => {
-                                console.log("Autoplay blocked, user interaction required");
-                            });
-                        }, 100);
-                    }, 500);
-
-                    // Transcribe the audio instead of just uploading
-                   // transcribeAudioFile(audioBlob);
-                   processEchoBotV2(audioBlob)
-                });
-            })
-            .catch(error => {
-                console.error("Microphone access denied:", error);
-                showStatus('echoStatus', 'Microphone access is required. Please allow access and try again.', 'error');
-            });
-        }
-
-        function stopRecording() {
-            if (mediaRecorder && mediaRecorder.state === 'recording') {
-                mediaRecorder.stop();
-                // Stop all audio tracks
-                mediaRecorder.stream.getTracks().forEach(track => track.stop());
-                showStatus('echoStatus', 'Processing your recording...', 'success');
-            } else {
-                showStatus('echoStatus', 'No active recording session found.', 'error');
-            }
-        }
-
-        // New function to upload audio file to server
-        async function uploadAudioFile(audioBlob) {
-            try {
-                // Show upload progress
-                showStatus('echoStatus', '📤 Uploading audio to server...', 'success');
-                
-                // Create FormData for file upload
-                const formData = new FormData();
-                const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-                const filename = `recording_${timestamp}.webm`;
-                formData.append('audio', audioBlob, filename);
-
-                // Upload to server
-                const response = await fetch('http://127.0.0.1:8000/upload-audio', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.detail || response.statusText);
-                }
-
-                const result = await response.json();
-                
-                // Display successful upload information
-                const uploadInfo = `✅ Upload successful! 
-                📁 File: ${result.filename} 
-                📊 Size: ${formatFileSize(result.size)} 
-                🎵 Type: ${result.content_type}`;
-                
-                showStatus('echoStatus', uploadInfo, 'success');
-                
-                console.log('Upload successful:', result);
-                
-            } catch (error) {
-                console.error('Upload failed:', error);
-                showStatus('echoStatus', `❌ Upload failed: ${error.message}`, 'error');
-            }
-        }
-
-        // Helper function to format file size
-        function formatFileSize(bytes) {
-            if (bytes === 0) return '0 Bytes';
-            const k = 1024;
-            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-        }
-
-        // New function to transcribe audio file
-        // async function transcribeAudioFile(audioBlob) {
-        //     try {
-        //         // Show transcription section and loading state
-        //         const transcriptionSection = document.getElementById('transcriptionSection');
-        //         const transcriptionContent = document.getElementById('transcriptionContent');
-                
-        //         transcriptionSection.style.display = 'block';
-        //         transcriptionSection.style.opacity = '0';
-        //         transcriptionSection.style.transform = 'translateY(20px)';
-        //         transcriptionSection.style.transition = 'all 0.5s ease';
-                
-        //         setTimeout(() => {
-        //             transcriptionSection.style.opacity = '1';
-        //             transcriptionSection.style.transform = 'translateY(0)';
-        //         }, 100);
-
-        //         transcriptionContent.innerHTML = `
-        //             <div class="transcription-loading">
-        //                 <div class="loading"></div>
-        //                 <span>Transcribing audio using AI...</span>
-        //             </div>
-        //         `;
-
-        //         showStatus('echoStatus', '🎤 Transcribing audio with AssemblyAI...', 'success');
-                
-        //         // Create FormData for file upload
-        //         const formData = new FormData();
-        //         const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-        //         const filename = `recording_${timestamp}.webm`;
-        //         formData.append('file', audioBlob, filename);
-
-        //         // Send to transcription endpoint
-        //         const response = await fetch('http://127.0.0.1:8000/transcribe/file', {
-        //             method: 'POST',
-        //             body: formData
-        //         });
-
-        //         if (!response.ok) {
-        //             const errorData = await response.json();
-        //             throw new Error(errorData.detail || response.statusText);
-        //         }
-
-        //         const result = await response.json();
-                
-        //         // Display transcription result
-        //         if (result.transcription) {
-        //             transcriptionContent.innerHTML = `
-        //                 <div style="margin-bottom: 15px;">
-        //                     <strong style="color: #3a86ff;">Transcription:</strong>
-        //                 </div>
-        //                 <div style="font-size: 1.1rem; line-height: 1.8;">
-        //                     "${result.transcription}"
-        //                 </div>
-        //                 <div style="margin-top: 15px; font-size: 0.9rem; color: rgba(255,255,255,0.6);">
-        //                     <span>📊 Confidence: ${(result.confidence * 100).toFixed(1)}%</span> | 
-        //                     <span>⏱️ Duration: ${result.audio_duration}s</span> |
-        //                     <span>📝 Words: ${result.words || 'N/A'}</span>
-        //                 </div>
-        //             `;
-                    
-        //             showStatus('echoStatus', '✅ Transcription completed successfully!', 'success');
-        //         } else {
-        //             throw new Error('No transcription received from server');
-        //         }
-                
-        //     } catch (error) {
-        //         console.error('Transcription failed:', error);
-                
-        //         const transcriptionContent = document.getElementById('transcriptionContent');
-        //         transcriptionContent.innerHTML = `
-        //             <div class="transcription-error">
-        //                 <strong>❌ Transcription Failed</strong><br>
-        //                 ${error.message}
-        //             </div>
-        //         `;
-                
-        //         showStatus('echoStatus', `❌ Transcription failed: ${error.message}`, 'error');
-        //     }
-        // }
-
-        async function processEchoBotV2(audioBlob) {
-    try {
-        // Show transcription section with loading
-        const transcriptionSection = document.getElementById('transcriptionSection');
-        const transcriptionContent = document.getElementById('transcriptionContent');
-        transcriptionSection.style.display = 'block';
-        transcriptionContent.innerHTML = `
-            <div class="transcription-loading">
-                <div class="loading"></div>
-                <span>Processing audio with Echo Bot v2...</span>
-            </div>
-        `;
-        showStatus('echoStatus', '🎤 Sending to Echo Bot v2...', 'success');
-
-        // Prepare FormData
-        const formData = new FormData();
-        formData.append('file', audioBlob, 'recording.webm');
-
-        // Send to /tts/echo
-        const response = await fetch('http://127.0.0.1:8000/tts/echo', {
-            method: 'POST',
-            body: formData
-        });
-
-        if (!response.ok) {
-            const errData = await response.json();
-            throw new Error(errData.detail || response.statusText);
-        }
-
-        const result = await response.json();
-
-        // Show transcription
-        transcriptionContent.innerHTML = `
-            <div><strong style="color:#3a86ff;">Transcription:</strong></div>
-            <div style="margin-top:8px;">"${result.transcription}"</div>
-        `;
-
-        // Play Murf audio
-        if (result.murf_audio_url) {
-            const echoAudio = document.getElementById('echoAudio');
-            echoAudio.src = result.murf_audio_url;
-            echoAudio.style.display = 'block';
-            echoAudio.play().catch(() => {
-                console.log("Autoplay blocked — click play manually");
-            });
-            showStatus('echoStatus', '✅ Murf audio ready! Playing...', 'success');
-        } else {
-            showStatus('echoStatus', '⚠️ No audio URL returned from server', 'error');
-        }
-
-    } catch (error) {
-        console.error(error);
-        showStatus('echoStatus', `❌ Echo Bot v2 failed: ${error.message}`, 'error');
-    }
-}
-
-
-        // Manual transcription function
-        function transcribeCurrentAudio() {
-            if (currentAudioBlob) {
-                transcribeAudioFile(currentAudioBlob);
-            } else {
-                showStatus('echoStatus', 'No audio recording available to transcribe. Please record something first.', 'error');
-            }
-        }
-
-        
-        // Enhanced Text-to-Speech Function
-        async function generateAudio() {
-            const textInput = document.getElementById('textInput');
-            const text = textInput.value.trim();
-            
-            if (!text) {
-                showStatus('ttsStatus', 'Please enter some text to convert to speech.', 'error');
-                textInput.focus();
-                textInput.style.animation = 'shake 0.5s ease-in-out';
-                setTimeout(() => textInput.style.animation = '', 500);
-                return;
-            }
-
-            if (text.length > 1000) {
-                showStatus('ttsStatus', 'Text is too long. Please keep it under 1000 characters.', 'error');
-                return;
-            }
-
-            setButtonLoading('ttsButtonText', true, 'Generate Audio');
-            showStatus('ttsStatus', 'AI is processing your text... Please wait.', 'success');
-
-            try {
-                const response = await fetch('http://127.0.0.1:8000/generate-audio?voice_id=en-AU-kylie', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ text: text })
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.detail || response.statusText);
-                }
-
-                const data = await response.json();
-
-                if (data.audioFile) {
-                    // Server provided audio data
-                    const audio = document.getElementById('audioPlayer');
-                    audio.src = data.audioFile;
-                    audio.style.display = 'block';
-                    
-                    showStatus('ttsStatus', `Audio generated successfully using ${data.service || 'TTS'}! Click play to listen.`, 'success');
-                    
-                    // Smooth audio reveal with animation
-                    audio.style.opacity = '0';
-                    audio.style.transform = 'translateY(20px)';
-                    audio.style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
-                    
-                    setTimeout(() => {
-                        audio.style.opacity = '1';
-                        audio.style.transform = 'translateY(0)';
-                        
-                        // Attempt autoplay with fallback
-                        setTimeout(() => {
-                            audio.play().catch(e => {
-                                console.log("Autoplay blocked by browser, user needs to click play.");
-                                showStatus('ttsStatus', 'Audio ready! Click the play button to listen.', 'success');
-                            });
-                        }, 300);
-                    }, 200);
-                } else if (data.use_browser_tts) {
-                    // Fallback to browser's speech synthesis
-                    useBrowserTTS(text);
-                    showStatus('ttsStatus', 'Using browser speech synthesis...', 'success');
-                } else {
-                    throw new Error("No audio file received from server and no fallback available.");
-                }
-            } catch (err) {
-                console.error("TTS request failed:", err);
-                // Fallback to browser TTS if server fails
-                try {
-                    useBrowserTTS(text);
-                    showStatus('ttsStatus', 'Server TTS unavailable. Using browser speech synthesis.', 'success');
-                } catch (fallbackErr) {
-                    showStatus('ttsStatus', `Error generating audio: ${err.message}`, 'error');
-                }
-            } finally {
-                setButtonLoading('ttsButtonText', false, 'Generate Audio');
-            }
-        }
-
-        // Browser TTS fallback function
-        function useBrowserTTS(text) {
-            if ('speechSynthesis' in window) {
-                // Stop any ongoing speech
-                speechSynthesis.cancel();
-                
-                // Create speech utterance
-                const utterance = new SpeechSynthesisUtterance(text);
-                
-                // Configure speech settings
-                utterance.rate = 1.0;
-                utterance.pitch = 1.0;
-                utterance.volume = 1.0;
-                
-                // Try to use a good voice
-                const voices = speechSynthesis.getVoices();
-                const preferredVoice = voices.find(voice => 
-                    voice.lang.startsWith('en') && 
-                    (voice.name.includes('Google') || voice.name.includes('Microsoft'))
-                );
-                
-                if (preferredVoice) {
-                    utterance.voice = preferredVoice;
-                }
-                
-                // Set up event handlers
-                utterance.onstart = () => {
-                    showStatus('ttsStatus', '🔊 Speaking...', 'success');
-                };
-                
-                utterance.onend = () => {
-                    showStatus('ttsStatus', '✅ Speech completed!', 'success');
-                };
-                
-                utterance.onerror = (event) => {
-                    showStatus('ttsStatus', `Speech synthesis error: ${event.error}`, 'error');
-                };
-                
-                // Speak the text
-                speechSynthesis.speak(utterance);
-            } else {
-                throw new Error('Speech synthesis not supported in this browser');
-            }
-        }
-
-        // Enhanced keyboard and interaction support
-        document.getElementById('textInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                generateAudio();
-            }
-        });
-
-        // Add input validation and character counter
-        document.getElementById('textInput').addEventListener('input', function(e) {
-            const text = e.target.value;
-            const maxLength = 500;
-            
-            if (text.length > maxLength) {
-                e.target.style.borderColor = '#ef4444';
-                e.target.style.boxShadow = '0 0 20px rgba(239, 68, 68, 0.3)';
-            } else {
-                e.target.style.borderColor = 'rgba(255, 255, 255, 0.2)';
-                e.target.style.boxShadow = 'none';
-            }
-        });
-
-        // Add smooth entrance animations
-        window.addEventListener('load', function() {
-            // Stagger section animations
-            const sections = document.querySelectorAll('.section');
-            sections.forEach((section, index) => {
-                section.style.opacity = '0';
-                section.style.transform = 'translateY(50px)';
-                section.style.transition = 'all 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
-                
-                setTimeout(() => {
-                    section.style.opacity = '1';
-                    section.style.transform = 'translateY(0)';
-                }, 1000 + (index * 200));
-            });
-        });
-
-        // Add particle interaction on mouse move
-        document.addEventListener('mousemove', function(e) {
-            const particles = document.querySelectorAll('.particle');
-            const mouseX = e.clientX / window.innerWidth;
-            const mouseY = e.clientY / window.innerHeight;
-            
-            particles.forEach((particle, index) => {
-                const speed = (index + 1) * 0.5;
-                const x = (mouseX - 0.5) * speed;
-                const y = (mouseY - 0.5) * speed;
-                
-                particle.style.transform = `translate(${x}px, ${y}px)`;
-            });
-        });
-
-        // Add CSS for shake animation
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes shake {
-                0%, 100% { transform: translateX(0); }
-                25% { transform: translateX(-5px); }
-                75% { transform: translateX(5px); }
-            }
-        `;
-        document.head.appendChild(style);
-
-        // Add visual feedback for button interactions
-        document.querySelectorAll('.btn').forEach(btn => {
-            btn.addEventListener('mousedown', function() {
-                this.style.transform = 'translateY(-2px) scale(0.98)';
-            });
-            
-            btn.addEventListener('mouseup', function() {
-                this.style.transform = '';
-            });
-            
-            btn.addEventListener('mouseleave', function() {
-                this.style.transform = '';
-            });
-        });
-
-        // Add smooth scrolling behavior
-        document.documentElement.style.scrollBehavior = 'smooth';
-
-        // Performance optimization - reduce animations on low-end devices
-        if (navigator.hardwareConcurrency && navigator.hardwareConcurrency < 4) {
-            document.body.classList.add('reduced-motion');
-            const reducedMotionCSS = `
-                .reduced-motion * {
-                    animation-duration: 0.01ms !important;
-                    animation-iteration-count: 1 !important;
-                    transition-duration: 0.01ms !important;
-                }
-            `;
-            const reducedStyle = document.createElement('style');
-            reducedStyle.textContent = reducedMotionCSS;
-            document.head.appendChild(reducedStyle);
-        }
-    </script>
-    <!-- <script>
 let mediaRecorder;
 let audioChunks = [];
-let currentAudioBlob = null;
+let isRecording = false;
+let isLLMMode = false;
 
-// ==========================
-// Utility: Show Status
-// ==========================
-function showStatus(elementId, message, type) {
-    const statusElem = document.getElementById(elementId);
-    if (!statusElem) return;
-    statusElem.innerHTML = message;
-    statusElem.className = type;
+// Configuration
+const SERVER_URL = 'http://127.0.0.1:8000'; // Make this configurable
+const AUDIO_FORMAT = 'audio/webm'; // Use consistent format
+
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    initializeRecordingButtons();
+    initializeLLMMode();
+});
+
+function initializeRecordingButtons() {
+    const startBtn = document.getElementById('startBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    
+    if (!startBtn || !stopBtn) {
+        console.error('Start/Stop buttons not found. Please ensure they exist with IDs "startBtn" and "stopBtn"');
+        return;
+    }
+    
+    startBtn.addEventListener('click', startRecording);
+    stopBtn.addEventListener('click', stopRecording);
 }
 
-// ==========================
-// Populate Voice Selector from Backend
-// ==========================
-async function loadMurfVoices() {
-    try {
-        const res = await fetch("http://127.0.0.1:8000/murf/voices");
-        if (!res.ok) throw new Error("Failed to load voices");
-        const data = await res.json();
-        const voices = data.voices?.voices || [];
-
-        const voiceSelect = document.getElementById("voiceSelect");
-        voiceSelect.innerHTML = ""; // clear old
-
-        voices.forEach(v => {
-            const opt = document.createElement("option");
-            opt.value = v.voiceId;
-            opt.textContent = `${v.name} (${v.language})`;
-            voiceSelect.appendChild(opt);
-        });
-    } catch (err) {
-        console.error("Error loading voices:", err);
-        // fallback default
-        const voiceSelect = document.getElementById("voiceSelect");
-        voiceSelect.innerHTML = `
-            <option value="en-US-natalie">Natalie (US Female)</option>
-            <option value="en-US-marcus">Marcus (US Male)</option>
-        `;
+function initializeLLMMode() {
+    const llmButton = document.getElementById('llmButton');
+    if (llmButton) {
+        llmButton.addEventListener('click', toggleLLMMode);
     }
 }
 
-// ==========================
-// Echo Bot v2 Processor
-// ==========================
-async function processEchoBotV2(audioBlob) {
-    try {
-        const transcriptionSection = document.getElementById('transcriptionSection');
-        const transcriptionContent = document.getElementById('transcriptionContent');
-        transcriptionSection.style.display = 'block';
-        transcriptionContent.innerHTML = `
-            <div class="transcription-loading">
-                <div class="loading"></div>
-                <span>Processing audio with Echo Bot v2...</span>
-            </div>
-        `;
-        showStatus('echoStatus', '🎤 Sending to Echo Bot v2...', 'success');
-
-        const formData = new FormData();
-        formData.append('file', audioBlob, 'recording.webm');
-
-        const voiceSelect = document.getElementById("voiceSelect");
-        if (voiceSelect) {
-            formData.append('voice_id', voiceSelect.value);
-        }
-
-        const response = await fetch('http://127.0.0.1:8000/tts/echo', {
-            method: 'POST',
-            body: formData
-        });
-
-        if (!response.ok) {
-            const errData = await response.json();
-            throw new Error(errData.detail || response.statusText);
-        }
-
-        const result = await response.json();
-
-        transcriptionContent.innerHTML = `
-            <div><strong style="color:#3a86ff;">Transcription:</strong></div>
-            <div style="margin-top:8px;">"${result.transcription}"</div>
-        `;
-
-        if (result.murf_audio_url) {
-            const echoAudio = document.getElementById('echoAudio');
-            echoAudio.src = result.murf_audio_url;
-            echoAudio.style.display = 'block';
-            echoAudio.play().catch(() => {
-                console.log("Autoplay blocked — click play manually");
-            });
-            showStatus('echoStatus', '✅ Murf audio ready! Playing...', 'success');
-        }
-    } catch (error) {
-        console.error(error);
-        showStatus('echoStatus', `❌ Echo Bot v2 failed: ${error.message}`, 'error');
-    }
-}
-
-// ==========================
-// Recording Controls
-// ==========================
 async function startRecording() {
     try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        mediaRecorder = new MediaRecorder(stream);
-        audioChunks = [];
+        // Request microphone access
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+            audio: {
+                echoCancellation: true,
+                noiseSuppression: true,
+                sampleRate: 44100
+            }
+        });
 
-        mediaRecorder.ondataavailable = event => {
+        // Initialize MediaRecorder with consistent format
+        const options = { mimeType: AUDIO_FORMAT };
+        if (!MediaRecorder.isTypeSupported(AUDIO_FORMAT)) {
+            console.warn(`${AUDIO_FORMAT} not supported, using default`);
+            mediaRecorder = new MediaRecorder(stream);
+        } else {
+            mediaRecorder = new MediaRecorder(stream, options);
+        }
+
+        audioChunks = [];
+        isRecording = true;
+
+        // Set up event handlers
+        mediaRecorder.ondataavailable = (event) => {
             if (event.data.size > 0) {
                 audioChunks.push(event.data);
             }
         };
 
-        mediaRecorder.onstop = () => {
-            document.getElementById('recordingIndicator').style.display = 'none';
-            const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-            currentAudioBlob = audioBlob;
-            processEchoBotV2(audioBlob);
-        };
+        mediaRecorder.onstop = handleRecordingStop;
 
+        // Start recording
         mediaRecorder.start();
-        document.getElementById('recordingIndicator').style.display = 'block';
-        showStatus('echoStatus', 'Recording started...', 'success');
-    } catch (err) {
-        console.error("Mic access denied:", err);
-        showStatus('echoStatus', '❌ Microphone access denied.', 'error');
+        updateUI('recording');
+        
+        if (isLLMMode) {
+            showStatus('🎤 Recording for AI conversation...', 'success');
+            updatePipelineStep('step1', 'active');
+        } else {
+            showStatus('🎤 Recording started...', 'success');
+        }
+
+    } catch (error) {
+        console.error('Failed to start recording:', error);
+        showStatus('❌ Microphone access denied or unavailable', 'error');
+        isRecording = false;
     }
 }
 
 function stopRecording() {
-    if (mediaRecorder && mediaRecorder.state === 'recording') {
+    if (mediaRecorder && isRecording) {
         mediaRecorder.stop();
         mediaRecorder.stream.getTracks().forEach(track => track.stop());
-        showStatus('echoStatus', 'Processing your recording...', 'success');
+        isRecording = false;
+        updateUI('stopped');
+        
+        if (isLLMMode) {
+            showStatus('⏳ Processing with AI...', 'success');
+        } else {
+            showStatus('✅ Recording stopped', 'success');
+        }
     } else {
-        showStatus('echoStatus', 'No active recording session found.', 'error');
+        showStatus('❌ No active recording to stop', 'error');
     }
 }
 
-// ==========================
-// Init on Page Load
-// ==========================
-window.addEventListener("DOMContentLoaded", () => {
-    loadMurfVoices();
-});
-</script> -->
+async function handleRecordingStop() {
+    const audioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType || AUDIO_FORMAT });
+    
+    if (isLLMMode) {
+        updatePipelineStep('step1', 'completed');
+        await processWithLLM(audioBlob);
+    } else {
+        // Simple playback mode
+        const audioUrl = URL.createObjectURL(audioBlob);
+        const audioElement = document.getElementById('audioPlayer') || document.getElementById('llmAudio');
+        if (audioElement) {
+            audioElement.src = audioUrl;
+            audioElement.style.display = 'block';
+        }
+        showStatus('✅ Recording ready for playback', 'success');
+    }
+}
 
+async function processWithLLM(audioBlob) {
+    try {
+        // Show processing sections
+        showProcessingSections();
+        
+        // Step 2: Transcription
+        updatePipelineStep('step2', 'active');
+        showTranscriptionLoading();
+        
+        // Prepare form data
+        const formData = new FormData();
+        formData.append('file', audioBlob, 'recording.webm');
+        
+        // Get selected voice
+        const voiceSelect = document.getElementById('voiceSelect');
+        const voiceId = voiceSelect ? voiceSelect.value : 'en-US-natalie';
+        formData.append('voice_id', voiceId);
+
+        showStatus('📝 Transcribing and processing with AI...', 'success');
+
+        // Send to LLM endpoint
+        const response = await fetch(`${SERVER_URL}/llm/query`, {
+            method: 'POST',
+            body: formData
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error || `Server error: ${response.status}`);
+        }
+
+        const result = await response.json();
+
+        // Step 2 Complete: Show transcription
+        updatePipelineStep('step2', 'completed');
+        showTranscription(result.transcription);
+
+        // Step 3: Show LLM response
+        updatePipelineStep('step3', 'active');
+        showStatus('🧠 AI generating response...', 'success');
+        
+        await new Promise(resolve => setTimeout(resolve, 500)); // Brief delay for UX
+        updatePipelineStep('step3', 'completed');
+        showLLMResponse(result.llm_response);
+
+        // Step 4: Play AI audio
+        updatePipelineStep('step4', 'active');
+        showStatus('🔊 Converting to speech...', 'success');
+
+        if (result.audioFile) {
+            const audioElement = document.getElementById('llmAudio');
+            if (audioElement) {
+                audioElement.src = result.audioFile;
+                audioElement.style.display = 'block';
+                
+                // Auto-play with fallback
+                try {
+                    await audioElement.play();
+                } catch (playError) {
+                    console.log('Autoplay blocked:', playError);
+                    showStatus('✅ AI response ready! Click play to listen', 'success');
+                }
+            }
+            
+            updatePipelineStep('step4', 'completed');
+            showStatus('✅ AI conversation complete!', 'success');
+        } else {
+            throw new Error('No audio file received from AI');
+        }
+
+        // Reset after success
+        setTimeout(resetLLMMode, 3000);
+
+    } catch (error) {
+        console.error('LLM Pipeline failed:', error);
+        handleLLMError(error);
+    }
+}
+
+function toggleLLMMode() {
+    isLLMMode = !isLLMMode;
+    const button = document.getElementById('llmButton');
+    
+    if (isLLMMode) {
+        if (button) {
+            button.textContent = '🤖 AI Mode Active';
+            button.style.background = 'linear-gradient(135deg, #22c55e, #16a34a)';
+        }
+        showStatus('🤖 AI Mode activated! Record your question...', 'success');
+        showPipelineStatus();
+    } else {
+        resetLLMMode();
+    }
+}
+
+function resetLLMMode() {
+    isLLMMode = false;
+    const button = document.getElementById('llmButton');
+    
+    if (button) {
+        button.textContent = '🤖 Talk to AI';
+        button.style.background = 'linear-gradient(135deg, #00d4ff, #00a8ff)';
+    }
+    
+    hidePipelineStatus();
+    resetPipelineSteps();
+}
+
+// UI Helper Functions
+function updateUI(state) {
+    const startBtn = document.getElementById('startBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    
+    if (startBtn && stopBtn) {
+        if (state === 'recording') {
+            startBtn.disabled = true;
+            stopBtn.disabled = false;
+            showRecordingIndicator();
+        } else {
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+            hideRecordingIndicator();
+        }
+    }
+}
+
+function showStatus(message, type) {
+    const statusElement = document.getElementById('llmStatus') || document.getElementById('status');
+    if (statusElement) {
+        statusElement.textContent = message;
+        statusElement.className = `status-message status-${type}`;
+        statusElement.style.display = 'block';
+        
+        if (type === 'success') {
+            setTimeout(() => {
+                statusElement.style.opacity = '0';
+                setTimeout(() => {
+                    statusElement.style.display = 'none';
+                    statusElement.style.opacity = '1';
+                }, 300);
+            }, 8000);
+        }
+    } else {
+        console.log(`Status: ${message}`);
+    }
+}
+
+function showRecordingIndicator() {
+    const indicator = document.getElementById('recordingIndicator');
+    if (indicator) {
+        indicator.style.display = 'flex';
+    }
+}
+
+function hideRecordingIndicator() {
+    const indicator = document.getElementById('recordingIndicator');
+    if (indicator) {
+        indicator.style.display = 'none';
+    }
+}
+
+function showProcessingSections() {
+    const transcriptionSection = document.getElementById('transcriptionSection');
+    const responseSection = document.getElementById('responseSection');
+    
+    if (transcriptionSection) transcriptionSection.style.display = 'block';
+    if (responseSection) responseSection.style.display = 'block';
+}
+
+function showTranscriptionLoading() {
+    const transcriptionContent = document.getElementById('transcriptionContent');
+    if (transcriptionContent) {
+        transcriptionContent.innerHTML = `
+            <div class="transcription-loading">
+                <div class="loading"></div>
+                <span>Converting speech to text...</span>
+            </div>
+        `;
+    }
+}
+
+function showTranscription(text) {
+    const transcriptionContent = document.getElementById('transcriptionContent');
+    if (transcriptionContent) {
+        transcriptionContent.innerHTML = `
+            <div style="font-size: 1.1rem; line-height: 1.8;">
+                "${text || 'Transcription not available'}"
+            </div>
+        `;
+    }
+}
+
+function showLLMResponse(response) {
+    const responseContent = document.getElementById('responseContent');
+    if (responseContent) {
+        responseContent.innerHTML = `
+            <div style="font-size: 1.1rem; line-height: 1.8;">
+                ${response || 'Response not available'}
+            </div>
+        `;
+    }
+}
+
+function updatePipelineStep(stepId, status) {
+    const step = document.getElementById(stepId);
+    if (step) {
+        step.className = `pipeline-step ${status}`;
+        
+        const icons = {
+            'active': '⏳',
+            'completed': '✅',
+            'error': '❌'
+        };
+        
+        const icon = step.querySelector('span');
+        if (icon && icons[status]) {
+            icon.textContent = icons[status];
+        }
+    }
+}
+
+function resetPipelineSteps() {
+    const steps = ['step1', 'step2', 'step3', 'step4'];
+    const defaultIcons = ['🎤', '📝', '🧠', '🔊'];
+    
+    steps.forEach((stepId, index) => {
+        const step = document.getElementById(stepId);
+        if (step) {
+            step.className = 'pipeline-step';
+            const icon = step.querySelector('span');
+            if (icon) {
+                icon.textContent = defaultIcons[index];
+            }
+        }
+    });
+}
+
+function showPipelineStatus() {
+    const pipelineStatus = document.getElementById('pipelineStatus');
+    if (pipelineStatus) {
+        pipelineStatus.style.display = 'flex';
+    }
+}
+
+function hidePipelineStatus() {
+    const pipelineStatus = document.getElementById('pipelineStatus');
+    if (pipelineStatus) {
+        setTimeout(() => {
+            pipelineStatus.style.display = 'none';
+        }, 2000);
+    }
+}
+
+function handleLLMError(error) {
+    const steps = ['step2', 'step3', 'step4'];
+    steps.forEach(step => updatePipelineStep(step, 'error'));
+    
+    const transcriptionContent = document.getElementById('transcriptionContent');
+    if (transcriptionContent) {
+        transcriptionContent.innerHTML = `
+            <div class="transcription-error">
+                <strong>❌ Processing Failed</strong><br>
+                ${error.message}
+            </div>
+        `;
+    }
+    
+    const responseContent = document.getElementById('responseContent');
+    if (responseContent) {
+        responseContent.innerHTML = `
+            <div class="transcription-error">
+                <strong>❌ AI Response Failed</strong><br>
+                Please try again or check your connection.
+            </div>
+        `;
+    }
+    
+    showStatus(`❌ AI Pipeline failed: ${error.message}`, 'error');
+    setTimeout(resetLLMMode, 5000);
+}
+
+// Health check function
+async function checkServerHealth() {
+    try {
+        const response = await fetch(`${SERVER_URL}/health`);
+        if (response.ok) {
+            console.log('✅ Server connection healthy');
+        } else {
+            console.warn('⚠️ Server responding with errors');
+            showStatus('⚠️ Server connection issues detected', 'error');
+        }
+    } catch (error) {
+        console.error('❌ Server connection failed:', error);
+        showStatus('⚠️ Cannot connect to AI server. Please check if it\'s running.', 'error');
+    }
+}
+
+// Initialize health check
+setTimeout(checkServerHealth, 2000);
+setInterval(checkServerHealth, 30000);
+</script>
 </body>
 </html>
-
-<!-- <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Echo Bot v2 - Murf Voice</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>🎤 Echo Bot v2</h1>
-            <p>Speak and hear your voice transformed with Murf AI</p>
-        </div>
-
-        <div class="main-content">
-            <div class="recording-section">
-                <button id="recordBtn" class="record-btn">
-                    <span class="btn-icon">🎤</span>
-                    <span class="btn-text">Start Recording</span>
-                </button>
-                <div class="recording-indicator" id="recordingIndicator">
-                    <div class="pulse"></div>
-                    <span>Recording...</span>
-                </div>
-            </div>
-
-            <div class="status-section" id="statusSection">
-                <div class="status-item">
-                    <span class="status-label">Status:</span>
-                    <span class="status-value" id="statusText">Ready to record</span>
-                </div>
-                <div class="status-item">
-                    <span class="status-label">Duration:</span>
-                    <span class="status-value" id="durationText">00:00</span>
-                </div>
-            </div>
-
-            <div class="transcription-section" id="transcriptionSection">
-                <h3>Transcription</h3>
-                <div class="transcription-box" id="transcriptionText">
-                    Your speech will appear here...
-                </div>
-            </div>
-
-            <div class="audio-section" id="audioSection">
-                <h3>Generated Audio</h3>
-                <audio id="generatedAudio" controls>
-                    Your browser does not support the audio element.
-                </audio>
-                <div class="audio-info" id="audioInfo">
-                    <span>Voice: Murf AI • Quality: High</span>
-                </div>
-            </div>
-
-            <div class="voice-selection" id="voiceSelection">
-                <h3>Select Voice</h3>
-                <select id="voiceSelect" class="voice-dropdown">
-                    <option value="en-US-aria">Aria (Female, US)</option>
-                    <option value="en-US-guy">Guy (Male, US)</option>
-                    <option value="en-US-jenny">Jenny (Female, US)</option>
-                    <option value="en-US-davis">Davis (Male, US)</option>
-                    <option value="en-GB-libby">Libby (Female, UK)</option>
-                    <option value="en-GB-ryan">Ryan (Male, UK)</option>
-                </select>
-            </div>
-
-            <div class="progress-section" id="progressSection">
-                <div class="progress-bar">
-                    <div class="progress-fill" id="progressFill"></div>
-                </div>
-                <div class="progress-text" id="progressText">Processing...</div>
-            </div>
-        </div>
-
-        <div class="footer">
-            <p>Powered by AssemblyAI & Murf API</p>
-        </div>
-    </div>
-
-    <script src="script.js"></script>
-</body>
-</html> -->
-
-<!-- <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Echo Bot v2 - AI Voice Agent with Murf</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600;700&display=swap');
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background: #0a0a0a;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow-x: hidden;
-            position: relative;
-        }
-
-        /* Animated Neural Network Background */
-        .neural-bg {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -2;
-            background: radial-gradient(circle at 20% 50%, #120a8f 0%, transparent 50%),
-                        radial-gradient(circle at 80% 20%, #ff006e 0%, transparent 50%),
-                        radial-gradient(circle at 40% 80%, #8338ec 0%, transparent 50%),
-                        radial-gradient(circle at 90% 90%, #3a86ff 0%, transparent 50%),
-                        linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
-            animation: bgShift 20s ease-in-out infinite;
-        }
-
-        @keyframes bgShift {
-            0%, 100% { filter: hue-rotate(0deg) brightness(0.8); }
-            25% { filter: hue-rotate(90deg) brightness(1); }
-            50% { filter: hue-rotate(180deg) brightness(0.9); }
-            75% { filter: hue-rotate(270deg) brightness(1.1); }
-        }
-
-        /* Floating Particles */
-        .particles {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            pointer-events: none;
-        }
-
-        .particle {
-            position: absolute;
-            background: linear-gradient(45deg, #ff006e, #8338ec, #3a86ff);
-            border-radius: 50%;
-            animation: float 6s ease-in-out infinite;
-        }
-
-        .particle:nth-child(1) {
-            width: 4px;
-            height: 4px;
-            top: 20%;
-            left: 20%;
-            animation-delay: -0.5s;
-            animation-duration: 8s;
-        }
-
-        .particle:nth-child(2) {
-            width: 6px;
-            height: 6px;
-            top: 60%;
-            left: 80%;
-            animation-delay: -2s;
-            animation-duration: 10s;
-        }
-
-        .particle:nth-child(3) {
-            width: 3px;
-            height: 3px;
-            top: 80%;
-            left: 10%;
-            animation-delay: -4s;
-            animation-duration: 7s;
-        }
-
-        .particle:nth-child(4) {
-            width: 5px;
-            height: 5px;
-            top: 10%;
-            left: 90%;
-            animation-delay: -1s;
-            animation-duration: 9s;
-        }
-
-        .particle:nth-child(5) {
-            width: 2px;
-            height: 2px;
-            top: 40%;
-            left: 60%;
-            animation-delay: -3s;
-            animation-duration: 11s;
-        }
-
-        @keyframes float {
-            0%, 100% {
-                transform: translateY(0px) rotate(0deg);
-                opacity: 0.4;
-            }
-            25% {
-                transform: translateY(-30px) rotate(90deg);
-                opacity: 0.8;
-            }
-            50% {
-                transform: translateY(-60px) rotate(180deg);
-                opacity: 1;
-            }
-            75% {
-                transform: translateY(-30px) rotate(270deg);
-                opacity: 0.6;
-            }
-        }
-
-        /* Geometric Shapes */
-        .shape {
-            position: fixed;
-            z-index: -1;
-            pointer-events: none;
-        }
-
-        .shape-1 {
-            width: 200px;
-            height: 200px;
-            border: 2px solid rgba(255, 0, 110, 0.2);
-            border-radius: 50%;
-            top: 10%;
-            right: 10%;
-            animation: rotate 15s linear infinite;
-        }
-
-        .shape-2 {
-            width: 150px;
-            height: 150px;
-            border: 2px solid rgba(131, 56, 236, 0.3);
-            transform: rotate(45deg);
-            bottom: 20%;
-            left: 15%;
-            animation: rotate 20s linear infinite reverse;
-        }
-
-        .shape-3 {
-            width: 100px;
-            height: 100px;
-            border: 2px solid rgba(58, 134, 255, 0.4);
-            border-radius: 20px;
-            top: 50%;
-            left: 5%;
-            animation: float 8s ease-in-out infinite;
-        }
-
-        @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        /* Main Container */
-        .container {
-            background: linear-gradient(135deg, 
-                rgba(255, 255, 255, 0.1) 0%,
-                rgba(255, 255, 255, 0.05) 50%,
-                rgba(255, 255, 255, 0.02) 100%);
-            backdrop-filter: blur(25px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            padding: 60px 50px;
-            border-radius: 30px;
-            box-shadow: 
-                0 40px 80px rgba(0, 0, 0, 0.3),
-                0 20px 40px rgba(255, 0, 110, 0.1),
-                inset 0 1px 0 rgba(255, 255, 255, 0.2);
-            text-align: center;
-            max-width: 900px;
-            width: 90%;
-            position: relative;
-            overflow: hidden;
-            animation: containerEntrance 1.5s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .container::before {
-            content: '';
-            position: absolute;
-            top: -2px;
-            left: -2px;
-            right: -2px;
-            bottom: -2px;
-            background: linear-gradient(45deg, 
-                #ff006e, #8338ec, #3a86ff, #ff006e);
-            background-size: 400% 400%;
-            border-radius: 30px;
-            z-index: -1;
-            animation: gradientFlow 6s ease infinite;
-            opacity: 0.3;
-        }
-
-        @keyframes gradientFlow {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-        }
-
-        @keyframes containerEntrance {
-            0% {
-                opacity: 0;
-                transform: translateY(100px) scale(0.8);
-            }
-            100% {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-        }
-
-        /* Typography */
-        .main-title {
-            font-family: 'Orbitron', monospace;
-            font-size: 3.5rem;
-            font-weight: 900;
-            margin-bottom: 10px;
-            background: linear-gradient(135deg, 
-                #ff006e 0%, 
-                #8338ec 30%, 
-                #3a86ff 60%, 
-                #ffffff 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-shadow: 0 0 50px rgba(255, 0, 110, 0.5);
-            animation: titleGlow 3s ease-in-out infinite alternate;
-            position: relative;
-        } -->
