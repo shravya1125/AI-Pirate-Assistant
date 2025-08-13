@@ -69,7 +69,7 @@ def demo_error_simulation():
             if response.ok:
                 data = response.json()
                 print(f"   ✅ {name}: {data.get('llm_response', 'No response')[:80]}...")
-                print(f"   📊 Error Type: {data.get('error_type')}")
+                print(f"    Error Type: {data.get('error_type')}")
                 print(f"   🔄 Fallback Used: {data.get('fallback_used')}")
             else:
                 print(f"   ❌ {name}: HTTP {response.status_code}")
