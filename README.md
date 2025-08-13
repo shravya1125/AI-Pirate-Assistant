@@ -50,66 +50,62 @@ uvicorn main:app --reload
 
 Visit http://localhost:8000/docs for API testing.
 
----
-
-📅 Build Progress  
+## 📅 Build Progress  
 
 Day 1 – Project Setup  
-✅ FastAPI backend skeleton  
-✅ Basic HTML/CSS/JS frontend
+- FastAPI backend skeleton  
+- Basic HTML/CSS/JS frontend
 
 Day 2 – Text-to-Speech with Murf API  
-Built /generate-audio endpoint  
-Returns playable audio URL from given text  
+- Built /generate-audio endpoint  
+- Returns playable audio URL from given text  
 
 Day 3 – Play TTS Audio on Web UI  
-Integrated fetch API to call backend  
-Dynamically plays audio in <audio> element  
+- Integrated fetch API to call backend  
+- Dynamically plays audio in <audio> element  
 
 Day 4 – Echo Bot v1  
-MediaRecorder API to capture microphone input  
-Instantly plays back recorded voice  
+- MediaRecorder API to capture microphone input  
+- Instantly plays back recorded voice  
 
 Day 5 – Send Audio to Server  
-/upload-audio endpoint  
-Saves uploaded files to /uploads directory  
+- /upload-audio endpoint  
+- Saves uploaded files to /uploads directory  
 
 Day 6 – Speech Transcription  
-Integrated AssemblyAI for transcription  
-Displays transcript in browser  
+- Integrated AssemblyAI for transcription  
+- Displays transcript in browser  
 
 Day 7 – Echo Bot v2  
-Record → Transcribe → Murf TTS → Playback  
-Added voice selection from Murf API  
+- Record → Transcribe → Murf TTS → Playback  
+- Added voice selection from Murf API  
 
 Day 8 – LLM Integration  
-/llm/query endpoint  
-Sends text to Gemini API and returns AI response  
+- /llm/query endpoint  
+- Sends text to Gemini API and returns AI response  
 
 Day 9 – Full Non-Streaming Pipeline  
-Voice in → STT → LLM → TTS → AI voice out  
-Entire conversation handled with no typing  
+- Voice in → STT → LLM → TTS → AI voice out  
+- Entire conversation handled with no typing  
 
 Day 10 – Memory & Hands-Free Mode  
-Per-session chat history  
-Auto-record after bot finishes speaking  
+- Per-session chat history  
+- Auto-record after bot finishes speaking  
 
 Day 11 – Robust Error Handling  
-try/except blocks for STT, LLM, TTS APIs  
-Fallback audio: “I’m having trouble connecting right now.”  
+- try/except blocks for STT, LLM, TTS APIs  
+- Fallback audio: “I’m having trouble connecting right now.”  
 
 Day 12 – UI Revamp  
-Single-tap recording button with live status  
-Minimal, modern conversational layout  
-Auto-play AI responses for smooth flow  
+- Single-tap recording button with live status  
+- Minimal, modern conversational layout  
+- Auto-play AI responses for smooth flow  
 
 ---
 
-🎯 What’s Next
-Summarized chat memory to keep prompts short
-Streaming audio responses
-Multi-voice personalities
-
+🎯 What’s Next  
+- Summarized chat memory to keep prompts short  
+- Streaming audio responses  
+- Multi-voice personalities  
 ---
-
 💡 This project is part of my #30DaysOfAIVoiceAgents challenge — exploring voice-first AI interaction from the ground up.
