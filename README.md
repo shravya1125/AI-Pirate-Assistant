@@ -1,4 +1,4 @@
-# 🎙️ AI VoiceBot – 30 Days of AI Voice Agents Challenge 🚀
+# 🎙️ AI VoiceBot – 30 Days of AI Voice Agents Challenge 
 
 An interactive voice-first AI assistant that supports speech input, natural AI conversation, and realistic text-to-speech output — built over 30 days, one feature at a time.
 
