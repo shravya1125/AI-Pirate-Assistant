@@ -1,17 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>AI Voice Agent - Full LLM Pipeline</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Conversational AI Voice Agent</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600;700&display=swap');
         
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
         }
-
+        
         body {
             font-family: 'Inter', sans-serif;
             background: #0a0a0a;
@@ -22,14 +23,13 @@
             overflow-x: hidden;
             position: relative;
         }
-
-        /* Animated Neural Network Background */
-        .neural-bg {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+        
+        .neural-bg { 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
             z-index: -2;
             background: radial-gradient(circle at 20% 50%, #120a8f 0%, transparent 50%),
                         radial-gradient(circle at 80% 20%, #ff006e 0%, transparent 50%),
@@ -38,409 +38,330 @@
                         linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
             animation: bgShift 20s ease-in-out infinite;
         }
-
-        @keyframes bgShift {
-            0%, 100% { filter: hue-rotate(0deg) brightness(0.8); }
+        
+        @keyframes bgShift { 
+            0%, 100% { filter: hue-rotate(0deg) brightness(.8); }
             25% { filter: hue-rotate(90deg) brightness(1); }
-            50% { filter: hue-rotate(180deg) brightness(0.9); }
+            50% { filter: hue-rotate(180deg) brightness(.9); }
             75% { filter: hue-rotate(270deg) brightness(1.1); }
         }
 
-        /* Floating Particles */
-        .particles {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            pointer-events: none;
+        .particles { 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            z-index: -1; 
+            pointer-events: none; 
         }
-
-        .particle {
-            position: absolute;
-            background: linear-gradient(45deg, #ff006e, #8338ec, #3a86ff);
-            border-radius: 50%;
+        
+        .particle { 
+            position: absolute; 
+            background: linear-gradient(45deg, #ff006e, #8338ec, #3a86ff); 
+            border-radius: 50%; 
             animation: float 6s ease-in-out infinite;
         }
-
-        .particle:nth-child(1) {
-            width: 4px;
-            height: 4px;
-            top: 20%;
-            left: 20%;
-            animation-delay: -0.5s;
-            animation-duration: 8s;
-        }
-
-        .particle:nth-child(2) {
-            width: 6px;
-            height: 6px;
-            top: 60%;
-            left: 80%;
-            animation-delay: -2s;
-            animation-duration: 10s;
-        }
-
-        .particle:nth-child(3) {
-            width: 3px;
-            height: 3px;
-            top: 80%;
-            left: 10%;
-            animation-delay: -4s;
-            animation-duration: 7s;
-        }
-
-        .particle:nth-child(4) {
-            width: 5px;
-            height: 5px;
-            top: 10%;
-            left: 90%;
-            animation-delay: -1s;
-            animation-duration: 9s;
-        }
-
-        .particle:nth-child(5) {
-            width: 2px;
-            height: 2px;
-            top: 40%;
-            left: 60%;
-            animation-delay: -3s;
-            animation-duration: 11s;
-        }
-
+        
+        .particle:nth-child(1) { width: 4px; height: 4px; top: 20%; left: 20%; animation-delay: -0.5s; animation-duration: 8s; }
+        .particle:nth-child(2) { width: 6px; height: 6px; top: 60%; left: 80%; animation-delay: -2s; animation-duration: 10s; }
+        .particle:nth-child(3) { width: 3px; height: 3px; top: 80%; left: 10%; animation-delay: -4s; animation-duration: 7s; }
+        .particle:nth-child(4) { width: 5px; height: 5px; top: 10%; left: 90%; animation-delay: -1s; animation-duration: 9s; }
+        .particle:nth-child(5) { width: 2px; height: 2px; top: 40%; left: 60%; animation-delay: -3s; animation-duration: 11s; }
+        
         @keyframes float {
-            0%, 100% {
-                transform: translateY(0px) rotate(0deg);
-                opacity: 0.4;
-            }
-            25% {
-                transform: translateY(-30px) rotate(90deg);
-                opacity: 0.8;
-            }
-            50% {
-                transform: translateY(-60px) rotate(180deg);
-                opacity: 1;
-            }
-            75% {
-                transform: translateY(-30px) rotate(270deg);
-                opacity: 0.6;
-            }
+            0%, 100% { transform: translateY(0) rotate(0deg); opacity: .4; }
+            25% { transform: translateY(-30px) rotate(90deg); opacity: .8; }
+            50% { transform: translateY(-60px) rotate(180deg); opacity: 1; }
+            75% { transform: translateY(-30px) rotate(270deg); opacity: .6; }
         }
 
-        /* Geometric Shapes */
-        .shape {
-            position: fixed;
-            z-index: -1;
-            pointer-events: none;
-        }
-
-        .shape-1 {
-            width: 200px;
-            height: 200px;
-            border: 2px solid rgba(255, 0, 110, 0.2);
-            border-radius: 50%;
-            top: 10%;
-            right: 10%;
-            animation: rotate 15s linear infinite;
-        }
-
-        .shape-2 {
-            width: 150px;
-            height: 150px;
-            border: 2px solid rgba(131, 56, 236, 0.3);
-            transform: rotate(45deg);
-            bottom: 20%;
-            left: 15%;
-            animation: rotate 20s linear infinite reverse;
-        }
-
-        .shape-3 {
-            width: 100px;
-            height: 100px;
-            border: 2px solid rgba(58, 134, 255, 0.4);
-            border-radius: 20px;
-            top: 50%;
-            left: 5%;
-            animation: float 8s ease-in-out infinite;
-        }
-
-        @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        /* Main Container */
         .container {
-            background: linear-gradient(135deg, 
-                rgba(255, 255, 255, 0.1) 0%,
-                rgba(255, 255, 255, 0.05) 50%,
-                rgba(255, 255, 255, 0.02) 100%);
-            backdrop-filter: blur(25px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            padding: 60px 50px;
-            border-radius: 30px;
+            background: linear-gradient(135deg, rgba(255,255,255,.12) 0%, rgba(255,255,255,.08) 50%, rgba(255,255,255,.04) 100%);
+            backdrop-filter: blur(30px);
+            border: 1px solid rgba(255,255,255,.2);
+            padding: 40px 35px;
+            border-radius: 25px;
+            box-shadow: 0 30px 60px rgba(0,0,0,.4), 
+                        0 15px 30px rgba(255,0,110,.15), 
+                        inset 0 1px 0 rgba(255,255,255,.25);
+            text-align: center; 
+            max-width: 600px; 
+            width: 90%; 
+            position: relative; 
+            overflow: hidden;
+            animation: containerEntrance 1.5s cubic-bezier(.4,0,.2,1);
+        }
+        
+        @keyframes containerEntrance {
+            0% { opacity: 0; transform: translateY(100px) scale(.8); }
+            100% { opacity: 1; transform: none; }
+        }
+
+        .main-title { 
+            font-family: 'Orbitron', monospace; 
+            font-size: 2.8rem; 
+            font-weight: 900; 
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, #ff006e 0%, #8338ec 30%, #3a86ff 60%, #fff 100%);
+            -webkit-background-clip: text; 
+            background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+            text-shadow: 0 0 50px rgba(255,0,110,.5);
+            animation: titleGlow 3s ease-in-out infinite alternate;
+        }
+        
+        @keyframes titleGlow {
+            0% { text-shadow: 0 0 20px rgba(255,0,110,.5), 0 0 40px rgba(131,56,236,.3); }
+            100% { text-shadow: 0 0 40px rgba(255,0,110,.8), 0 0 80px rgba(131,56,236,.5); }
+        }
+
+        .subtitle { 
+            font-size: 1.1rem; 
+            color: rgba(255,255,255,.7); 
+            margin-bottom: 25px; 
+            font-weight: 300; 
+            letter-spacing: 0.5px; 
+            animation: subtitleFade 2s ease-out .5s both;
+        }
+        
+        @keyframes subtitleFade {
+            0% { opacity: 0; transform: translateY(30px); }
+            100% { opacity: 1; transform: none; }
+        }
+
+        .session-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding: 12px 18px;
+            background: linear-gradient(135deg, rgba(58,134,255,.12), rgba(131,56,236,.08));
+            border-radius: 12px;
+            border: 1px solid rgba(58,134,255,.25);
+            font-family: 'Orbitron', monospace;
+            font-size: .85rem;
+        }
+        
+        .session-id { color: #3a86ff; font-weight: 600; }
+        .message-count { color: rgba(255,255,255,.8); }
+        
+        .clear-history-btn {
+            background: linear-gradient(135deg, #ff006e, #ff4757);
+            border: none;
+            padding: 6px 12px;
+            border-radius: 8px;
+            color: white;
+            font-size: .75rem;
+            cursor: pointer;
+            transition: all .3s ease;
+            font-family: 'Orbitron', monospace;
+        }
+        
+        .clear-history-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(255,0,110,.4);
+        }
+
+        .voice-controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+        
+        .voice-label {
+            color: white;
+            font-weight: 500;
+            font-family: 'Orbitron', monospace;
+            font-size: .9rem;
+        }
+        
+        select { 
+            padding: 8px 15px; 
+            border: 2px solid rgba(255,255,255,.2); 
+            border-radius: 10px; 
+            background: linear-gradient(135deg, rgba(255,255,255,.1), rgba(255,255,255,.05)); 
+            color: #fff; 
+            font-size: .9rem; 
+            backdrop-filter: blur(15px); 
+            transition: all .4s ease; 
+            outline: none; 
+            font-family: 'Inter', sans-serif;
+        }
+        
+        select:focus {
+            border-color: #8338ec;
+            box-shadow: 0 0 20px rgba(131,56,236,.3);
+        } 
+        
+        select option {
+            background: #1a1a2e;
+            color: #fff;
+        }
+
+        .pipeline-status {
+            display: none;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(255,255,255,.06);
+            border-radius: 12px;
+            font-family: 'Orbitron', monospace;
+            font-size: .8rem;
+            border: 1px solid rgba(255,255,255,.1);
+        }
+        
+        .pipeline-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            color: rgba(255,255,255,.6);
+            transition: all .3s ease;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        
+        .pipeline-step.active {
+            color: #00d4ff;
+            background: rgba(0,212,255,.1);
+            animation: stepPulse 2s ease-in-out infinite;
+        }
+        
+        .pipeline-step.completed {
+            color: #22c55e;
+            background: rgba(34,197,94,.1);
+        }
+        
+        .pipeline-step.error {
+            color: #ef4444;
+            background: rgba(239,68,68,.1);
+        }
+        
+        @keyframes stepPulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: .6; transform: scale(1.05); }
+        }
+
+        .control-section {
+            margin: 30px 0;
+        }
+        
+        .main-controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        
+        .record-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            margin: 25px 0;
             
-            box-shadow: 
-                0 40px 80px rgba(0, 0, 0, 0.3),
-                0 20px 40px rgba(255, 0, 110, 0.1),
-                inset 0 1px 0 rgba(255, 255, 255, 0.2);
-            text-align: center;
-            max-width: 900px;
-            width: 90%;
+        }
+
+        .record-button {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, #ff006e, #8338ec);
+            color: white;
+            font-size: 2.5rem;
+            cursor: pointer;
+            transition: all .4s cubic-bezier(.4,0,.2,1);
             position: relative;
             overflow: hidden;
-            animation: containerEntrance 1.5s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .container::before {
-            content: '';
-            position: absolute;
-            top: -2px;
-            left: -2px;
-            right: -2px;
-            bottom: -2px;
-            background: linear-gradient(45deg, 
-                #ff006e, #8338ec, #3a86ff, #ff006e);
-            background-size: 400% 400%;
-            border-radius: 30px;
-            z-index: -1;
-            animation: gradientFlow 6s ease infinite;
-            opacity: 0.3;
-        }
-
-        @keyframes gradientFlow {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-        }
-
-        @keyframes containerEntrance {
-            0% {
-                opacity: 0;
-                transform: translateY(100px) scale(0.8);
-            }
-            100% {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-        }
-
-        /* Typography */
-        .main-title {
+            box-shadow: 0 15px 30px rgba(255,0,110,.4), 
+                        0 5px 15px rgba(0,0,0,.2),
+                        inset 0 2px 0 rgba(255,255,255,.2);
             font-family: 'Orbitron', monospace;
-            font-size: 3.5rem;
-            font-weight: 900;
-            margin-bottom: 20px;
-            background: linear-gradient(135deg, 
-                #ff006e 0%, 
-                #8338ec 30%, 
-                #3a86ff 60%, 
-                #ffffff 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-shadow: 0 0 50px rgba(255, 0, 110, 0.5);
-            animation: titleGlow 3s ease-in-out infinite alternate;
-            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-
-        .main-title::after {
+        
+        
+        .record-button::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(135deg, 
-                transparent 0%, 
-                rgba(255, 255, 255, 0.1) 50%, 
-                transparent 100%);
-            animation: shine 2s linear infinite;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            background: radial-gradient(circle, rgba(255,255,255,.3) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity .3s ease;
         }
-
-        @keyframes titleGlow {
-            0% { 
-                text-shadow: 0 0 20px rgba(255, 0, 110, 0.5),
-                           0 0 40px rgba(131, 56, 236, 0.3);
+        
+        .record-button:hover::before {
+            opacity: 1;
+        }
+        
+        .record-button:hover {
+            transform: translateY(-5px) scale(1.1);
+            box-shadow: 0 25px 50px rgba(255,0,110,.6), 
+                        0 10px 25px rgba(0,0,0,.3),
+                        inset 0 2px 0 rgba(255,255,255,.3);
+        }
+        
+        .record-button.recording {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            animation: recordingPulse 1.5s ease-in-out infinite;
+        }
+        
+        .record-button.processing {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            animation: processingRotate 2s linear infinite;
+        }
+        
+        @keyframes recordingPulse {
+            0%, 100% { 
+                transform: translateY(-5px) scale(1.1);
+                box-shadow: 0 25px 50px rgba(34,197,94,.6), 0 10px 25px rgba(0,0,0,.3);
             }
-            100% { 
-                text-shadow: 0 0 40px rgba(255, 0, 110, 0.8),
-                           0 0 80px rgba(131, 56, 236, 0.5);
+            50% { 
+                transform: translateY(-5px) scale(1.15);
+                box-shadow: 0 30px 60px rgba(34,197,94,.8), 0 15px 30px rgba(0,0,0,.4);
             }
         }
-
-        @keyframes shine {
-            0% { background-position: -200% 0; }
-            100% { background-position: 200% 0; }
+        
+        @keyframes processingRotate {
+            0% { transform: translateY(-5px) scale(1.1) rotate(0deg); }
+            100% { transform: translateY(-5px) scale(1.1) rotate(360deg); }
         }
 
-        .subtitle {
-            font-size: 1.4rem;
-            color: rgba(255, 255, 255, 0.8);
-            margin-bottom: 50px;
-            font-weight: 300;
-            letter-spacing: 1px;
-            animation: subtitleFade 2s ease-out 0.5s both;
-        }
-
-        @keyframes subtitleFade {
-            0% { opacity: 0; transform: translateY(30px); }
-            100% { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Sections */
-        .section {
-            background: linear-gradient(135deg, 
-                rgba(255, 255, 255, 0.1) 0%,
-                rgba(255, 255, 255, 0.05) 100%);
-            border-radius: 25px;
-            padding: 40px;
-            margin: 30px 0;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            position: relative;
-            overflow: hidden;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .section::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, 
-                transparent, 
-                rgba(255, 255, 255, 0.1), 
-                transparent);
-            transition: left 0.8s ease;
-        }
-
-        .section:hover {
-            transform: translateY(-10px) scale(1.02);
-            box-shadow: 
-                0 30px 60px rgba(0, 0, 0, 0.2),
-                0 15px 30px rgba(255, 0, 110, 0.1);
-            border-color: rgba(255, 255, 255, 0.3);
-        }
-
-        .section:hover::before {
-            left: 100%;
-        }
-
-        .section-title {
+        .record-status {
             font-family: 'Orbitron', monospace;
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 25px;
-            color: #ffffff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
-            text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+            font-size: .9rem;
+            font-weight: 600;
+            color: rgba(255,255,255,.8);
+            min-height: 20px;
         }
 
-        .icon {
-            font-size: 1.8em;
-            animation: iconFloat 3s ease-in-out infinite;
-            filter: drop-shadow(0 0 10px rgba(255, 0, 110, 0.5));
-        }
-
-        @keyframes iconFloat {
-            0%, 100% { transform: translateY(0) rotate(0deg); }
-            50% { transform: translateY(-8px) rotate(5deg); }
-        }
-
-        /* Input Elements */
-        .input-group {
-            display: flex;
-            gap: 20px;
-            margin-bottom: 25px;
-            flex-wrap: wrap;
-            justify-content: center;
-            align-items: stretch;
-        }
-
-        input[type="text"] {
-            flex: 1;
-            min-width: 300px;
-            padding: 20px 25px;
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            border-radius: 20px;
-            background: linear-gradient(135deg, 
-                rgba(255, 255, 255, 0.1) 0%,
-                rgba(255, 255, 255, 0.05) 100%);
-            color: #ffffff;
-            font-size: 1.1rem;
-            backdrop-filter: blur(15px);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            outline: none;
-            position: relative;
-        }
-
-        input[type="text"]:focus {
-            border-color: #ff006e;
-            box-shadow: 
-                0 0 30px rgba(255, 0, 110, 0.3),
-                0 0 60px rgba(255, 0, 110, 0.1);
-            transform: scale(1.02);
-            background: linear-gradient(135deg, 
-                rgba(255, 0, 110, 0.1) 0%,
-                rgba(131, 56, 236, 0.05) 100%);
-        }
-
-        input[type="text"]::placeholder {
-            color: rgba(255, 255, 255, 0.5);
-            font-style: italic;
-        }
-
-        /* Select Elements */
-        select {
-            padding: 15px 20px;
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            border-radius: 15px;
-            background: linear-gradient(135deg, 
-                rgba(255, 255, 255, 0.1) 0%,
-                rgba(255, 255, 255, 0.05) 100%);
-            color: #ffffff;
-            font-size: 1rem;
-            backdrop-filter: blur(15px);
-            transition: all 0.4s ease;
-            outline: none;
-            margin-left: 10px;
-        }
-
-        select:focus {
-            border-color: #8338ec;
-            box-shadow: 0 0 20px rgba(131, 56, 236, 0.3);
-        }
-
-        select option {
-            background: #1a1a2e;
-            color: #ffffff;
-        }
-
-        /* Buttons */
         .btn {
-            padding: 20px 35px;
+            padding: 12px 20px;
             border: none;
-            border-radius: 20px;
-            font-size: 1.2rem;
+            border-radius: 12px;
+            font-size: .9rem;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all .4s cubic-bezier(.4,0,.2,1);
             position: relative;
             overflow: hidden;
-            min-width: 180px;
+            min-width: 120px;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
             font-family: 'Orbitron', monospace;
         }
-
+        
         .btn::before {
             content: '';
             position: absolute;
@@ -448,406 +369,282 @@
             left: -100%;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, 
-                transparent, 
-                rgba(255, 255, 255, 0.3), 
-                transparent);
-            transition: left 0.6s ease;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,.3), transparent);
+            transition: left .6s ease;
         }
-
+        
         .btn:hover::before {
             left: 100%;
         }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #ff006e, #8338ec);
+        
+        .btn-conversation {
+            background: linear-gradient(135deg, #8338ec, #3a86ff);
             color: white;
-            box-shadow: 
-                0 15px 30px rgba(255, 0, 110, 0.4),
-                0 5px 15px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 10px 20px rgba(131,56,236,.3), 0 3px 10px rgba(0,0,0,.2);
         }
-
-        .btn-primary:hover {
-            transform: translateY(-5px) scale(1.05);
-            box-shadow: 
-                0 25px 50px rgba(255, 0, 110, 0.5),
-                0 10px 25px rgba(0, 0, 0, 0.3);
+        
+        .btn-conversation:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 15px 30px rgba(131,56,236,.4), 0 5px 15px rgba(0,0,0,.3);
         }
-
-        .btn-secondary {
-            background: linear-gradient(135deg, #3a86ff, #8338ec);
+        
+        .btn-conversation.active {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            animation: conversationActive 2s ease-in-out infinite;
+        }
+        
+        @keyframes conversationActive {
+            0%, 100% { box-shadow: 0 10px 20px rgba(34,197,94,.3), 0 3px 10px rgba(0,0,0,.2); }
+            50% { box-shadow: 0 15px 30px rgba(34,197,94,.5), 0 5px 15px rgba(0,0,0,.3); }
+        }
+        
+        .btn-warning {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
             color: white;
-            box-shadow: 
-                0 15px 30px rgba(58, 134, 255, 0.4),
-                0 5px 15px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 10px 20px rgba(245,158,11,.3), 0 3px 10px rgba(0,0,0,.2);
         }
-
-        .btn-secondary:hover {
-            transform: translateY(-5px) scale(1.05);
-            box-shadow: 
-                0 25px 50px rgba(58, 134, 255, 0.5),
-                0 10px 25px rgba(0, 0, 0, 0.3);
+        
+        .btn-warning:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 15px 30px rgba(245,158,11,.4), 0 5px 15px rgba(0,0,0,.3);
         }
-
-        .btn-danger {
-            background: linear-gradient(135deg, #ff006e, #ff4757);
-            color: white;
-            box-shadow: 
-                0 15px 30px rgba(255, 0, 110, 0.4),
-                0 5px 15px rgba(0, 0, 0, 0.2);
+        
+        .btn:disabled {
+            opacity: .5;
+            cursor: not-allowed;
+            transform: none !important;
         }
-
-        .btn-danger:hover {
-            transform: translateY(-5px) scale(1.05);
-            box-shadow: 
-                0 25px 50px rgba(255, 71, 87, 0.5),
-                0 10px 25px rgba(0, 0, 0, 0.3);
-        }
-
-        .btn-llm {
-            background: linear-gradient(135deg, #00d4ff, #00a8ff);
-            color: white;
-            box-shadow: 
-                0 15px 30px rgba(0, 212, 255, 0.4),
-                0 5px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .btn-llm:hover {
-            transform: translateY(-5px) scale(1.05);
-            box-shadow: 
-                0 25px 50px rgba(0, 212, 255, 0.5),
-                0 10px 25px rgba(0, 0, 0, 0.3);
-        }
-
+        
         .btn:active {
-            transform: translateY(-2px) scale(1.02);
+            transform: translateY(-1px) scale(1.02);
         }
 
-        .btn-group {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        /* Audio Elements */
-        audio {
-            width: 100%;
-            margin-top: 25px;
-            border-radius: 15px;
-            filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.3));
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-        }
-
-        /* Status Messages */
         .status-message {
-            margin: 20px 0;
-            padding: 15px 25px;
-            border-radius: 15px;
+            margin: 15px 0;
+            padding: 12px 20px;
+            border-radius: 12px;
             font-weight: 500;
-            transition: all 0.4s ease;
+            transition: all .4s ease;
             display: none;
             backdrop-filter: blur(10px);
+            font-family: 'Inter', sans-serif;
+            font-size: .9rem;
         }
-
+        
         .status-success {
-            background: linear-gradient(135deg, 
-                rgba(34, 197, 94, 0.2) 0%,
-                rgba(34, 197, 94, 0.1) 100%);
+            background: linear-gradient(135deg, rgba(34,197,94,.2), rgba(34,197,94,.1));
             color: #22c55e;
-            border: 1px solid rgba(34, 197, 94, 0.3);
-            box-shadow: 0 0 20px rgba(34, 197, 94, 0.2);
+            border: 1px solid rgba(34,197,94,.3);
+            box-shadow: 0 0 20px rgba(34,197,94,.2);
         }
-
+        
         .status-error {
-            background: linear-gradient(135deg, 
-                rgba(239, 68, 68, 0.2) 0%,
-                rgba(239, 68, 68, 0.1) 100%);
+            background: linear-gradient(135deg, rgba(239,68,68,.2), rgba(239,68,68,.1));
             color: #ef4444;
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            box-shadow: 0 0 20px rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239,68,68,.3);
+            box-shadow: 0 0 20px rgba(239,68,68,.2);
         }
 
-        /* Recording Indicator */
-        .recording-indicator {
+        .content-sections {
+            margin-top: 25px;
+        }
+
+        .transcription-section, .response-section {
+            margin-top: 20px;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(58,134,255,.08), rgba(131,56,236,.04));
+            border-radius: 15px;
+            border: 1px solid rgba(58,134,255,.2);
             display: none;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
-            margin: 20px 0;
-            color: #ff006e;
-            font-weight: 600;
+        }
+        
+        .section-title {
             font-family: 'Orbitron', monospace;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .transcription-section .section-title {
+            color: #3a86ff;
+        }
+        
+        .response-section .section-title {
+            color: #00d4ff;
+        }
+        
+        .section-content {
+            background: rgba(255,255,255,.05);
+            border: 1px solid rgba(255,255,255,.1);
+            border-radius: 10px;
+            padding: 15px;
+            color: #fff;
+            font-size: 1rem;
+            line-height: 1.6;
+            min-height: 50px;
+            max-height: 150px;
+            overflow-y: auto;
+            backdrop-filter: blur(10px);
+            word-wrap: break-word;
         }
 
-        .recording-dot {
-            width: 15px;
-            height: 15px;
-            background: radial-gradient(circle, #ff006e, #ff4757);
-            border-radius: 50%;
-            animation: recordingPulse 1s ease-in-out infinite;
-            box-shadow: 0 0 20px rgba(255, 0, 110, 0.5);
+        .chat-history {
+            margin-top: 25px;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(255,255,255,.08), rgba(255,255,255,.02));
+            border-radius: 15px;
+            border: 1px solid rgba(255,255,255,.1);
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+        }
+        
+        .chat-history-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .chat-message {
+            margin-bottom: 12px;
+            padding: 12px 15px;
+            border-radius: 12px;
+            animation: messageSlideIn .5s ease-out;
+            font-size: .9rem;
+        }
+        
+        .chat-message.user {
+            background: linear-gradient(135deg, rgba(255,0,110,.15), rgba(255,0,110,.05));
+            border-left: 3px solid #ff006e;
+            margin-left: 15px;
+        }
+        
+        .chat-message.assistant {
+            background: linear-gradient(135deg, rgba(0,212,255,.15), rgba(0,212,255,.05));
+            border-left: 3px solid #00d4ff;
+            margin-right: 15px;
+        }
+        
+        .message-role {
+            font-family: 'Orbitron', monospace;
+            font-size: .8rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+            opacity: .8;
+        }
+        
+        .user .message-role {
+            color: #ff006e;
+        }
+        
+        .assistant .message-role {
+            color: #00d4ff;
+        }
+        
+        .message-content {
+            color: #fff;
+            font-size: .9rem;
+            line-height: 1.5;
+        }
+        
+        @keyframes messageSlideIn {
+            0% { opacity: 0; transform: translateX(20px); }
+            100% { opacity: 1; transform: none; }
         }
 
-        @keyframes recordingPulse {
-            0%, 100% { 
-                opacity: 1; 
-                transform: scale(1);
-                box-shadow: 0 0 20px rgba(255, 0, 110, 0.5);
-            }
-            50% { 
-                opacity: 0.5; 
-                transform: scale(1.3);
-                box-shadow: 0 0 40px rgba(255, 0, 110, 0.8);
-            }
-        }
-
-        /* Divider */
-        .divider {
-            height: 3px;
-            background: linear-gradient(90deg, 
-                transparent, 
-                rgba(255, 0, 110, 0.5),
-                rgba(131, 56, 236, 0.5),
-                rgba(58, 134, 255, 0.5),
-                transparent);
-            margin: 40px 0;
-            border-radius: 2px;
-            animation: dividerGlow 3s ease-in-out infinite alternate;
-        }
-
-        @keyframes dividerGlow {
-            0% { opacity: 0.5; filter: blur(1px); }
-            100% { opacity: 1; filter: blur(0px); }
-        }
-
-        /* Footer */
         .footer {
-            margin-top: 50px;
-            font-size: 1.2rem;
-            color: rgba(255, 255, 255, 0.6);
+            margin-top: 35px;
+            font-size: 1rem;
+            color: rgba(255,255,255,.6);
             font-weight: 300;
             animation: footerFade 2s ease-out 1s both;
         }
-
+        
         .footer strong {
-            background: linear-gradient(135deg, #ff006e, #8338ec);
+            background: linear-gradient(135deg, #f7f3f5, #8338ec);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
-
+        
         @keyframes footerFade {
             0% { opacity: 0; transform: translateY(20px); }
-            100% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 1; transform: none; }
         }
 
-        /* Loading Animation */
-        .loading {
-            display: inline-block;
-            width: 25px;
-            height: 25px;
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top-color: #ff006e;
-            animation: loadingSpin 1s ease-in-out infinite;
-        }
-
-        @keyframes loadingSpin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* Response Display */
-        .response-section {
-            margin-top: 25px;
-            padding: 20px;
-            background: linear-gradient(135deg, 
-                rgba(0, 212, 255, 0.1) 0%,
-                rgba(0, 168, 255, 0.05) 100%);
-            border-radius: 15px;
-            border: 1px solid rgba(0, 212, 255, 0.2);
-            display: none;
-        }
-
-        .response-title {
-            font-family: 'Orbitron', monospace;
-            font-size: 1.3rem;
-            font-weight: 600;
-            color: #00d4ff;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .response-content {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            padding: 20px;
-            color: #ffffff;
-            font-size: 1.1rem;
-            line-height: 1.6;
-            min-height: 60px;
-            max-height: 300px;
-            overflow-y: auto;
-            backdrop-filter: blur(10px);
-            word-wrap: break-word;
-            margin-bottom: 15px;
-        }
-
-        /* Transcription Display */
-        .transcription-section {
-            margin-top: 25px;
-            padding: 20px;
-            background: linear-gradient(135deg, 
-                rgba(58, 134, 255, 0.1) 0%,
-                rgba(131, 56, 236, 0.05) 100%);
-            border-radius: 15px;
-            border: 1px solid rgba(58, 134, 255, 0.2);
-            display: none;
-        }
-
-        .transcription-title {
-            font-family: 'Orbitron', monospace;
-            font-size: 1.3rem;
-            font-weight: 600;
-            color: #3a86ff;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .transcription-content {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            padding: 20px;
-            color: #ffffff;
-            font-size: 1.1rem;
-            line-height: 1.6;
-            min-height: 60px;
-            max-height: 200px;
-            overflow-y: auto;
-            backdrop-filter: blur(10px);
-            word-wrap: break-word;
-        }
-
-        .transcription-content:empty::before {
-            content: "Transcription will appear here...";
-            color: rgba(255, 255, 255, 0.5);
-            font-style: italic;
-        }
-
-        .transcription-loading {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            color: #3a86ff;
-            font-weight: 500;
-        }
-
-        .transcription-error {
-            color: #ef4444;
-            background: rgba(239, 68, 68, 0.1);
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid rgba(239, 68, 68, 0.2);
-        }
-
-        /* Pipeline Status */
-        .pipeline-status {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin: 20px 0;
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 10px;
-            font-family: 'Orbitron', monospace;
-            font-size: 0.9rem;
-        }
-
-        .pipeline-step {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: rgba(255, 255, 255, 0.6);
-            transition: all 0.3s ease;
-        }
-
-        .pipeline-step.active {
-            color: #00d4ff;
-            animation: stepPulse 2s ease-in-out infinite;
-        }
-
-        .pipeline-step.completed {
-            color: #22c55e;
-        }
-
-        .pipeline-step.error {
-            color: #ef4444;
-        }
-
-        @keyframes stepPulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.6; }
-        }
-
-        /* Responsive Design */
         @media (max-width: 768px) {
             .container {
-                padding: 40px 25px;
-                margin: 20px;
+                padding: 30px 20px;
+                margin: 15px;
             }
             
             .main-title {
-                font-size: 2.5rem;
+                font-size: 2.2rem;
             }
             
-            .input-group {
+            .main-controls {
                 flex-direction: column;
+                align-items: center;
             }
             
-            input[type="text"] {
-                min-width: auto;
-            }
-            
-            .btn-group {
-                flex-direction: column;
-            }
-
             .btn {
                 min-width: auto;
+                width: 100%;
+                max-width: 250px;
             }
-
+            
             .pipeline-status {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+            
+            .session-info {
                 flex-direction: column;
                 gap: 10px;
+                text-align: center;
+            }
+            
+            .voice-controls {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .record-button {
+                width: 100px;
+                height: 100px;
+                font-size: 2rem;
             }
         }
 
         ::-webkit-scrollbar {
-            width: 8px;
+            width: 6px;
         }
-
+        
         ::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255,255,255,.1);
         }
-
+        
         ::-webkit-scrollbar-thumb {
             background: linear-gradient(135deg, #ff006e, #8338ec);
-            border-radius: 4px;
+            border-radius: 3px;
+        }
+
+        /* Hidden audio element */
+        #responseAudio {
+            display: none;
         }
     </style>
 </head>
-
 <body>
     <div class="neural-bg"></div>
-    
     <div class="particles">
         <div class="particle"></div>
         <div class="particle"></div>
@@ -856,548 +653,508 @@
         <div class="particle"></div>
     </div>
 
-    <div class="shape shape-1"></div>
-    <div class="shape shape-2"></div>
-    <div class="shape shape-3"></div>
-
     <div class="container">
-        <h1 class="main-title">🤖 AI VOICE AGENT</h1>
-        <p class="subtitle">Day 9: Complete LLM Pipeline | Audio → Transcription → AI → Speech</p>
+        <h1 class="main-title"> CONVERSATIONAL AI </h1>
+        <p class="subtitle">Your Voice, Connected </p>
 
-        <div class="section">
-            <h2 class="section-title">
-                <span class="icon">🎤</span>
-                Text to Speech
-            </h2>
-            <div class="input-group">
-                <input type="text" id="textInput" placeholder="Enter your text and witness the magic of AI voice synthesis..." />
-                <button class="btn btn-primary" onclick="generateAudio()">
-                    <span id="ttsButtonText">Generate Audio</span>
-                </button>
-            </div>
-            <div id="ttsStatus" class="status-message"></div>
-            <audio id="audioPlayer" controls style="display:none;"></audio>
+
+        <div class="session-info">
+            <div><span class="session-id">Session: <span id="sessionDisplay">Loading...</span></span></div>
+            <div class="message-count">Messages: <span id="messageCount">0</span></div>
+            <button class="clear-history-btn" onclick="conversationalAI.clearChatHistory()">Clear History</button>
         </div>
 
-        <div class="divider"></div>
 
-        <div class="section">
-            <h2 class="section-title">
-                <span class="icon">🧠</span>
-                AI Voice Conversation
-            </h2>
-            <div style="margin-bottom: 20px;">
-                <label for="voiceSelect" style="color:white; font-weight: 500;">Choose AI Voice:</label>
-                <select id="voiceSelect">
-                    <option value="en-US-natalie">Natalie (US Female)</option>
-                    <option value="en-US-marcus">Marcus (US Male)</option>
-                    <option value="en-GB-sarah">Sarah (UK Female)</option>
-                    <option value="en-US-guy">Guy (US Male)</option>
-                </select>
+        <div class="voice-controls">
+            <label class="voice-label" for="voiceSelect">Voice:</label>
+            <select id="voiceSelect">
+                <option value="en-US-natalie">Natalie (US Female)</option>
+                <option value="en-US-marcus">Marcus (US Male)</option>
+                <option value="en-GB-sarah">Sarah (UK Female)</option>
+                <option value="en-US-guy">Guy (US Male)</option>
+            </select>
+        </div>
+
+
+        <div class="pipeline-status" id="pipelineStatus">
+            <div class="pipeline-step" id="step1"><span>🎤</span><span>Recording</span></div>
+            <div class="pipeline-step" id="step2"><span>📝</span><span>Transcribing</span></div>
+            <div class="pipeline-step" id="step3"><span>🧠</span><span>AI Thinking</span></div>
+            <div class="pipeline-step" id="step4"><span>🔊</span><span>Generating Speech </span></div>
+        </div>
+
+
+        <div class="control-section">
+            <div class="main-controls">
+                <button id="autoModeBtn" onclick="conversationalAI.toggleAutoMode()" class="btn btn-conversation">🤖 Auto-Mode OFF</button>
+                <button class="btn btn-conversation" id="conversationBtn" onclick="conversationalAI.startConversation()">🗣️ Start Conversation</button>
+                <button class="btn btn-warning" id="retryBtn" onclick="retryLastRequest()" style="display:none;">🔄 Retry</button>
             </div>
 
-            <div class="pipeline-status" id="pipelineStatus" style="display: none;">
-                <div class="pipeline-step" id="step1">
-                    <span>🎤</span> Recording
-                </div>
-                <div class="pipeline-step" id="step2">
-                    <span>📝</span> Transcribing
-                </div>
-                <div class="pipeline-step" id="step3">
-                    <span>🧠</span> AI Thinking
-                </div>
-                <div class="pipeline-step" id="step4">
-                    <span>🔊</span> Generating Speech
-                </div>
-            </div>
-            
-            <div class="btn-group" style="margin-top: 15px;">
-                <button class="btn btn-secondary" onclick="startRecording()">
-                    🎤 Start Recording
+
+            <div class="record-section">
+                <button class="record-button" id="recordButton" onclick="conversationalAI.toggleRecording()" disabled>
+                    <span id="recordIcon">🎤</span>
                 </button>
-                <button class="btn btn-danger" onclick="stopRecording()">
-                    ⏹️ Stop & Process
-                </button>
-                <button class="btn btn-llm" onclick="startLLMConversation()" id="llmButton">
-                    🤖 Talk to AI
-                </button>
+                <div class="record-status" id="recordStatus">Click "Start Conversation" to begin</div>
             </div>
-            
-            <div class="recording-indicator" id="recordingIndicator">
-                <div class="recording-dot"></div>
-                <span>RECORDING YOUR VOICE...</span>
-            </div>
-            
-            <div id="llmStatus" class="status-message"></div>
-            
+
+            <div id="statusMessage" class="status-message"></div>
+        </div>
+
+
+        <div class="content-sections">
+    
             <div class="transcription-section" id="transcriptionSection">
-                <h3 class="transcription-title">
-                    <span>📝</span>
-                    Your Words
-                </h3>
-                <div class="transcription-content" id="transcriptionContent"></div>
+                <h3 class="section-title"><span>📝</span> What You Said</h3>
+                <div class="section-content" id="transcriptionContent"></div>
             </div>
 
             <div class="response-section" id="responseSection">
-                <h3 class="response-title">
-                    <span>🤖</span>
-                    AI Response
-                </h3>
-                <div class="response-content" id="responseContent"></div>
-                <audio id="llmAudio" controls></audio>
+                <h3 class="section-title"><span>🤖</span> AI Response</h3>
+                <div class="section-content" id="responseContent"></div>
+            </div>
+
+     
+            <div class="chat-history" id="chatHistory">
+                <h3 class="chat-history-title"><span>💬</span> Conversation History</h3>
+                <div id="chatMessages"></div>
             </div>
         </div>
 
-        <div class="divider"></div>
-
-        <div class="section">
-            <h2 class="section-title">
-                <span class="icon">🔊</span>
-                Simple Echo Bot
-            </h2>
-            <div class="btn-group">
-                <button class="btn btn-secondary" onclick="startEchoRecording()">
-                    Start Echo
-                </button>
-                <button class="btn btn-danger" onclick="stopEchoRecording()">
-                    Stop Echo
-                </button>
-            </div>
-            <div class="recording-indicator" id="echoRecordingIndicator">
-                <div class="recording-dot"></div>
-                <span>ECHO RECORDING...</span>
-            </div>
-            <div id="echoStatus" class="status-message"></div>
-            <audio id="echoAudio" controls></audio>
-        </div>
+        <audio id="responseAudio" preload="metadata"></audio>
 
         <div class="footer">
-            Made with ❤️ by <strong>Shreya</strong> | Day 9: Full LLM Pipeline
+            Made with ❤️ Shreya
+            
         </div>
     </div>
     <script>
-    // Consolidated and fixed recording script for LLM pipeline
+    /* Production-ready client script (clean, no debug logs) */
+    class ConversationalAI {
+        constructor() {
+            this.mediaRecorder = null;
+            this.audioChunks = [];
+            this.isRecording = false;
+            this.isConversationActive = false;
+            this.sessionId = null;
+            this.messageCount = 0;
+            this.serverUrl = 'http://127.0.0.1:8000';
+            this.lastAudioBlob = null;
+            this.retryCount = 0;
+            this.autoMode = false;
 
-let mediaRecorder;
-let audioChunks = [];
-let isRecording = false;
-let isLLMMode = false;
+            this.initializeSession();
+            this.setupEventListeners();
+            this.checkServerHealth();
+        }
 
-// Configuration
-const SERVER_URL = 'http://127.0.0.1:8000'; // Make this configurable
-const AUDIO_FORMAT = 'audio/webm'; // Use consistent format
-
-// Initialize when DOM is ready
-document.addEventListener('DOMContentLoaded', function() {
-    initializeRecordingButtons();
-    initializeLLMMode();
-});
-
-function initializeRecordingButtons() {
-    const startBtn = document.getElementById('startBtn');
-    const stopBtn = document.getElementById('stopBtn');
-    
-    if (!startBtn || !stopBtn) {
-        console.error('Start/Stop buttons not found. Please ensure they exist with IDs "startBtn" and "stopBtn"');
-        return;
-    }
-    
-    startBtn.addEventListener('click', startRecording);
-    stopBtn.addEventListener('click', stopRecording);
-}
-
-function initializeLLMMode() {
-    const llmButton = document.getElementById('llmButton');
-    if (llmButton) {
-        llmButton.addEventListener('click', toggleLLMMode);
-    }
-}
-
-async function startRecording() {
-    try {
-        // Request microphone access
-        const stream = await navigator.mediaDevices.getUserMedia({ 
-            audio: {
-                echoCancellation: true,
-                noiseSuppression: true,
-                sampleRate: 44100
+        initializeSession() {
+            const params = new URLSearchParams(window.location.search);
+            let sessionId = params.get('session_id');
+            if (!sessionId) {
+                sessionId = this.generateSessionId();
+                params.set('session_id', sessionId);
+                const newUrl = `${window.location.pathname}?${params.toString()}`;
+                window.history.replaceState({}, '', newUrl);
             }
-        });
-
-        // Initialize MediaRecorder with consistent format
-        const options = { mimeType: AUDIO_FORMAT };
-        if (!MediaRecorder.isTypeSupported(AUDIO_FORMAT)) {
-            console.warn(`${AUDIO_FORMAT} not supported, using default`);
-            mediaRecorder = new MediaRecorder(stream);
-        } else {
-            mediaRecorder = new MediaRecorder(stream, options);
+            this.sessionId = sessionId;
+            const sessionDisplay = document.getElementById('sessionDisplay');
+            if (sessionDisplay) sessionDisplay.textContent = this.sessionId.substring(0,8) + '...';
         }
 
-        audioChunks = [];
-        isRecording = true;
-
-        // Set up event handlers
-        mediaRecorder.ondataavailable = (event) => {
-            if (event.data.size > 0) {
-                audioChunks.push(event.data);
-            }
-        };
-
-        mediaRecorder.onstop = handleRecordingStop;
-
-        // Start recording
-        mediaRecorder.start();
-        updateUI('recording');
-        
-        if (isLLMMode) {
-            showStatus('🎤 Recording for AI conversation...', 'success');
-            updatePipelineStep('step1', 'active');
-        } else {
-            showStatus('🎤 Recording started...', 'success');
+        generateSessionId() {
+            if (self.crypto && self.crypto.randomUUID) return self.crypto.randomUUID();
+            return `${Date.now()}-${Math.random().toString(36).slice(2,10)}`;
         }
+       
 
-    } catch (error) {
-        console.error('Failed to start recording:', error);
-        showStatus('❌ Microphone access denied or unavailable', 'error');
-        isRecording = false;
-    }
-}
-
-function stopRecording() {
-    if (mediaRecorder && isRecording) {
-        mediaRecorder.stop();
-        mediaRecorder.stream.getTracks().forEach(track => track.stop());
-        isRecording = false;
-        updateUI('stopped');
-        
-        if (isLLMMode) {
-            showStatus('⏳ Processing with AI...', 'success');
-        } else {
-            showStatus('✅ Recording stopped', 'success');
-        }
-    } else {
-        showStatus('❌ No active recording to stop', 'error');
-    }
-}
-
-async function handleRecordingStop() {
-    const audioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType || AUDIO_FORMAT });
-    
-    if (isLLMMode) {
-        updatePipelineStep('step1', 'completed');
-        await processWithLLM(audioBlob);
-    } else {
-        // Simple playback mode
-        const audioUrl = URL.createObjectURL(audioBlob);
-        const audioElement = document.getElementById('audioPlayer') || document.getElementById('llmAudio');
-        if (audioElement) {
-            audioElement.src = audioUrl;
-            audioElement.style.display = 'block';
-        }
-        showStatus('✅ Recording ready for playback', 'success');
-    }
-}
-
-async function processWithLLM(audioBlob) {
-    try {
-        // Show processing sections
-        showProcessingSections();
-        
-        // Step 2: Transcription
-        updatePipelineStep('step2', 'active');
-        showTranscriptionLoading();
-        
-        // Prepare form data
-        const formData = new FormData();
-        formData.append('file', audioBlob, 'recording.webm');
-        
-        // Get selected voice
-        const voiceSelect = document.getElementById('voiceSelect');
-        const voiceId = voiceSelect ? voiceSelect.value : 'en-US-natalie';
-        formData.append('voice_id', voiceId);
-
-        showStatus('📝 Transcribing and processing with AI...', 'success');
-
-        // Send to LLM endpoint
-        const response = await fetch(`${SERVER_URL}/llm/query`, {
-            method: 'POST',
-            body: formData
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.error || `Server error: ${response.status}`);
-        }
-
-        const result = await response.json();
-
-        // Step 2 Complete: Show transcription
-        updatePipelineStep('step2', 'completed');
-        showTranscription(result.transcription);
-
-        // Step 3: Show LLM response
-        updatePipelineStep('step3', 'active');
-        showStatus('🧠 AI generating response...', 'success');
-        
-        await new Promise(resolve => setTimeout(resolve, 500)); // Brief delay for UX
-        updatePipelineStep('step3', 'completed');
-        showLLMResponse(result.llm_response);
-
-        // Step 4: Play AI audio
-        updatePipelineStep('step4', 'active');
-        showStatus('🔊 Converting to speech...', 'success');
-
-        if (result.audioFile) {
-            const audioElement = document.getElementById('llmAudio');
-            if (audioElement) {
-                audioElement.src = result.audioFile;
-                audioElement.style.display = 'block';
-                
-                // Auto-play with fallback
-                try {
-                    await audioElement.play();
-                } catch (playError) {
-                    console.log('Autoplay blocked:', playError);
-                    showStatus('✅ AI response ready! Click play to listen', 'success');
-                }
-            }
-            
-            updatePipelineStep('step4', 'completed');
-            showStatus('✅ AI conversation complete!', 'success');
-        } else {
-            throw new Error('No audio file received from AI');
-        }
-
-        // Reset after success
-        setTimeout(resetLLMMode, 3000);
-
-    } catch (error) {
-        console.error('LLM Pipeline failed:', error);
-        handleLLMError(error);
-    }
-}
-
-function toggleLLMMode() {
-    isLLMMode = !isLLMMode;
-    const button = document.getElementById('llmButton');
-    
-    if (isLLMMode) {
-        if (button) {
-            button.textContent = '🤖 AI Mode Active';
-            button.style.background = 'linear-gradient(135deg, #22c55e, #16a34a)';
-        }
-        showStatus('🤖 AI Mode activated! Record your question...', 'success');
-        showPipelineStatus();
-    } else {
-        resetLLMMode();
-    }
-}
-
-function resetLLMMode() {
-    isLLMMode = false;
-    const button = document.getElementById('llmButton');
-    
-    if (button) {
-        button.textContent = '🤖 Talk to AI';
-        button.style.background = 'linear-gradient(135deg, #00d4ff, #00a8ff)';
-    }
-    
-    hidePipelineStatus();
-    resetPipelineSteps();
-}
-
-// UI Helper Functions
-function updateUI(state) {
-    const startBtn = document.getElementById('startBtn');
-    const stopBtn = document.getElementById('stopBtn');
-    
-    if (startBtn && stopBtn) {
-        if (state === 'recording') {
-            startBtn.disabled = true;
-            stopBtn.disabled = false;
-            showRecordingIndicator();
-        } else {
-            startBtn.disabled = false;
-            stopBtn.disabled = true;
-            hideRecordingIndicator();
-        }
-    }
-}
-
-function showStatus(message, type) {
-    const statusElement = document.getElementById('llmStatus') || document.getElementById('status');
-    if (statusElement) {
-        statusElement.textContent = message;
-        statusElement.className = `status-message status-${type}`;
-        statusElement.style.display = 'block';
-        
-        if (type === 'success') {
-            setTimeout(() => {
-                statusElement.style.opacity = '0';
-                setTimeout(() => {
-                    statusElement.style.display = 'none';
-                    statusElement.style.opacity = '1';
-                }, 300);
-            }, 8000);
-        }
-    } else {
-        console.log(`Status: ${message}`);
-    }
-}
-
-function showRecordingIndicator() {
-    const indicator = document.getElementById('recordingIndicator');
-    if (indicator) {
-        indicator.style.display = 'flex';
-    }
-}
-
-function hideRecordingIndicator() {
-    const indicator = document.getElementById('recordingIndicator');
-    if (indicator) {
-        indicator.style.display = 'none';
-    }
-}
-
-function showProcessingSections() {
-    const transcriptionSection = document.getElementById('transcriptionSection');
-    const responseSection = document.getElementById('responseSection');
-    
-    if (transcriptionSection) transcriptionSection.style.display = 'block';
-    if (responseSection) responseSection.style.display = 'block';
-}
-
-function showTranscriptionLoading() {
-    const transcriptionContent = document.getElementById('transcriptionContent');
-    if (transcriptionContent) {
-        transcriptionContent.innerHTML = `
-            <div class="transcription-loading">
-                <div class="loading"></div>
-                <span>Converting speech to text...</span>
-            </div>
-        `;
-    }
-}
-
-function showTranscription(text) {
-    const transcriptionContent = document.getElementById('transcriptionContent');
-    if (transcriptionContent) {
-        transcriptionContent.innerHTML = `
-            <div style="font-size: 1.1rem; line-height: 1.8;">
-                "${text || 'Transcription not available'}"
-            </div>
-        `;
-    }
-}
-
-function showLLMResponse(response) {
-    const responseContent = document.getElementById('responseContent');
-    if (responseContent) {
-        responseContent.innerHTML = `
-            <div style="font-size: 1.1rem; line-height: 1.8;">
-                ${response || 'Response not available'}
-            </div>
-        `;
-    }
-}
-
-function updatePipelineStep(stepId, status) {
-    const step = document.getElementById(stepId);
-    if (step) {
-        step.className = `pipeline-step ${status}`;
-        
-        const icons = {
-            'active': '⏳',
-            'completed': '✅',
-            'error': '❌'
-        };
-        
-        const icon = step.querySelector('span');
-        if (icon && icons[status]) {
-            icon.textContent = icons[status];
-        }
-    }
-}
-
-function resetPipelineSteps() {
-    const steps = ['step1', 'step2', 'step3', 'step4'];
-    const defaultIcons = ['🎤', '📝', '🧠', '🔊'];
-    
-    steps.forEach((stepId, index) => {
-        const step = document.getElementById(stepId);
-        if (step) {
-            step.className = 'pipeline-step';
-            const icon = step.querySelector('span');
-            if (icon) {
-                icon.textContent = defaultIcons[index];
-            }
+  setupEventListeners() {
+    // Spacebar events
+    document.addEventListener('keydown', (e) => {
+        if (e.code === 'Space' && !e.repeat && this.isConversationActive) {
+            e.preventDefault();
+            if (!this.isRecording) this.startRecording();
         }
     });
-}
-
-function showPipelineStatus() {
-    const pipelineStatus = document.getElementById('pipelineStatus');
-    if (pipelineStatus) {
-        pipelineStatus.style.display = 'flex';
-    }
-}
-
-function hidePipelineStatus() {
-    const pipelineStatus = document.getElementById('pipelineStatus');
-    if (pipelineStatus) {
-        setTimeout(() => {
-            pipelineStatus.style.display = 'none';
-        }, 2000);
-    }
-}
-
-function handleLLMError(error) {
-    const steps = ['step2', 'step3', 'step4'];
-    steps.forEach(step => updatePipelineStep(step, 'error'));
-    
-    const transcriptionContent = document.getElementById('transcriptionContent');
-    if (transcriptionContent) {
-        transcriptionContent.innerHTML = `
-            <div class="transcription-error">
-                <strong>❌ Processing Failed</strong><br>
-                ${error.message}
-            </div>
-        `;
-    }
-    
-    const responseContent = document.getElementById('responseContent');
-    if (responseContent) {
-        responseContent.innerHTML = `
-            <div class="transcription-error">
-                <strong>❌ AI Response Failed</strong><br>
-                Please try again or check your connection.
-            </div>
-        `;
-    }
-    
-    showStatus(`❌ AI Pipeline failed: ${error.message}`, 'error');
-    setTimeout(resetLLMMode, 5000);
-}
-
-// Health check function
-async function checkServerHealth() {
-    try {
-        const response = await fetch(`${SERVER_URL}/health`);
-        if (response.ok) {
-            console.log('✅ Server connection healthy');
-        } else {
-            console.warn('⚠️ Server responding with errors');
-            showStatus('⚠️ Server connection issues detected', 'error');
+    document.addEventListener('keyup', (e) => {
+        if (e.code === 'Space' && this.isRecording) {
+            e.preventDefault();
+            this.stopRecording();
         }
-    } catch (error) {
-        console.error('❌ Server connection failed:', error);
-        showStatus('⚠️ Cannot connect to AI server. Please check if it\'s running.', 'error');
-    }
-}
+    });
 
-// Initialize health check
-setTimeout(checkServerHealth, 2000);
-setInterval(checkServerHealth, 30000);
-</script>
+    const recordBtn = document.getElementById('recordBtn');
+      if (recordBtn) {
+          recordBtn.addEventListener('click', () => {
+              if (!this.isRecording) {
+                  this.startRecording();
+                  recordBtn.textContent = '⏹ Stop';
+              } else {
+                  this.stopRecording();
+                  recordBtn.textContent = '🎤 Record';
+              }
+          });
+     }
+    }
+
+
+
+        toggleAutoMode() {
+            this.autoMode = !this.autoMode;
+            const autoBtn = document.getElementById('autoModeBtn');
+            if (autoBtn) { autoBtn.textContent = this.autoMode ? '🤖 Auto-Mode ON' : '🤖 Auto-Mode OFF'; autoBtn.classList.toggle('active', this.autoMode); }
+            this.showStatus(`Auto-Mode ${this.autoMode ? 'Enabled' : 'Disabled'}`, 'success');
+        }
+
+        async startConversation() {
+            const conversationBtn = document.getElementById('conversationBtn');
+            const startBtn = document.getElementById('startRecordingBtn');
+            if (!this.isConversationActive) {
+                this.isConversationActive = true;
+                if (conversationBtn) { conversationBtn.textContent = '🔴 End Conversation'; conversationBtn.classList.add('active'); }
+                if (startBtn) startBtn.disabled = false;
+                this.showPipelineStatus();
+                this.showStatus('🎤 Conversation started! Click "Record Message" or press SPACE to speak', 'success');
+                this.loadChatHistory();
+            } else {
+                this.endConversation();
+            }
+        }
+
+        endConversation() {
+            this.isConversationActive = false;
+            const conversationBtn = document.getElementById('conversationBtn');
+            const startBtn = document.getElementById('startRecordingBtn');
+            const stopBtn = document.getElementById('stopRecordingBtn');
+            if (conversationBtn) { conversationBtn.textContent = '🗣️ Start Conversation'; conversationBtn.classList.remove('active'); }
+            if (startBtn) startBtn.disabled = true;
+            if (stopBtn) stopBtn.disabled = true;
+            this.hidePipelineStatus();
+            this.hideRecordingIndicator();
+            this.showStatus('👋 Conversation ended. Start a new one anytime!', 'success');
+            if (this.isRecording) this.stopRecording();
+        }
+
+        async startRecording() {
+            if (!this.isConversationActive) { this.showStatus('❌ Please start a conversation first','error'); return; }
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation:true, noiseSuppression:true, sampleRate:44100 }});
+                const options = { mimeType: 'audio/webm' };
+                this.mediaRecorder = MediaRecorder.isTypeSupported('audio/webm') ? new MediaRecorder(stream, options) : new MediaRecorder(stream);
+                this.audioChunks = [];
+                this.isRecording = true;
+                this.mediaRecorder.ondataavailable = (ev) => { if (ev.data && ev.data.size>0) this.audioChunks.push(ev.data); };
+                this.mediaRecorder.onstop = () => this.handleRecordingComplete();
+                this.mediaRecorder.start();
+                this.updateRecordingUI(true);
+                this.updatePipelineStep('step1','active');
+                this.showStatus('🎤 Recording... Speak your message','success');
+            } catch (e) {
+                this.showStatus('❌ Microphone access denied or unavailable','error');
+                this.isRecording = false;
+            }
+        }
+
+        stopRecording() {
+            if (this.mediaRecorder && this.isRecording) {
+                this.mediaRecorder.stop();
+                try { this.mediaRecorder.stream.getTracks().forEach(t => t.stop()); } catch(e){}
+                this.isRecording = false;
+                this.updateRecordingUI(false);
+                this.showStatus('⏳ Processing your message...','success');
+            } else {
+                this.showStatus('❌ No active recording to stop','error');
+            }
+        }
+
+        async handleRecordingComplete() {
+            const audioBlob = new Blob(this.audioChunks, { type: this.mediaRecorder?.mimeType || 'audio/webm' });
+            await this.sendToAI(audioBlob);
+        }
+
+        async sendToAI(audioBlob) {
+            try {
+                this.lastAudioBlob = audioBlob;
+                this.retryCount = 0;
+                this.showProcessingSections();
+                this.updatePipelineStep('step1','completed');
+                this.updatePipelineStep('step2','active');
+
+                const formData = new FormData();
+                formData.append('file', audioBlob, 'recording.webm');
+                const voiceSelect = document.getElementById('voiceSelect');
+                const voiceId = voiceSelect ? voiceSelect.value : 'en-US-natalie';
+                formData.append('voice_id', voiceId);
+
+                this.showStatus('📝 Converting speech to text...','success');
+
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 60000);
+                const response = await fetch(`${this.serverUrl}/agent/chat/${encodeURIComponent(this.sessionId)}`, { method:'POST', body:formData, signal:controller.signal });
+                clearTimeout(timeoutId);
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(()=>({}));
+                    const errorType = errorData.error_type || 'unknown';
+                    const details = errorData.error_details || errorData.detail || `Server error: ${response.status}`;
+                    if (errorType === 'stt_error') { this.updatePipelineStep('step2','error'); throw new Error(`Speech recognition failed: ${details}`); }
+                    else if (errorType === 'llm_error') { this.updatePipelineStep('step3','error'); throw new Error(`AI processing failed: ${details}`); }
+                    else if (errorType === 'tts_error') { this.updatePipelineStep('step4','error'); throw new Error(`Audio generation failed: ${details}`); }
+                    else if (errorType === 'network_error') { throw new Error(`Connection error: ${details}`); }
+                    else { throw new Error(details); }
+                }
+
+                const result = await response.json();
+                if (result.fallback_used) this.showStatus('⚠️ Using fallback response due to service issues','error');
+                await this.handleAIResponse(result);
+
+            } catch (err) {
+                if (err.name === 'AbortError') this.handleError(new Error('Request timed out. Please try again.'));
+                else if (String(err).includes('Failed to fetch')) this.handleError(new Error('Cannot connect to server. Please check your connection.'));
+                else this.handleError(err);
+            }
+        }
+
+        async handleAIResponse(result) {
+            this.updatePipelineStep('step2','completed');
+            this.showTranscription(result.transcription);
+            this.updatePipelineStep('step3','active');
+            this.showStatus('🧠 AI is thinking...','success');
+            await this.delay(800);
+            this.updatePipelineStep('step3','completed');
+            this.showAIResponse(result.llm_response);
+            this.updatePipelineStep('step4','active');
+            this.showStatus('🔊 Converting to speech...','success');
+
+            if (result.audioFile) {
+                this.playAudio(result.audioFile);
+                this.updatePipelineStep('step4','completed');
+                this.messageCount = result.message_count || 0;
+                this.updateMessageCount();
+                this.updateChatHistory(result.recent_messages || []);
+            } else {
+                // If server didn't give audio, fallback to speaking the text
+                this.playFallbackAudio(result.llm_response || "I'm having trouble generating audio right now.");
+                this.updatePipelineStep('step4','completed');
+            }
+        }
+
+      updateRecordingUI(recording) {
+      const recordBtn = document.getElementById('recordBtn');
+      if (recordBtn) {
+          recordBtn.disabled = false;
+          recordBtn.textContent = recording ? '⏹ Stop' : '🎤 Record';
+      }
+      if (recording) this.showRecordingIndicator();
+      else this.hideRecordingIndicator();
+  }
+
+
+        showStatus(message, type) {
+            const el = document.getElementById('statusMessage');
+            if (!el) return;
+            el.textContent = message;
+            el.className = `status-message status-${type}`;
+            el.style.display = 'block';
+            if (type === 'success') {
+                setTimeout(() => { el.style.opacity = '0'; setTimeout(()=>{ el.style.display='none'; el.style.opacity='1'; }, 300); }, 8000);
+            }
+        }
+
+        showRecordingIndicator(){ const i = document.getElementById('recordingIndicator'); if (i) i.style.display='flex'; }
+        hideRecordingIndicator(){ const i = document.getElementById('recordingIndicator'); if (i) i.style.display='none'; }
+
+        showProcessingSections() {
+            const ts = document.getElementById('transcriptionSection'), rs = document.getElementById('responseSection'), ch = document.getElementById('chatHistory');
+            if (ts) ts.style.display='block'; if (rs) rs.style.display='block'; if (ch) ch.style.display='block';
+        }
+
+        showTranscription(text) {
+            const el = document.getElementById('transcriptionContent');
+            if (!el) return;
+            el.innerHTML = `<div style="font-size:1.1rem;line-height:1.8;font-style:italic;">"${text || 'Transcription not available'}"</div>`;
+        }
+
+        showAIResponse(response) {
+            const el = document.getElementById('responseContent');
+            if (!el) return;
+            el.innerHTML = `<div style="font-size:1.1rem;line-height:1.8;">${response || 'Response not available'}</div>`;
+        }
+
+        updatePipelineStep(stepId, status) {
+            const step = document.getElementById(stepId);
+            if (!step) return;
+            step.className = `pipeline-step ${status}`;
+            const icons = { 'active':'⏳', 'completed':'✅', 'error':'❌' };
+            const icon = step.querySelector('span');
+            if (icon && icons[status]) icon.textContent = icons[status];
+        }
+
+        resetPipelineSteps() {
+            const steps = ['step1','step2','step3','step4'];
+            const icons = ['🎤','📝','🧠','🔊'];
+            steps.forEach((s,i) => { const el = document.getElementById(s); if (el) { el.className='pipeline-step'; const sp = el.querySelector('span'); if (sp) sp.textContent = icons[i]; }});
+        }
+
+        showPipelineStatus(){ const el = document.getElementById('pipelineStatus'); if (el) el.style.display='flex'; }
+        hidePipelineStatus(){ const el = document.getElementById('pipelineStatus'); if (el) el.style.display='none'; }
+
+        updateMessageCount(){ const el = document.getElementById('messageCount'); if (el) el.textContent = this.messageCount; }
+
+        async loadChatHistory() {
+            try {
+                const res = await fetch(`${this.serverUrl}/agent/chat/${encodeURIComponent(this.sessionId)}/history`);
+                if (res.ok) { const data = await res.json(); this.messageCount = data.message_count || 0; this.updateMessageCount(); this.updateChatHistory(data.messages || []); }
+            } catch(e) {}
+        }
+
+        updateChatHistory(messages) {
+            const container = document.getElementById('chatMessages'); if(!container) return;
+            if (!messages || messages.length === 0) { container.innerHTML = '<div style="color:rgba(255,255,255,.5);text-align:center;padding:20px;">No conversation history yet. Start talking!</div>'; return; }
+            const html = messages.slice(-10).map(m => {
+                const role = m.role==='user' ? 'user' : 'assistant';
+                const label = role==='user' ? 'You' : 'AI Assistant';
+                const timestamp = m.timestamp ? new Date(m.timestamp*1000).toLocaleTimeString() : '';
+                return `<div class="chat-message ${role}"><div class="message-role">${label} ${timestamp}</div><div class="message-content">${m.content}</div></div>`;
+            }).join('');
+            container.innerHTML = html;
+            setTimeout(()=>{ container.scrollTop = container.scrollHeight; },100);
+        }
+
+        async clearChatHistory() {
+            if (!confirm('Are you sure you want to clear the conversation history?')) return;
+            try {
+                const res = await fetch(`${this.serverUrl}/agent/chat/${encodeURIComponent(this.sessionId)}/history`, { method:'DELETE' });
+                if (res.ok) { this.messageCount=0; this.updateMessageCount(); this.updateChatHistory([]); this.showStatus('🗑️ Conversation history cleared','success'); const ts = document.getElementById('transcriptionSection'); const rs = document.getElementById('responseSection'); if (ts) ts.style.display='none'; if (rs) rs.style.display='none'; }
+                else this.showStatus('❌ Failed to clear history','error');
+            } catch(e){ this.showStatus('❌ Failed to clear history','error'); }
+        }
+
+        handleError(error) {
+            const msg = (error && error.message) ? error.message : String(error);
+            const low = msg.toLowerCase();
+            if (low.includes('speech recognition') || low.includes('transcription')) this.updatePipelineStep('step2','error');
+            else if (low.includes('ai processing') || low.includes('llm')) this.updatePipelineStep('step3','error');
+            else if (low.includes('audio generation') || low.includes('tts')) this.updatePipelineStep('step4','error');
+            else ['step2','step3','step4'].forEach(s => this.updatePipelineStep(s,'error'));
+
+            const tc = document.getElementById('transcriptionContent');
+            if (tc) tc.innerHTML = `<div style="color:#ef4444;background:rgba(239,68,68,.1);padding:15px;border-radius:8px;border:1px solid rgba(239,68,68,.2)"><strong>❌ Processing Failed</strong><br>${msg}<br><br><small>💡 Try speaking more clearly or check your microphone</small></div>`;
+
+            const rc = document.getElementById('responseContent');
+            if (rc) rc.innerHTML = `<div style="color:#ef4444;background:rgba(239,68,68,.1);padding:15px;border-radius:8px;border:1px solid rgba(239,68,68,.2)"><strong>❌ AI Response Failed</strong><br>${msg}<br><br><small>💡 The system will try to provide a fallback response</small></div>`;
+
+            this.showStatus(`❌ Error: ${msg}`,'error');
+
+            if (this.lastAudioBlob) {
+                const retryBtn = document.getElementById('retryBtn'); if (retryBtn) retryBtn.style.display='inline-block';
+            }
+
+            setTimeout(()=>{ if (this.isConversationActive) this.showStatus('🔄 Click "Retry Last Request" or "Record Message" to try again','success'); },2000);
+            setTimeout(()=>{ if (this.isConversationActive) { this.resetPipelineSteps(); this.showStatus('🎤 Ready to try again!','success'); } },5000);
+
+            // play fallback audio for user so they are not left in silence
+            this.playFallbackAudio("I'm having trouble connecting right now");
+        }
+
+        async checkServerHealth() {
+            try {
+                const ctrl = new AbortController();
+                const tid = setTimeout(()=>ctrl.abort(),5000);
+                const res = await fetch(`${this.serverUrl}/health`, { signal: ctrl.signal });
+                clearTimeout(tid);
+                if (!res.ok) { this.showStatus('⚠️ Server connection issues detected','error'); return false; }
+                const d = await res.json().catch(()=>({}));
+                const api = d.api_status || {};
+                const missing = [];
+                if (!api.assemblyai) missing.push('Speech Recognition');
+                if (!api.gemini) missing.push('AI Processing');
+                if (!api.murf) missing.push('Voice Generation');
+                if (missing.length) this.showStatus(`⚠️ Some services unavailable: ${missing.join(', ')}. Using fallbacks.`, 'error');
+                return true;
+            } catch(e) {
+                if (e && e.name === 'AbortError') this.showStatus('⚠️ Server connection timeout','error');
+                else this.showStatus('⚠️ Cannot connect to AI server. Please check if it is running.','error');
+                return false;
+            }
+        }
+
+        delay(ms) { return new Promise(res => setTimeout(res, ms)); }
+
+        /* === Production helper: play server-provided audio (URL or data:) or TEXT_ONLY: prefix === */
+        playAudio(audioSrc) {
+            try {
+                const audioElement = document.getElementById('responseAudio');
+                if (!audioElement) return;
+
+                if (typeof audioSrc === 'string' && audioSrc.startsWith('TEXT_ONLY:')) {
+                    const txt = audioSrc.replace(/^TEXT_ONLY:/,'');
+                    this.playFallbackAudio(txt);
+                    return;
+                }
+
+                audioElement.src = audioSrc;
+                audioElement.onended = () => {
+                    setTimeout(()=> {
+                        if (this.isConversationActive) {
+                            if (this.autoMode) { this.showStatus('🎤 Auto-Mode: Starting next recording...','success'); this.resetPipelineSteps(); this.startRecording(); }
+                            else { this.showStatus('🎤 Ready for your next message! Click record or press SPACE','success'); this.resetPipelineSteps(); }
+                        }
+                    }, 500);
+                };
+                audioElement.play().catch(()=> { this.showStatus('✅ Response ready! Click play to listen','success'); });
+            } catch(e) { /* swallow in production */ }
+        }
+
+        /* === Production helper: browser-based fallback TTS === */
+        playFallbackAudio(source) {
+            try {
+                if (typeof source === 'string' && source.startsWith('data:audio')) { this.playAudio(source); return; }
+                if (typeof source === 'string' && source.startsWith('TEXT_ONLY:')) source = source.replace(/^TEXT_ONLY:/,'');
+                if ('speechSynthesis' in window) {
+                    const utt = new SpeechSynthesisUtterance(typeof source === 'string' ? source : String(source));
+                    utt.lang = 'en-US';
+                    window.speechSynthesis.cancel();
+                    window.speechSynthesis.speak(utt);
+                }
+            } catch(e) { /* swallow */ }
+        }
+
+        /* Exposed simulation method retained (no UI) — useful in staging if you call it programmatically */
+        async simulateError(errorType='network_error') {
+            try {
+                const res = await fetch(`${this.serverUrl}/test/simulate-error/${errorType}`, { method:'POST' });
+                const data = await res.json().catch(()=>({}));
+                if (data && data.audioFile) this.playAudio(data.audioFile);
+                else if (data && data.llm_response) this.playFallbackAudio(data.llm_response);
+                else this.playFallbackAudio("I'm having trouble connecting right now");
+            } catch(e) {
+                this.playFallbackAudio("Simulation failed — cannot reach server");
+            }
+        }
+    }
+
+    /* Initialize global instance in production */
+    let conversationalAI = null;
+    document.addEventListener('DOMContentLoaded', () => {
+        conversationalAI = new ConversationalAI();
+        setInterval(() => conversationalAI.checkServerHealth(), 30000);
+        window.retryLastRequest = function() {
+            if (conversationalAI && conversationalAI.lastAudioBlob) {
+                conversationalAI.showStatus('🔄 Retrying last request...','success');
+                conversationalAI.sendToAI(conversationalAI.lastAudioBlob);
+            } else {
+                if (conversationalAI) conversationalAI.showStatus('❌ No previous request to retry','error');
+            }
+        };
+    });
+
+    /* Prevent spacebar scrolling while using space to record */
+    window.addEventListener('keydown', function(e) {
+        if (e.keyCode === 32 && e.target === document.body) e.preventDefault();
+    });
+    </script>
 </body>
 </html>
+
