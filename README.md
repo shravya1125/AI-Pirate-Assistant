@@ -109,5 +109,5 @@ Day 12 – UI Revamp
 - Multi-voice personalities  
 ---
 💡 This project is part of my #30DaysOfAIVoiceAgents challenge — exploring voice-first AI interaction from the ground up.  
-💬 Follow my **#30DaysOfAIVoiceAgents** journey on [LinkedIn](https://www.linkedin.com/in/shravya-s/) to see daily updates, demos, and progress!
+💬 Follow my **#30DaysOfAIVoiceAgents** journey on [LinkedIn](https://www.linkedin.com/in/shreya-s-5685232ab/) to see daily updates, demos, and progress!
 
