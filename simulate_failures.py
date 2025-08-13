@@ -52,7 +52,7 @@ def simulate_api_failure(api_name):
         'assemblyai': 'ASSEMBLYAI_API_KEY = safe_env_get("ASSEMBLYAI_API_KEY", required=True)',
         'gemini': 'GEMINI_API_KEY = safe_env_get("GEMINI_API_KEY", required=True)',
         'murf': 'MURF_API_KEY = safe_env_get("MURF_API_KEY", required=True)',
-        'all': None  # Special case for all APIs
+        'all': None 
     }
     
     if api_name not in api_patterns:

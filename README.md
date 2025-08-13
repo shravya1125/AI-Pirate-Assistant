@@ -50,6 +50,8 @@ uvicorn main:app --reload
 
 Visit http://localhost:8000/docs for API testing.
 
+---
+
 📅 Build Progress
 
 Day 1 – Project Setup
@@ -100,6 +102,8 @@ Day 12 – UI Revamp
 Single-tap recording button with live status
 Minimal, modern conversational layout
 Auto-play AI responses for smooth flow
+
+---
 
 🎯 What’s Next
 Summarized chat memory to keep prompts short
