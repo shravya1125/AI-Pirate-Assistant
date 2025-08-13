@@ -2,7 +2,6 @@
 
 An interactive voice-first AI assistant that supports speech input, natural AI conversation, and realistic text-to-speech output — built over 30 days, one feature at a time.
 
----
 
 ## ⚡ Overview
 
@@ -15,7 +14,7 @@ It combines:
 - **Text-to-Speech (TTS)** for speaking back naturally  
 - **Memory & error handling** for smooth, resilient experiences  
 
----
+
 
 ## 🛠 Tech Stack
 
@@ -29,7 +28,7 @@ It combines:
 | Audio Input       | MediaRecorder API             |
 | Deployment Ready  | CORS + .env secured API keys  |
 
----
+
 
 ## 🚀 Run Locally
 
@@ -47,6 +46,7 @@ pip install -r requirements.txt
 
 # Start backend
 uvicorn main:app --reload
+```
 
 Visit http://localhost:8000/docs for API testing.
 
