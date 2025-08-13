@@ -121,7 +121,7 @@ def show_status():
             else:
                 print(f"   {name}: ✅ ACTIVE")
         else:
-            print(f"   {name}: ❓ NOT FOUND")
+            print(f"   {name}:  NOT FOUND")
 
 def main():
     """Main function"""

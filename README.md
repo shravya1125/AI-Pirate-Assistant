@@ -110,4 +110,6 @@ Summarized chat memory to keep prompts short
 Streaming audio responses
 Multi-voice personalities
 
+---
+
 💡 This project is part of my #30DaysOfAIVoiceAgents challenge — exploring voice-first AI interaction from the ground up.

@@ -98,7 +98,7 @@ def create_test_audio():
 
 def test_chat_endpoint_with_errors():
     """Test the chat endpoint with various error conditions"""
-    print("\n🗣️ Testing chat endpoint with error conditions...")
+    print("\n Testing chat endpoint with error conditions...")
     
     # Test with missing API keys (simulated by commenting them out in main.py)
     print("   Testing with missing API keys...")

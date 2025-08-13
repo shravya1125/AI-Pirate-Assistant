@@ -598,7 +598,7 @@ if __name__ == "__main__":
     import uvicorn
     print("🚀 Starting Robust AI Voice Agent Server...")
     print(" Enhanced with comprehensive error handling and fallbacks")
-    print("🔧 API Status:")
+    print(" API Status:")
     print(f"   - AssemblyAI: {'✅' if ASSEMBLYAI_API_KEY else '❌'}")
     print(f"   - Gemini: {'✅' if GEMINI_API_KEY else '❌'}")
     print(f"   - Murf: {'✅' if MURF_API_KEY else '❌'}")

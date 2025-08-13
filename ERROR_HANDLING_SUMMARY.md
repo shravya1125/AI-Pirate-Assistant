@@ -54,7 +54,6 @@ FALLBACK_RESPONSES = {
 
 ### 4. Enhanced User Experience
 ```javascript
-// Key features added:
 - Request timeout handling (60s)
 - Retry button with stored audio
 - Health monitoring (30s intervals)
