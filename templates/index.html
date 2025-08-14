@@ -693,10 +693,10 @@
 
 
             <div class="record-section">
-                <button class="record-button" id="recordButton" onclick="conversationalAI.toggleRecording()" disabled>
+                <button class="record-button" id="recordButton" onclick="conversationalAI.toggleRecording()">
                     <span id="recordIcon">🎤</span>
                 </button>
-                <div class="record-status" id="recordStatus">Click "Start Conversation" to begin</div>
+                <div class="record-status" id="recordStatus">Click the mic or press SPACE to record</div>
             </div>
 
             <div id="statusMessage" class="status-message"></div>
@@ -784,18 +784,12 @@
         }
     });
 
-    const recordBtn = document.getElementById('recordBtn');
-      if (recordBtn) {
-          recordBtn.addEventListener('click', () => {
-              if (!this.isRecording) {
-                  this.startRecording();
-                  recordBtn.textContent = '⏹ Stop';
-              } else {
-                  this.stopRecording();
-                  recordBtn.textContent = '🎤 Record';
-              }
-          });
-     }
+    const recordCircle = document.getElementById('recordButton');
+    if (recordCircle) {
+        recordCircle.addEventListener('click', async () => {
+            await this.toggleRecording();
+        });
+    }
     }
         toggleAutoMode() {
             this.autoMode = !this.autoMode;
@@ -827,6 +821,8 @@
             if (conversationBtn) { conversationBtn.textContent = '🗣️ Start Conversation'; conversationBtn.classList.remove('active'); }
             if (startBtn) startBtn.disabled = true;
             if (stopBtn) stopBtn.disabled = true;
+            const recordCircle = document.getElementById('recordButton');
+            if (recordCircle) recordCircle.classList.remove('recording','processing');
             this.hidePipelineStatus();
             this.hideRecordingIndicator();
             this.showStatus('👋 Conversation ended. Start a new one anytime!', 'success');
@@ -834,7 +830,10 @@
         }
 
         async startRecording() {
-            if (!this.isConversationActive) { this.showStatus('❌ Please start a conversation first','error'); return; }
+            // Auto-start conversation if not active
+            if (!this.isConversationActive) {
+                await this.startConversation();
+            }
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation:true, noiseSuppression:true, sampleRate:44100 }});
                 const options = { mimeType: 'audio/webm' };
@@ -845,6 +844,8 @@
                 this.mediaRecorder.onstop = () => this.handleRecordingComplete();
                 this.mediaRecorder.start();
                 this.updateRecordingUI(true);
+                const recordCircle = document.getElementById('recordButton');
+                if (recordCircle) recordCircle.classList.add('recording');
                 this.updatePipelineStep('step1','active');
                 this.showStatus('🎤 Recording... Speak your message','success');
             } catch (e) {
@@ -859,6 +860,8 @@
                 try { this.mediaRecorder.stream.getTracks().forEach(t => t.stop()); } catch(e){}
                 this.isRecording = false;
                 this.updateRecordingUI(false);
+                const recordCircle = document.getElementById('recordButton');
+                if (recordCircle) recordCircle.classList.remove('recording');
                 this.showStatus('⏳ Processing your message...','success');
             } else {
                 this.showStatus('❌ No active recording to stop','error');
@@ -877,6 +880,8 @@
                 this.showProcessingSections();
                 this.updatePipelineStep('step1','completed');
                 this.updatePipelineStep('step2','active');
+                const recordCircle = document.getElementById('recordButton');
+                if (recordCircle) { recordCircle.classList.remove('recording'); recordCircle.classList.add('processing'); }
 
                 const formData = new FormData();
                 formData.append('file', audioBlob, 'recording.webm');
@@ -911,6 +916,10 @@
                 else if (String(err).includes('Failed to fetch')) this.handleError(new Error('Cannot connect to server. Please check your connection.'));
                 else this.handleError(err);
             }
+            finally {
+                const recordCircle = document.getElementById('recordButton');
+                if (recordCircle) recordCircle.classList.remove('processing');
+            }
         }
 
         async handleAIResponse(result) {
@@ -938,14 +947,23 @@
         }
 
       updateRecordingUI(recording) {
-      const recordBtn = document.getElementById('recordBtn');
-      if (recordBtn) {
-          recordBtn.disabled = false;
-          recordBtn.textContent = recording ? '⏹ Stop' : '🎤 Record';
-      }
+      const recordBtn = document.getElementById('recordButton');
+      const recordIcon = document.getElementById('recordIcon');
+      const recordStatus = document.getElementById('recordStatus');
+      if (recordBtn) { recordBtn.disabled = false; }
+      if (recordIcon) { recordIcon.textContent = recording ? '⏹' : '🎤'; }
+      if (recordStatus) { recordStatus.textContent = recording ? 'Recording... click again or press SPACE to stop' : 'Click the mic or press SPACE to record'; }
       if (recording) this.showRecordingIndicator();
       else this.hideRecordingIndicator();
   }
+
+        async toggleRecording() {
+            if (!this.isRecording) {
+                await this.startRecording();
+            } else {
+                this.stopRecording();
+            }
+        }
 
 
         showStatus(message, type) {
