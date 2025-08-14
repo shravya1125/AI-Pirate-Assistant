@@ -40,8 +40,6 @@ Browser (MediaRecorder) → /agent/chat/{session_id}
 ├─ main.py                   # FastAPI server with robust pipeline
 ├─ templates/
 │  └─ index.html             # Frontend UI
-├─ static/
-│  └─ index.html             # (legacy / optional)
 ├─ uploads/                  # Example recordings
 ├─ venv/                     # Virtual environment (local)
 ├─ requirements.txt
@@ -63,7 +61,7 @@ MURF_API_KEY=your_murf_key
 
 # Optional
 FFMPEG_PATH=C:\\path\\to\\ffmpeg\\bin   # Windows example
-# FFMPEG_PATH=/usr/local/bin                   # macOS/Linux example
+# FFMPEG_PATH=/usr/local/bin            # macOS/Linux example
 ```
 Notes:
 - If keys are missing/placeholder, the app remains functional with fallbacks
@@ -136,10 +134,9 @@ curl -X POST http://127.0.0.1:8000/agent/chat/test-session \
 For details, see `ROBUST_ERROR_HANDLING.md`.
 
 ## 🖼️ Screenshots
-Add screenshots to `static/` and reference them here.
 
-![UI Screenshot](static/screenshot-ui.png)
-![Diagnostics Screenshot](static/screenshot-diagnostics.png)
+<img width="1366" height="768" alt="Screenshot (84)" src="https://github.com/user-attachments/assets/e748461b-d02e-41fe-96d3-4ab25f91f7de" />
+
 
 ## 💡 Tips
 - Press SPACE to record while conversation is active
