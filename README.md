@@ -208,7 +208,7 @@ For details, see `ROBUST_ERROR_HANDLING.md`.
 ### [Day 13](https://www.linkedin.com/posts/shreya-s-5685232ab_documentation-readme-softwaredevelopment-activity-7361820918190428160-lgr2?utm_source=share&utm_medium=member_desktop&rcm=ACoAAEqmZWABQoQd7GPvz8EDIg31Jt4Su3UUv8k) - Documentatiom
 - Wrote comprehensive README.md
 
-### [Day 14]() - Refactoring
+### [Day 14](https://www.linkedin.com/posts/shreya-s-5685232ab_30daysofvoiceagents-ai-voiceai-activity-7362188432418222080-SMLh?utm_source=share&utm_medium=member_desktop&rcm=ACoAAEqmZWABQoQd7GPvz8EDIg31Jt4Su3UUv8k) - Refactoring
 - Refactored code, added schemas, logging, and robust error handling — published public repo
 
 </details>
