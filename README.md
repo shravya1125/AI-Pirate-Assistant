@@ -40,9 +40,14 @@ Browser (MediaRecorder) → /agent/chat/{session_id}
 ├─ main.py                   # FastAPI server with robust pipeline
 ├─ templates/
 │  └─ index.html             # Frontend UI
-├─ static/
-│  └─ index.html             # (legacy / optional)
-├─ uploads/                  # Example recordings
+├─ schemas/
+│  └─ models.py  
+├─ services/
+│  └─ llm.py  
+|  └─ memory.py 
+|  └─ stt.py 
+|  └─ tts.py
+├─ uploads/                  # Example recordings            
 ├─ venv/                     # Virtual environment (local)
 ├─ requirements.txt
 ├─ README.md                 # This file
@@ -136,91 +141,81 @@ curl -X POST http://127.0.0.1:8000/agent/chat/test-session \
 For details, see `ROBUST_ERROR_HANDLING.md`.
 
 ## 🖼️ Screenshots
-Add screenshots to `static/` and reference them here.
-
-![UI Screenshot](static/screenshot-ui.png)
-![Diagnostics Screenshot](static/screenshot-diagnostics.png)
+<img width="1366" height="768" alt="Screenshot (84)" src="https://github.com/user-attachments/assets/e748461b-d02e-41fe-96d3-4ab25f91f7de" />
 
 ## 💡 Tips
 - Press SPACE to record while conversation is active
 - Use Auto-Mode to continue the conversation hands-free
 - Check `pipeline_status` block in responses for step-level success
 
-## 📣 Share on LinkedIn
-1. Open `README.md` in your editor
-2. Take a screenshot of the top section (title + features + architecture)
-3. Post on LinkedIn with a short write-up:
-   - What you built and why
-   - Challenges and how you handled failures
-   - A short clip/GIF of it working
 
-Example caption:
-> Built a robust AI Voice Agent with graceful fallbacks. Even when STT/LLM/TTS APIs go down, users still get helpful responses. Full write-up in the repo – would love feedback!
-
-<<<<<<< HEAD
 ---
 
-Made with ❤️. Contributions and suggestions welcome!
-=======
-## 📅 Build Progress  
+## 🛠 Build Progress
 
-Day 1 – Project Setup  
+<details>
+<summary>📅 Click to expand — Day 1 to Day 14 progress</summary>
+
+### [Day 1](https://www.linkedin.com/posts/shreya-s-5685232ab_30daysofvoiceagents-buildwithmurf-30daysofvoiceagents-activity-7357343462360322048-xwKe?utm_source=share&utm_medium=member_desktop&rcm=ACoAAEqmZWABQoQd7GPvz8EDIg31Jt4Su3UUv8k) – Project Setup  
 - FastAPI backend skeleton  
 - Basic HTML/CSS/JS frontend
 
-Day 2 – Text-to-Speech with Murf API  
+### [Day 2](https://www.linkedin.com/posts/shreya-s-5685232ab_30daysofvoiceagents-ai-tts-activity-7357795416802807810-M70-?utm_source=share&utm_medium=member_desktop&rcm=ACoAAEqmZWABQoQd7GPvz8EDIg31Jt4Su3UUv8k) – Text-to-Speech with Murf API  
 - Built /generate-audio endpoint  
 - Returns playable audio URL from given text  
 
-Day 3 – Play TTS Audio on Web UI  
+### [Day 3](https://www.linkedin.com/posts/shreya-s-5685232ab_30daysofvoiceagents-murfai-buildwithmurf-activity-7358173427288952832-I7_a?utm_source=share&utm_medium=member_desktop&rcm=ACoAAEqmZWABQoQd7GPvz8EDIg31Jt4Su3UUv8k) – Play TTS Audio on Web UI  
 - Integrated fetch API to call backend  
 - Dynamically plays audio in <audio> element  
 
-Day 4 – Echo Bot v1  
+### [Day 4](https://www.linkedin.com/posts/shreya-s-5685232ab_30daysofaivoiceagents-mediarecorder-30dayschallenge-activity-7358506915213033472-EW6g?utm_source=share&utm_medium=member_desktop&rcm=ACoAAEqmZWABQoQd7GPvz8EDIg31Jt4Su3UUv8k) – Echo Bot v1  
 - MediaRecorder API to capture microphone input  
 - Instantly plays back recorded voice  
 
-Day 5 – Send Audio to Server  
+### [Day 5](https://www.linkedin.com/posts/shreya-s-5685232ab_30daysofaivoiceagents-murfai-buildwithmurf-activity-7358898454552612864-vJFM?utm_source=share&utm_medium=member_desktop&rcm=ACoAAEqmZWABQoQd7GPvz8EDIg31Jt4Su3UUv8k) – Send Audio to Server  
 - /upload-audio endpoint  
 - Saves uploaded files to /uploads directory  
 
-Day 6 – Speech Transcription  
+### [Day 6](https://www.linkedin.com/posts/shreya-s-5685232ab_30daysofaivoiceagents-30daysofvoiceagents-activity-7359271368774873089-fcaN?utm_source=share&utm_medium=member_desktop&rcm=ACoAAEqmZWABQoQd7GPvz8EDIg31Jt4Su3UUv8k) – Speech Transcription  
 - Integrated AssemblyAI for transcription  
 - Displays transcript in browser  
 
-Day 7 – Echo Bot v2  
+### [Day 7](https://www.linkedin.com/posts/shreya-s-5685232ab_30daysofvoiceagents-ai-voiceai-activity-7359637529605623808-GoV_?utm_source=share&utm_medium=member_desktop&rcm=ACoAAEqmZWABQoQd7GPvz8EDIg31Jt4Su3UUv8k) – Echo Bot v2  
 - Record → Transcribe → Murf TTS → Playback  
 - Added voice selection from Murf API  
 
-Day 8 – LLM Integration  
+### [Day 8](https://www.linkedin.com/posts/shreya-s-5685232ab_ai-voiceagents-gemini-activity-7360009252981149697-elkc?utm_source=share&utm_medium=member_desktop&rcm=ACoAAEqmZWABQoQd7GPvz8EDIg31Jt4Su3UUv8k) – LLM Integration  
 - /llm/query endpoint  
 - Sends text to Gemini API and returns AI response  
 
-Day 9 – Full Non-Streaming Pipeline  
+### [Day 9](https://www.linkedin.com/posts/shreya-s-5685232ab_ai-voiceai-llm-activity-7360434838731960321-d0Fj?utm_source=share&utm_medium=member_desktop&rcm=ACoAAEqmZWABQoQd7GPvz8EDIg31Jt4Su3UUv8k) – Full Non-Streaming Pipeline  
 - Voice in → STT → LLM → TTS → AI voice out  
 - Entire conversation handled with no typing  
 
-Day 10 – Memory & Hands-Free Mode  
+### [Day 10](https://www.linkedin.com/posts/shreya-s-5685232ab_ai-voiceai-fastapi-activity-7360783451186221056-LhIq?utm_source=share&utm_medium=member_desktop&rcm=ACoAAEqmZWABQoQd7GPvz8EDIg31Jt4Su3UUv8k) – Memory & Hands-Free Mode  
 - Per-session chat history  
 - Auto-record after bot finishes speaking  
 
-Day 11 – Robust Error Handling  
+### [Day 11](https://www.linkedin.com/posts/shreya-s-5685232ab_ai-softwaredevelopment-errorhandling-activity-7361175095244939264-Lr_j?utm_source=share&utm_medium=member_desktop&rcm=ACoAAEqmZWABQoQd7GPvz8EDIg31Jt4Su3UUv8k) – Robust Error Handling  
 - try/except blocks for STT, LLM, TTS APIs  
 - Fallback audio: “I’m having trouble connecting right now.”  
 
-Day 12 – UI Revamp  
+### [Day 12](https://www.linkedin.com/posts/shreya-s-5685232ab_30daysofaivoiceagents-voiceai-conversationalai-activity-7361429562418704389-zco3?utm_source=share&utm_medium=member_desktop&rcm=ACoAAEqmZWABQoQd7GPvz8EDIg31Jt4Su3UUv8k) – UI Revamp  
 - Single-tap recording button with live status  
 - Minimal, modern conversational layout  
-- Auto-play AI responses for smooth flow  
+- Auto-play AI responses for smooth flow 
+
+### [Day 13](https://www.linkedin.com/posts/shreya-s-5685232ab_documentation-readme-softwaredevelopment-activity-7361820918190428160-lgr2?utm_source=share&utm_medium=member_desktop&rcm=ACoAAEqmZWABQoQd7GPvz8EDIg31Jt4Su3UUv8k) - Documentatiom
+- Wrote comprehensive README.md
+
+### [Day 14]() - Refactoring
+- Refactored code, added schemas, logging, and robust error handling — published public repo
+
+</details>
+
+---
+💡 This project is part of my #30DaysOfAIVoiceAgents challenge — exploring voice-first AI interaction from the ground up. Special Thanks to #MurfAI.  
 
 ---
 
-🎯 What’s Next  
-- Summarized chat memory to keep prompts short  
-- Streaming audio responses  
-- Multi-voice personalities  
----
-💡 This project is part of my #30DaysOfAIVoiceAgents challenge — exploring voice-first AI interaction from the ground up.  
-💬 Follow my **#30DaysOfAIVoiceAgents** journey on [LinkedIn](https://www.linkedin.com/in/shreya-s-5685232ab/) to see daily updates, demos, and progress!
-
->>>>>>> bdbc4751f3834426fbccf862f0637bcbb4b6ccd8
+Made with ❤️. Contributions and suggestions welcome!

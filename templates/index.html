@@ -730,7 +730,6 @@
         </div>
     </div>
     <script>
-    /* Production-ready client script (clean, no debug logs) */
     class ConversationalAI {
         constructor() {
             this.mediaRecorder = null;
@@ -1122,7 +1121,7 @@
             } catch(e) { /* swallow in production */ }
         }
 
-        /* === Production helper: browser-based fallback TTS === */
+        /* === browser-based fallback TTS === */
         playFallbackAudio(source) {
             try {
                 if (typeof source === 'string' && source.startsWith('data:audio')) { this.playAudio(source); return; }
@@ -1136,7 +1135,7 @@
             } catch(e) { /* swallow */ }
         }
 
-        /* Exposed simulation method retained (no UI) — useful in staging if you call it programmatically */
+        /* Exposed simulation method retained — useful in staging */
         async simulateError(errorType='network_error') {
             try {
                 const res = await fetch(`${this.serverUrl}/test/simulate-error/${errorType}`, { method:'POST' });
@@ -1150,7 +1149,6 @@
         }
     }
 
-    /* Initialize global instance in production */
     let conversationalAI = null;
     document.addEventListener('DOMContentLoaded', () => {
         conversationalAI = new ConversationalAI();
@@ -1165,11 +1163,9 @@
         };
     });
 
-    /* Prevent spacebar scrolling while using space to record */
     window.addEventListener('keydown', function(e) {
         if (e.keyCode === 32 && e.target === document.body) e.preventDefault();
     });
     </script>
 </body>
 </html>
-
