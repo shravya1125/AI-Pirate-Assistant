@@ -68,7 +68,7 @@ MURF_API_KEY=your_murf_key
 
 # Optional
 FFMPEG_PATH=C:\\path\\to\\ffmpeg\\bin   # Windows example
-# FFMPEG_PATH=/usr/local/bin                   # macOS/Linux example
+# FFMPEG_PATH=/usr/local/bin            # macOS/Linux example
 ```
 Notes:
 - If keys are missing/placeholder, the app remains functional with fallbacks
