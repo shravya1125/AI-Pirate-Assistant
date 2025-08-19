@@ -1,0 +1,441 @@
+<!-- <!DOCTYPE html>
+<html>
+<head>
+  <title>Realtime Speech</title>
+</head>
+<body>
+  <h1>🎤 Realtime Speech-to-Text</h1>
+  <button onclick="start()">Start Recording</button>
+  <button onclick="stop()">Stop</button>
+  <pre id="output"></pre>
+
+  <script>
+    let ws, mediaRecorder;
+
+    async function start() {
+      ws = new WebSocket("ws://localhost:8000");
+      ws.onmessage = (event) => {
+        let data = JSON.parse(event.data);
+        if (data.text) {
+          document.getElementById("output").textContent += data.text + "\n";
+        }
+      };
+
+      let stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaRecorder = new MediaRecorder(stream, { mimeType: "audio/webm" });
+      mediaRecorder.addEventListener("dataavailable", async (e) => {
+        if (e.data.size > 0 && ws.readyState === WebSocket.OPEN) {
+          let buffer = await e.data.arrayBuffer();
+          let base64 = btoa(String.fromCharCode(...new Uint8Array(buffer)));
+          ws.send(JSON.stringify({ audio: base64 }));
+        }
+      });
+      mediaRecorder.start(250); // send every 250ms
+    }
+
+    function stop() {
+      mediaRecorder.stop();
+      ws.send(JSON.stringify({ terminate: true }));
+      ws.close();
+    }
+  </script>
+</body>
+</html> -->
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-time Audio Transcription</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            text-align: center;
+            max-width: 600px;
+            width: 90%;
+        }
+
+        h1 {
+            margin-bottom: 2rem;
+            font-size: 2.5rem;
+            background: linear-gradient(45deg, #fff, #f0f0f0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .controls {
+            margin-bottom: 2rem;
+        }
+
+        button {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            border: none;
+            color: white;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 0 10px;
+            box-shadow: 0 4px 15px 0 rgba(255, 107, 107, 0.3);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px 0 rgba(255, 107, 107, 0.4);
+        }
+
+        button:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .status {
+            margin: 1rem 0;
+            padding: 10px;
+            border-radius: 10px;
+            font-weight: 500;
+        }
+
+        .status.connected {
+            background: rgba(46, 204, 113, 0.2);
+            border: 1px solid rgba(46, 204, 113, 0.5);
+        }
+
+        .status.disconnected {
+            background: rgba(231, 76, 60, 0.2);
+            border: 1px solid rgba(231, 76, 60, 0.5);
+        }
+
+        .status.recording {
+            background: rgba(255, 193, 7, 0.2);
+            border: 1px solid rgba(255, 193, 7, 0.5);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .transcription {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            min-height: 150px;
+            max-height: 300px;
+            overflow-y: auto;
+            text-align: left;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .transcription:empty::before {
+            content: "Transcription will appear here...";
+            color: rgba(255, 255, 255, 0.5);
+            font-style: italic;
+        }
+
+        .audio-visualizer {
+            width: 100%;
+            height: 60px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 30px;
+            margin: 1rem 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .wave {
+            width: 4px;
+            height: 20px;
+            background: linear-gradient(to top, #ff6b6b, #ee5a24);
+            margin: 0 2px;
+            border-radius: 2px;
+            animation: wave 1.5s ease-in-out infinite;
+            opacity: 0.3;
+        }
+
+        .wave.active {
+            opacity: 1;
+            animation-duration: 0.8s;
+        }
+
+        @keyframes wave {
+            0%, 100% { transform: scaleY(0.5); }
+            50% { transform: scaleY(1.5); }
+        }
+
+        .wave:nth-child(2) { animation-delay: 0.1s; }
+        .wave:nth-child(3) { animation-delay: 0.2s; }
+        .wave:nth-child(4) { animation-delay: 0.3s; }
+        .wave:nth-child(5) { animation-delay: 0.4s; }
+        .wave:nth-child(6) { animation-delay: 0.5s; }
+        .wave:nth-child(7) { animation-delay: 0.4s; }
+        .wave:nth-child(8) { animation-delay: 0.3s; }
+        .wave:nth-child(9) { animation-delay: 0.2s; }
+        .wave:nth-child(10) { animation-delay: 0.1s; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1> Real-time Transcription</h1>
+        
+        <div class="controls">
+            <button id="startBtn">Start Recording</button>
+            <button id="stopBtn" disabled>Stop Recording</button>
+        </div>
+
+        <div id="status" class="status disconnected">
+            Disconnected from server
+        </div>
+
+        <div class="audio-visualizer" id="visualizer">
+            <div class="wave"></div>
+            <div class="wave"></div>
+            <div class="wave"></div>
+            <div class="wave"></div>
+            <div class="wave"></div>
+            <div class="wave"></div>
+            <div class="wave"></div>
+            <div class="wave"></div>
+            <div class="wave"></div>
+            <div class="wave"></div>
+        </div>
+
+        <div id="transcription" class="transcription"></div>
+    </div>
+
+    <script>
+        class AudioTranscriptionClient {
+            constructor() {
+                this.ws = null;
+                this.mediaRecorder = null;
+                this.audioContext = null;
+                this.processor = null;
+                this.stream = null;
+                
+                this.startBtn = document.getElementById('startBtn');
+                this.stopBtn = document.getElementById('stopBtn');
+                this.status = document.getElementById('status');
+                this.transcription = document.getElementById('transcription');
+                this.visualizer = document.getElementById('visualizer');
+                
+                this.initializeEventListeners();
+                this.connectWebSocket();
+            }
+
+            initializeEventListeners() {
+                this.startBtn.addEventListener('click', () => this.startRecording());
+                this.stopBtn.addEventListener('click', () => this.stopRecording());
+            }
+
+            connectWebSocket() {
+                try {
+                    this.ws = new WebSocket('ws://localhost:8000/ws');
+                    
+                    this.ws.onopen = () => {
+                        this.updateStatus('connected', 'Connected to server');
+                        console.log('Connected to WebSocket server');
+                    };
+
+                    this.ws.onmessage = (event) => {
+                        const msg = JSON.parse(event.data);
+
+                        if (msg.type === "transcription" && msg.is_final) {
+                            this.displayTranscription(msg.text);
+
+                        } else if (msg.type === "end_of_turn") {
+                                const span = document.createElement("div");
+                                span.textContent = "── End of Turn ──";
+                                span.style.textAlign = "center";
+                                span.style.color = "rgba(255,255,255,0.5)";
+                                span.style.fontStyle = "italic";
+                                span.style.margin = "0.5rem 0";
+                                this.transcription.appendChild(span);
+                            }
+
+                    };
+
+                    
+                    this.ws.onclose = () => {
+                        this.updateStatus('disconnected', 'Disconnected from server');
+                        console.log('WebSocket connection closed');
+                        
+                        // Attempt to reconnect after 3 seconds
+                        setTimeout(() => {
+                            if (this.ws.readyState === WebSocket.CLOSED) {
+                                this.connectWebSocket();
+                            }
+                        }, 3000);
+                    };
+
+                    this.ws.onerror = (error) => {
+                        console.error('WebSocket error:', error);
+                        this.updateStatus('disconnected', 'Connection error');
+                    };
+                } catch (error) {
+                    console.error('Error connecting to WebSocket:', error);
+                    this.updateStatus('disconnected', 'Failed to connect');
+                }
+            }
+
+            async startRecording() {
+                try {
+                    // Request microphone access
+                    this.stream = await navigator.mediaDevices.getUserMedia({
+                        audio: {
+                            sampleRate: 16000,
+                            channelCount: 1,
+                            echoCancellation: true,
+                            noiseSuppression: true
+                        }
+                    });
+
+                    // Create audio context for processing
+                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)({
+                        sampleRate: 16000
+                    });
+
+                    const source = this.audioContext.createMediaStreamSource(this.stream);
+                    
+                    // Create a script processor for real-time audio processing
+                    this.processor = this.audioContext.createScriptProcessor(4096, 1, 1);
+                    
+                    this.processor.onaudioprocess = (event) => {
+                        if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+                            const inputData = event.inputBuffer.getChannelData(0);
+                            
+                            // Convert float32 to int16 PCM
+                            const pcmData = new Int16Array(inputData.length);
+                            for (let i = 0; i < inputData.length; i++) {
+                                const sample = Math.max(-1, Math.min(1, inputData[i]));
+                                pcmData[i] = sample < 0 ? sample * 0x8000 : sample * 0x7FFF;
+                            }
+                            
+                            // Send audio data as binary
+                            this.ws.send(pcmData.buffer);
+                            
+                            // Update visualizer
+                            this.updateVisualizer(inputData);
+                        }
+                    };
+
+                    source.connect(this.processor);
+                    this.processor.connect(this.audioContext.destination);
+
+                    this.updateStatus('recording', 'Recording...');
+                    this.startBtn.disabled = true;
+                    this.stopBtn.disabled = false;
+
+                    console.log('Recording started');
+                } catch (error) {
+                    console.error('Error starting recording:', error);
+                    alert('Error accessing microphone: ' + error.message);
+                }
+            }
+
+            stopRecording() {
+                if (this.processor) {
+                    this.processor.disconnect();
+                    this.processor = null;
+                }
+
+                if (this.audioContext) {
+                    this.audioContext.close();
+                    this.audioContext = null;
+                }
+
+                if (this.stream) {
+                    this.stream.getTracks().forEach(track => track.stop());
+                    this.stream = null;
+                }
+
+                this.updateStatus('connected', 'Connected to server');
+                this.startBtn.disabled = false;
+                this.stopBtn.disabled = true;
+                
+                // Reset visualizer
+                const waves = this.visualizer.querySelectorAll('.wave');
+                waves.forEach(wave => wave.classList.remove('active'));
+
+                console.log('Recording stopped');
+            }
+
+            updateVisualizer(audioData) {
+                // Calculate RMS (root mean square) for volume level
+                let rms = 0;
+                for (let i = 0; i < audioData.length; i++) {
+                    rms += audioData[i] * audioData[i];
+                }
+                rms = Math.sqrt(rms / audioData.length);
+                
+                // Update visualizer waves based on volume
+                const waves = this.visualizer.querySelectorAll('.wave');
+                const activeWaves = Math.floor(rms * waves.length * 5); // Scale factor
+                
+                waves.forEach((wave, index) => {
+                    if (index < activeWaves) {
+                        wave.classList.add('active');
+                    } else {
+                        wave.classList.remove('active');
+                    }
+                });
+            }
+
+            updateStatus(type, message) {
+                this.status.className = `status ${type}`;
+                this.status.textContent = message;
+            }
+
+            displayTranscription(text) {
+                const p = document.createElement('p');
+                p.textContent = text;
+                p.style.marginBottom = '0.5rem';
+                p.style.padding = '0.5rem';
+                p.style.background = 'rgba(255, 255, 255, 0.1)';
+                p.style.borderRadius = '5px';
+                
+                this.transcription.appendChild(p);
+                this.transcription.scrollTop = this.transcription.scrollHeight;
+            }
+        }
+
+        // Initialize the client when the page loads
+        window.addEventListener('load', () => {
+            new AudioTranscriptionClient();
+        });
+    </script>
+</body>
+</html>
