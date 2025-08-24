@@ -140,9 +140,9 @@ curl -X POST http://127.0.0.1:8000/agent/chat/test-session \
 
 For details, see `ROBUST_ERROR_HANDLING.md`.
 
-## 🖼️ Screenshots
+<!---## 🖼️ Screenshots
 <img width="1366" height="768" alt="Screenshot (84)" src="https://github.com/user-attachments/assets/e748461b-d02e-41fe-96d3-4ab25f91f7de" />
-
+-->
 ## 💡 Tips
 - Press SPACE to record while conversation is active
 - Use Auto-Mode to continue the conversation hands-free
