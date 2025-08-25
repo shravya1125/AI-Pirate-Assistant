@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Captain Blackbeard's Voice Agent</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Georgia',serif;background:linear-gradient(135deg,#1e3c72,#2a5298);min-height:100vh;display:flex;align-items:center;justify-content:center;color:#fff;overflow-x:hidden;position:relative}
+    .ocean-bg{position:absolute;top:0;left:0;width:100%;height:100%;background:radial-gradient(ellipse at center,rgba(41,82,152,.8) 0%,rgba(30,60,114,.9) 70%);animation:wave 4s ease-in-out infinite alternate;z-index:1}
+    @keyframes wave{0%{transform:translateY(0) scale(1)}100%{transform:translateY(-10px) scale(1.05)}}
+    .container{position:relative;z-index:10;background:rgba(0,0,0,.75);backdrop-filter:blur(10px);border-radius:20px;padding:2rem;box-shadow:0 8px 32px 0 rgba(0,0,0,.5);border:3px solid #d4af37;text-align:center;max-width:800px;width:90%;overflow:hidden}
+    h1{margin-bottom:1rem;font-size:2.5rem;color:#d4af37;text-shadow:2px 2px 4px rgba(0,0,0,.8)}
+    .subtitle{font-size:1.1rem;color:rgba(255,255,255,.8);margin-bottom:1.5rem;font-style:italic;letter-spacing:.5px}
+    .session-info{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;padding:12px 18px;background:rgba(255,255,255,.1);border-radius:12px;border:1px solid rgba(212,175,55,.4);font-size:.9rem;flex-wrap:wrap;gap:10px}
+    .session-id{color:#ffd700;font-weight:600}
+    .clear-history-btn{background:linear-gradient(135deg,#8b0000,#dc143c);border:1px solid #ff6b6b;padding:6px 12px;border-radius:8px;color:#fff;font-size:.8rem;cursor:pointer;transition:all .3s ease}
+    .clear-history-btn:hover{transform:scale(1.05);box-shadow:0 5px 15px rgba(220,20,60,.4)}
+    .controls{margin-bottom:1.5rem;display:flex;gap:15px;justify-content:center;align-items:center}
+    .main-button{background:linear-gradient(45deg,#d4af37,#ffd700);border:none;color:#1e3c72;padding:12px 25px;font-size:1rem;border-radius:50px;cursor:pointer;transition:all .3s ease;box-shadow:0 4px 15px 0 rgba(212,175,55,.3);font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+    .main-button:hover{transform:translateY(-2px);box-shadow:0 8px 25px 0 rgba(212,175,55,.4)}
+    .main-button:disabled{background:#666;cursor:not-allowed;transform:none;box-shadow:none}
+    .main-button.active{background:linear-gradient(45deg,#8b0000,#dc143c);color:#fff;animation:pulse 1.5s ease-in-out infinite}
+    .status{margin:1rem 0;padding:12px 20px;border-radius:10px;font-weight:500;transition:all .4s ease;backdrop-filter:blur(10px);font-size:.9rem;display:block}
+    .status.connected,.status.success{background:rgba(212,175,55,.2);border:1px solid rgba(212,175,55,.5);color:#ffd700}
+    .status.disconnected,.status.error{background:rgba(231,76,60,.2);border:1px solid rgba(231,76,60,.5);color:#e74c3c}
+    .status.recording{background:rgba(220,20,60,.3);border:1px solid rgba(220,20,60,.5);color:#ffc107;animation:pulse 1.5s infinite}
+    @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.7;transform:scale(1.05)}}
+    .chat-history{margin-top:25px;padding:20px;background:rgba(255,255,255,.08);border-radius:15px;border:1px solid rgba(212,175,55,.2);max-height:300px;overflow-y:auto;text-align:left;display:block}
+    .chat-history-title{font-size:1.1rem;font-weight:600;color:#fff;margin-bottom:15px}
+    .chat-message{margin-bottom:12px;padding:12px 15px;border-radius:12px;font-size:.9rem}
+    .chat-message.user{background:rgba(212,175,55,.2);border-left:3px solid #d4af37;margin-left:15px}
+    .chat-message.assistant{background:rgba(220,20,60,.2);border-left:3px solid #dc143c;margin-right:15px}
+    .message-role{font-size:.8rem;font-weight:600;margin-bottom:6px;opacity:.8}
+    .user .message-role{color:#d4af37}.assistant .message-role{color:#dc143c}
+    .message-content{color:#fff;font-size:.9rem;line-height:1.5}
+    .footer{margin-top:2rem;font-size:1rem;color:rgba(255,255,255,.6);font-weight:300}
+    .footer strong{color:#d4af37}
+    #ttsPlayer{display:none}
+    ::-webkit-scrollbar{width:6px}
+    ::-webkit-scrollbar-track{background:rgba(0,0,0,.3)}
+    ::-webkit-scrollbar-thumb{background:linear-gradient(135deg,#d4af37,#8b0000);border-radius:3px}
+  </style>
+</head>
+<body>
+  <div class="ocean-bg"></div>
+  <div class="container">
+    <h1>⚓ Captain Blackbeard ⚓</h1>
+    <p class="subtitle">Your AI Voice Matey on the Seven Seas</p>
+
+    <div class="session-info">
+      <div><span class="session-id">Ship's Log: <span id="sessionDisplay">Loading…</span></span></div>
+      <div class="message-count">Messages: <span id="messageCount">0</span></div>
+      <button class="clear-history-btn" id="clearBtn">Scuttle the Log</button>
+    </div>
+
+    <div class="controls">
+      <button class="main-button" id="conversationBtn">🏴‍☠️ Set Sail</button>
+      <button class="main-button" id="toggleBtn">Speak to the Captain</button>
+    </div>
+
+    <div id="status" class="status disconnected">
+      Ahoy there, matey! Ready to set sail on a conversational adventure?
+    </div>
+
+    <div class="chat-history" id="chatHistory">
+      <div class="chat-history-title"><span>💬</span> Captain's Log</div>
+      <div id="chatMessages">
+        <div class="chat-message assistant">
+          <div class="message-role">Captain Blackbeard</div>
+          <div class="message-content">
+            Ahoy there, ye landlubber! I be Captain Blackbeard, the fiercest AI pirate to sail the digital seas!
+            Click 'Set Sail' and then 'Speak' to tell me what treasure of knowledge ye be seekin' today! Arrr! 🏴‍☠️⚓
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <audio id="ttsPlayer" controls autoplay hidden></audio>
+
+    <div class="footer">Built by <strong>a hearty developer</strong></div>
+  </div>
+
+  <script>
+    class VoiceAgent {
+      constructor() {
+        
+        this.serverUrl = /^https?:\/\//.test(window.location.origin) ? window.location.origin : 'http://127.0.0.1:5000';
+
+        this.sessionId = this.loadOrCreateSession();
+        this.messageCount = 0;
+
+        this.statusEl = document.getElementById('status');
+        this.chatMessagesEl = document.getElementById('chatMessages');
+        this.messageCountEl = document.getElementById('messageCount');
+        this.audioEl = document.getElementById('ttsPlayer');
+
+        this.convoBtn = document.getElementById('conversationBtn');
+        this.talkBtn = document.getElementById('toggleBtn');
+        this.clearBtn = document.getElementById('clearBtn');
+
+        this.isRecording = false;
+        this.mediaRecorder = null;
+        this.recordingChunks = [];
+
+        this.bindUI();
+        this.updateStatus('connected', '🏴‍☠️ Ship is ready. Press “Set Sail”!');
+        this.loadChatHistory(); // Prefetch history on load
+      }
+
+      loadOrCreateSession() {
+        let id = localStorage.getItem('pirate_session_id');
+        if (!id) {
+          id = 'session_' + Math.random().toString(36).slice(2, 10);
+          localStorage.setItem('pirate_session_id', id);
+        }
+        document.getElementById('sessionDisplay').textContent = id;
+        return id;
+      }
+
+      bindUI() {
+        this.convoBtn.addEventListener('click', () => this.startConversation());
+        this.talkBtn.addEventListener('click', () => this.toggleRecording());
+        this.clearBtn.addEventListener('click', () => this.clearChatHistory());
+
+        // Space bar toggles recording
+        window.addEventListener('keydown', (e) => {
+          if (e.code === 'Space') {
+            e.preventDefault();
+            this.toggleRecording();
+          }
+        });
+      }
+
+      updateStatus(kind, msg) {
+        this.statusEl.className = `status ${kind}`;
+        this.statusEl.textContent = msg;
+      }
+
+      appendMessage(role, text) {
+        const roleClass = role === 'user' ? 'user' : 'assistant';
+        const label = role === 'user' ? 'You' : 'Captain Blackbeard';
+        const div = document.createElement('div');
+        div.className = `chat-message ${roleClass}`;
+        div.innerHTML = `<div class="message-role">${label}</div><div class="message-content">${this.escapeHtml(text)}</div>`;
+        this.chatMessagesEl.appendChild(div);
+        this.chatMessagesEl.scrollTop = this.chatMessagesEl.scrollHeight;
+      }
+
+      updateHistoryFromServer(messages) {
+        this.chatMessagesEl.innerHTML = messages.map(m => {
+          const role = m.role === 'user' ? 'user' : 'assistant';
+          const label = role === 'user' ? 'You' : 'Captain Blackbeard';
+          return `<div class="chat-message ${role}">
+            <div class="message-role">${label}</div>
+            <div class="message-content">${this.escapeHtml(m.content || '')}</div>
+          </div>`;
+        }).join('');
+        this.chatMessagesEl.scrollTop = this.chatMessagesEl.scrollHeight;
+      }
+
+      async loadChatHistory() {
+        try {
+          const r = await fetch(`${this.serverUrl}/chat/history/${encodeURIComponent(this.sessionId)}`);
+          if (!r.ok) return;
+          const data = await r.json();
+          this.messageCount = data.message_count || 0;
+          this.messageCountEl.textContent = this.messageCount;
+          if (Array.isArray(data.messages) && data.messages.length) {
+            this.updateHistoryFromServer(data.messages);
+          }
+        } catch (err) {
+          console.warn('History load failed:', err);
+        }
+      }
+
+      async startConversation() {
+        // Send an opening line via /chat/text
+        this.convoBtn.disabled = true;
+        try {
+          this.updateStatus('connected', 'Sending greetings to the Captain…');
+          const body = { message: "Ahoy Captain! I'm ready to sail!", session_id: this.sessionId };
+          const r = await fetch(`${this.serverUrl}/chat/text`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+          });
+          if (!r.ok) throw new Error(`HTTP ${r.status}`);
+          const data = await r.json();
+          // Server returns response text and recent_messages
+          this.appendMessage('user', body.message);
+          this.appendMessage('assistant', data.response || '…');
+          this.messageCount = (data.message_count ?? this.messageCount) || this.messageCount + 2;
+          this.messageCountEl.textContent = this.messageCount;
+          // Try TTS for the greeting
+          await this.speakWithAPI(data.response || '');
+          this.updateStatus('success', '🎤 Press “Speak to the Captain” or tap SPACE to talk.');
+        } catch (e) {
+          console.error(e);
+          this.updateStatus('error', 'Couldn’t hail the Captain. Check the server.');
+        } finally {
+          this.convoBtn.disabled = false;
+        }
+      }
+
+      async toggleRecording() {
+        if (this.isRecording) {
+          this.stopRecording();
+          return;
+        }
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          this.recordingChunks = [];
+          // MediaRecorder defaults to webm/opus
+          this.mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+          this.mediaRecorder.ondataavailable = (e) => {
+            if (e.data && e.data.size > 0) this.recordingChunks.push(e.data);
+          };
+          this.mediaRecorder.onstop = () => this.onRecordingComplete();
+          this.mediaRecorder.start();
+          this.isRecording = true;
+          this.talkBtn.classList.add('active');
+          this.talkBtn.textContent = 'Stop Speaking';
+          this.updateStatus('recording', '🎙️ Recording… Speak yer mind, matey!');
+        } catch (err) {
+          console.error(err);
+          this.updateStatus('error', '❌ No microphone access — I can’t hear ye!');
+        }
+      }
+
+      stopRecording() {
+        if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
+          this.mediaRecorder.stop();
+          this.mediaRecorder.stream.getTracks().forEach(t => t.stop());
+        }
+        this.isRecording = false;
+        this.talkBtn.classList.remove('active');
+        this.talkBtn.textContent = 'Speak to the Captain';
+      }
+
+      async onRecordingComplete() {
+        try {
+          this.updateStatus('connected', '🧭 Sending yer message to the Captain…');
+          const blob = new Blob(this.recordingChunks, { type: 'audio/webm' });
+          const fd = new FormData();
+          fd.append('audio', blob, 'voice_message.webm');
+          fd.append('session_id', this.sessionId);
+
+          const r = await fetch(`${this.serverUrl}/chat/voice`, { method: 'POST', body: fd });
+          if (!r.ok) throw new Error(`HTTP ${r.status}`);
+          const data = await r.json();
+
+          if (data.error) {
+            this.updateStatus('error', data.error);
+            return;
+          }
+
+          if (data.transcribed_text) {
+            this.appendMessage('user', data.transcribed_text);
+          }
+          if (data.response) {
+            this.appendMessage('assistant', data.response);
+          }
+
+          // Update message count if provided
+          if (typeof data.message_count === 'number') {
+            this.messageCount = data.message_count;
+            this.messageCountEl.textContent = this.messageCount;
+          }
+
+          // Play audio if server already generated it; else synthesize now
+          if (data.has_audio && data.audio_data) {
+            await this.playServerAudioData(data.audio_data);
+          } else if (data.response) {
+            await this.speakWithAPI(data.response);
+          }
+
+          this.updateStatus('success', '🏴‍☠️ Ready for yer next command, captain!');
+        } catch (err) {
+          console.error(err);
+          this.updateStatus('error', '⚠️ Rough seas delivering yer message. Try again!');
+        }
+      }
+
+      async playServerAudioData(audioData) {
+        try {
+          // If backend returned a URL, just play it
+          if (/^https?:\/\//i.test(audioData)) {
+            this.audioEl.src = audioData;
+            await this.audioEl.play();
+            return;
+          }
+          // Otherwise treat as base64 (Murf encodedAudio)
+          const b64 = audioData.startsWith('data:') ? audioData.split(',')[1] : audioData;
+          const byteStr = atob(b64);
+          const bytes = new Uint8Array(byteStr.length);
+          for (let i = 0; i < byteStr.length; i++) bytes[i] = byteStr.charCodeAt(i);
+          const blob = new Blob([bytes], { type: 'audio/mpeg' });
+          const url = URL.createObjectURL(blob);
+          this.audioEl.src = url;
+          await this.audioEl.play();
+          this.audioEl.onended = () => URL.revokeObjectURL(url);
+        } catch (e) {
+          console.warn('Audio playback failed; falling back to browser TTS', e);
+        }
+      }
+
+      async speakWithAPI(text) {
+        if (!text) return;
+        try {
+          const r = await fetch(`${this.serverUrl}/chat/audio-response`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text, voice_id: 'en-US-marcus' })
+          });
+
+          const ct = r.headers.get('Content-Type') || '';
+          if (ct.startsWith('audio/')) {
+            // Streamed mp3
+            const blob = await r.blob();
+            const url = URL.createObjectURL(blob);
+            this.audioEl.src = url;
+            await this.audioEl.play();
+            this.audioEl.onended = () => URL.revokeObjectURL(url);
+          } else {
+            const data = await r.json();
+            if (data.audio_url) {
+              this.audioEl.src = data.audio_url;
+              await this.audioEl.play();
+            } else {
+              // Fallback to browser TTS
+              this.browserSpeak(text);
+            }
+          }
+        } catch (e) {
+          console.warn('TTS API failed; using browser TTS', e);
+          this.browserSpeak(text);
+        }
+      }
+
+      browserSpeak(text) {
+        if (!('speechSynthesis' in window)) return;
+        const synth = window.speechSynthesis;
+        try { synth.cancel(); } catch {}
+        const u = new SpeechSynthesisUtterance(text);
+        u.rate = 0.95; u.pitch = 0.9; u.volume = 1.0;
+        const voices = synth.getVoices();
+        const v = voices.find(v => /English/i.test(v.lang) && /Male|UK|US/i.test(v.name)) || voices[0];
+        if (v) u.voice = v;
+        synth.speak(u);
+      }
+
+      async clearChatHistory() {
+        if (!confirm("Are you sure you want to scuttle the ship's log? This cannot be undone!")) return;
+        try {
+          const r = await fetch(`${this.serverUrl}/chat/history/${encodeURIComponent(this.sessionId)}`, { method: 'DELETE' });
+          if (!r.ok) throw new Error(`HTTP ${r.status}`);
+          this.messageCount = 0;
+          this.messageCountEl.textContent = '0';
+          this.chatMessagesEl.innerHTML = `<div class="chat-message assistant">
+            <div class="message-role">Captain Blackbeard</div>
+            <div class="message-content">The log has been wiped clean! A fresh start for our adventures!</div>
+          </div>`;
+          this.updateStatus('success', '🗑️ Ship’s log cleared!');
+        } catch (e) {
+          console.error(e);
+          this.updateStatus('error', 'Could not clear the log.');
+        }
+      }
+
+      escapeHtml(s) {
+        return String(s)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#039;');
+      }
+    }
+
+    // Make available for onclicks if needed; but we use bound listeners above.
+    window.voiceAgent = new VoiceAgent();
+  </script>
+</body>
+</html>
