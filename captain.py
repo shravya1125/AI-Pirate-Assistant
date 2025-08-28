@@ -3,6 +3,7 @@
 Captain Blackbeard AI Voice Agent Server
 Complete conversational voice agent with pirate persona
 """
+import random
 
 import os
 import tempfile
@@ -15,6 +16,11 @@ import base64
 import aiohttp
 from typing import Dict, List, Optional, Any, Type
 from pathlib import Path as PathLib
+
+from dotenv import load_dotenv
+import google.generativeai as genai
+import assemblyai as aai
+import requests
 
 # FastAPI and WebSocket imports
 from fastapi import FastAPI, UploadFile, Form, HTTPException, File, WebSocket, WebSocketDisconnect
@@ -80,7 +86,9 @@ def safe_env_get(key: str, required: bool = False, default: str = "") -> str:
 # API Keys
 ASSEMBLYAI_API_KEY = safe_env_get("ASSEMBLYAI_API_KEY", required=True) 
 GEMINI_API_KEY = safe_env_get("GEMINI_API_KEY", required=True)  
-MURF_API_KEY = safe_env_get("MURF_API_KEY", required=True)  
+MURF_API_KEY = safe_env_get("MURF_API_KEY", required=True) 
+OPENWEATHER_API_KEY = safe_env_get("OPENWEATHER_API_KEY", required=True) 
+NEWS_API_KEY = safe_env_get("NEWS_API_KEY", required=True)
 
 # Configure APIs
 if GEMINI_API_KEY:
@@ -438,6 +446,107 @@ async def chat_with_captain(request: TextRequest):
             "session_id": session_id
         }, status_code=500)
 
+@app.post("/config/keys")
+async def update_keys(keys: Dict[str, str]):
+    global GEMINI_API_KEY, ASSEMBLYAI_API_KEY, MURF_API_KEY, OPENWEATHER_API_KEY, NEWS_API_KEY
+    if "gemini" in keys: 
+        GEMINI_API_KEY = keys["gemini"]; genai.configure(api_key=GEMINI_API_KEY)
+    if "assemblyai" in keys: 
+        ASSEMBLYAI_API_KEY = keys["assemblyai"]; aai.settings.api_key = ASSEMBLYAI_API_KEY
+    if "murf" in keys: 
+        MURF_API_KEY = keys["murf"]
+    if "weather" in keys: 
+        OPENWEATHER_API_KEY = keys["weather"]
+    if "news" in keys: 
+        NEWS_API_KEY = keys["news"]
+    return {"status": "updated", "keys_set": list(keys.keys())}
+
+
+
+
+# ===== WEATHER API ENDPOINT =====
+import requests
+import os
+from fastapi import Query 
+
+OPENWEATHER_API_KEY = os.getenv("OPENWEATHER_API_KEY", "")
+
+@app.get("/skill/weather")
+async def get_weather(city: str = Query(...)):
+    """Fetch current weather for a city, with pirate flair ⚓"""
+    if not OPENWEATHER_API_KEY:
+        return {"error": "Arrr! No weather API key be configured in me treasure chest."}
+    
+    try:
+        
+        clean_city = city.strip("?.!,; ")
+        
+        url = f"http://api.openweathermap.org/data/2.5/weather?q={clean_city}&appid={OPENWEATHER_API_KEY}&units=metric"
+        r = requests.get(url, timeout=5)
+        
+        if r.status_code != 200:
+            return {"error": f"Blimey! Could not fetch the skies over {clean_city}, matey."}
+        
+        data = r.json()
+        desc = data["weather"][0]["description"]
+        temp = data["main"]["temp"]
+        
+        pirate_msg = (
+            f"🌦️ Ahoy! In {clean_city}, the weather be {desc}, "
+            f"with the seas at {temp}°C. Batten down the hatches if needed, arrr!"
+        )
+        
+        return {
+            "city": clean_city,
+            "weather": desc,
+            "temperature": f"{temp} °C",
+            "pirate_report": pirate_msg
+        }
+    except Exception as e:
+        return {"error": f"Shiver me timbers! The weather service failed: {str(e)}"}
+
+
+
+NEWS_API_KEY = os.getenv("NEWS_API_KEY", "")
+
+@app.get("/skill/news")
+async def get_news(topic: str = "technology"):
+    """Fetch top headlines or articles for a given topic"""
+    if not NEWS_API_KEY:
+        return {"error": "Arrr! No news API key be configured, matey."}
+    try:
+        # Use 'everything' for flexible topics
+        url = f"https://newsapi.org/v2/everything?q={topic}&sortBy=publishedAt&apiKey={NEWS_API_KEY}&language=en&pageSize=3"
+        r = requests.get(url, timeout=5)
+        if r.status_code != 200:
+            return {"error": f"Blimey! Could not fetch news on {topic}, matey."}
+
+        data = r.json()
+        articles = data.get("articles", [])
+        if not articles:
+            return {"message": f"Arrr! No fresh tales on {topic}, me hearty."}
+
+        headlines = [a.get("title", "Mystery tale with no title") for a in articles[:3]]
+        pirate_news = "📰 Hear ye, matey! Fresh tales from the seas:\n- " + "\n- ".join(headlines)
+        return {"news": pirate_news}
+    except Exception as e:
+        return {"error": f"Shiver me timbers! News service failed: {str(e)}"}
+
+
+
+@app.get("/skill/shanty")
+async def generate_sea_shanty():
+    """Generate a short pirate sea shanty"""
+    shanties = [
+        "🎵 Yo ho ho, we code till night, chasing bugs by lantern light! 🎵",
+        "🎵 Shiver me timbers, the AI be grand, guiding our ship with a coder’s hand! 🎵",
+        "🎵 Heave ho matey, let’s set sail, with datasets vast and models that scale! 🎵",
+        "🎵 Hoist the sails and man the oars, our code be smoother than ocean shores! 🎵",
+        "🎵 Arrr, no storm can bring us down, we debug with a coder’s crown! 🎵"
+    ]
+    return {"shanty": random.choice(shanties)}
+
+
 @app.post("/chat/voice")
 async def voice_chat_with_captain(
     session_id: str = Form(...),
@@ -549,7 +658,7 @@ async def generate_audio_response(request: AudioRequest):
         )
         
         if success and audio_data:
-            # If it's base64 encoded audio, decode and return
+            
             if audio_data.startswith("data:audio") or len(audio_data) > 1000:
                 # Return as streaming response for large audio
                 audio_bytes = base64.b64decode(audio_data)

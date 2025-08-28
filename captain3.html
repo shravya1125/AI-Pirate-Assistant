@@ -54,10 +54,38 @@
       <button class="clear-history-btn" id="clearBtn">Scuttle the Log</button>
     </div>
 
+    
     <div class="controls">
       <button class="main-button" id="conversationBtn">🏴‍☠️ Set Sail</button>
       <button class="main-button" id="toggleBtn">Speak to the Captain</button>
+      <button class="main-button" id="configBtn">⚙️ Configure Keys</button>
     </div>
+
+<div id="configModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:1000; align-items:center; justify-content:center;">
+  <div style="background:#1e3c72; padding:20px; border-radius:15px; max-width:400px; width:90%; color:#fff; border:2px solid #d4af37;">
+    <h2 style="margin-bottom:15px; text-align:center;"> Configure API Keys</h2>
+    
+    <label>Gemini API Key</label>
+    <input id="geminiKey" type="password" style="width:100%; margin-bottom:10px; padding:6px; border-radius:8px; border:none;">
+
+    <label>AssemblyAI Key</label>
+    <input id="assemblyKey" type="password" style="width:100%; margin-bottom:10px; padding:6px; border-radius:8px; border:none;">
+
+    <label>Murf API Key</label>
+    <input id="murfKey" type="password" style="width:100%; margin-bottom:10px; padding:6px; border-radius:8px; border:none;">
+
+    <label>Weather API Key</label>
+    <input id="weatherKey" type="password" style="width:100%; margin-bottom:10px; padding:6px; border-radius:8px; border:none;">
+
+    <label>News API Key</label>
+    <input id="newsKey" type="password" style="width:100%; margin-bottom:15px; padding:6px; border-radius:8px; border:none;">
+
+    <div style="display:flex; justify-content:space-between; gap:10px;">
+      <button id="saveKeysBtn" class="main-button" style="flex:1;"> Save</button>
+      <button id="closeConfigBtn" class="main-button" style="flex:1; background:#666;"> Close</button>
+    </div>
+  </div>
+</div>
 
     <div id="status" class="status disconnected">
       Ahoy there, matey! Ready to set sail on a conversational adventure?
@@ -137,27 +165,41 @@
         this.statusEl.textContent = msg;
       }
 
+      
       appendMessage(role, text) {
-        const roleClass = role === 'user' ? 'user' : 'assistant';
-        const label = role === 'user' ? 'You' : 'Captain Blackbeard';
-        const div = document.createElement('div');
-        div.className = `chat-message ${roleClass}`;
-        div.innerHTML = `<div class="message-role">${label}</div><div class="message-content">${this.escapeHtml(text)}</div>`;
-        this.chatMessagesEl.appendChild(div);
-        this.chatMessagesEl.scrollTop = this.chatMessagesEl.scrollHeight;
-      }
+  const roleClass = role === 'user' ? 'user' : 'assistant';
+  const label = role === 'user' ? 'You' : 'Captain Blackbeard';
+  const div = document.createElement('div');
+  div.className = `chat-message ${roleClass}`;
+  div.innerHTML = `<div class="message-role">${label}</div><div class="message-content">${this.escapeHtml(text)}</div>`;
+  this.chatMessagesEl.appendChild(div);
+  this.chatMessagesEl.scrollTop = this.chatMessagesEl.scrollHeight;
+
+  //  Increment counter live
+  this.messageCount++;
+  this.messageCountEl.textContent = this.messageCount;
+}
+
+
+      
 
       updateHistoryFromServer(messages) {
-        this.chatMessagesEl.innerHTML = messages.map(m => {
-          const role = m.role === 'user' ? 'user' : 'assistant';
-          const label = role === 'user' ? 'You' : 'Captain Blackbeard';
-          return `<div class="chat-message ${role}">
-            <div class="message-role">${label}</div>
-            <div class="message-content">${this.escapeHtml(m.content || '')}</div>
-          </div>`;
-        }).join('');
-        this.chatMessagesEl.scrollTop = this.chatMessagesEl.scrollHeight;
-      }
+  this.chatMessagesEl.innerHTML = messages.map(m => {
+    const role = m.role === 'user' ? 'user' : 'assistant';
+    const label = role === 'user' ? 'You' : 'Captain Blackbeard';
+    return `<div class="chat-message ${role}">
+      <div class="message-role">${label}</div>
+      <div class="message-content">${this.escapeHtml(m.content || '')}</div>
+    </div>`;
+  }).join('');
+
+  this.chatMessagesEl.scrollTop = this.chatMessagesEl.scrollHeight;
+
+  //  Reset message count 
+  this.messageCount = Array.isArray(messages) ? messages.length : 0;
+  this.messageCountEl.textContent = this.messageCount;
+}
+
 
       async loadChatHistory() {
         try {
@@ -203,6 +245,8 @@
         }
       }
 
+
+      
       async toggleRecording() {
         if (this.isRecording) {
           this.stopRecording();
@@ -256,8 +300,30 @@
           }
 
           if (data.transcribed_text) {
-            this.appendMessage('user', data.transcribed_text);
-          }
+  const lower = data.transcribed_text.toLowerCase();
+
+  // Weather skill
+  if (lower.includes("weather in")) {
+    const city = lower.split("weather in")[1].trim();
+    if (city) return this.fetchWeather(city);
+  }
+
+  // Shanty skill
+  if (lower.includes("shanty") || lower.includes("sing")) {
+    return this.fetchShanty();
+  }
+
+// News skill
+  if (lower.includes("news")) {
+    let topic = "world";
+    if (lower.includes("about")) {
+      topic = lower.split("about")[1].trim();
+    }
+    return this.fetchNews(topic);
+  }
+}
+
+
           if (data.response) {
             this.appendMessage('assistant', data.response);
           }
@@ -368,6 +434,74 @@
         }
       }
 
+    // --- Code to replace in captain3.html ---
+async fetchWeather(city) {
+  try {
+    const url = new URL(`${this.serverUrl}/skill/weather`);
+    url.searchParams.append('city', city);
+    const r = await fetch(url);
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+
+    const data = await r.json();
+
+    if (data.error) {
+      this.appendMessage('assistant', `Arrr! Couldn’t fetch weather for ${city}.`);
+    } else {
+      const msg = `🌦️ The weather in ${data.city} be ${data.weather}, with a temperature of ${data.temperature}.`;
+      this.appendMessage('assistant', msg);
+      await this.speakWithAPI(msg);
+    }
+  } catch (err) {
+    console.error("Weather fetch failed:", err);
+    this.appendMessage('assistant', "⚠️ Stormy seas! Couldn’t fetch the weather.");
+  }
+}
+
+
+
+      async fetchShanty() {
+  try {
+    const r = await fetch(`${this.serverUrl}/skill/shanty`);
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const data = await r.json();
+
+    if (data.shanty) {
+      this.appendMessage('assistant', data.shanty);
+      await this.speakWithAPI(data.shanty);
+    } else {
+      this.appendMessage('assistant', "Arrr! Me voice be too hoarse for singin’, matey!");
+    }
+  } catch (err) {
+    console.error("Shanty fetch failed:", err);
+    this.appendMessage('assistant', "Blast! The seas stole me song!");
+  }
+}
+
+async fetchNews(topic) {
+  try {
+    const url = new URL(`${this.serverUrl}/skill/news`);
+    url.searchParams.append('topic', topic);
+    const r = await fetch(url);
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+
+    const data = await r.json();
+
+    if (data.news) {
+      this.appendMessage('assistant', data.news);
+      await this.speakWithAPI(data.news);
+    } else if (data.message) {
+      this.appendMessage('assistant', data.message);
+      await this.speakWithAPI(data.message);
+    } else {
+      this.appendMessage('assistant', `Arrr! Couldn’t fetch the news on ${topic}, matey.`);
+    }
+  } catch (err) {
+    console.error("News fetch failed:", err);
+    this.appendMessage('assistant', "⚠️ Stormy seas! Couldn’t fetch the news.");
+  }
+}
+
+
       escapeHtml(s) {
         return String(s)
           .replace(/&/g, '&amp;')
@@ -378,8 +512,54 @@
       }
     }
 
-    // Make available for onclicks if needed; but we use bound listeners above.
+    
     window.voiceAgent = new VoiceAgent();
+
+    // --- CONFIG UI HANDLING ---
+const configBtn = document.getElementById("configBtn");
+const configModal = document.getElementById("configModal");
+const closeConfigBtn = document.getElementById("closeConfigBtn");
+const saveKeysBtn = document.getElementById("saveKeysBtn");
+
+function loadKeys() {
+  document.getElementById("geminiKey").value = localStorage.getItem("geminiKey") || "";
+  document.getElementById("assemblyKey").value = localStorage.getItem("assemblyKey") || "";
+  document.getElementById("murfKey").value = localStorage.getItem("murfKey") || "";
+  document.getElementById("weatherKey").value = localStorage.getItem("weatherKey") || "";
+  document.getElementById("newsKey").value = localStorage.getItem("newsKey") || "";
+}
+
+configBtn.onclick = () => { loadKeys(); configModal.style.display = "flex"; };
+closeConfigBtn.onclick = () => { configModal.style.display = "none"; };
+
+saveKeysBtn.onclick = async () => {
+  const keys = {
+    gemini: document.getElementById("geminiKey").value,
+    assemblyai: document.getElementById("assemblyKey").value,
+    murf: document.getElementById("murfKey").value,
+    weather: document.getElementById("weatherKey").value,
+    news: document.getElementById("newsKey").value
+  };
+
+  for (const [k,v] of Object.entries(keys)) {
+    if (v) localStorage.setItem(k+"Key", v);
+  }
+
+  try {
+    const r = await fetch("/config/keys", {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify(keys)
+    });
+    const data = await r.json();
+    alert(" Keys updated: " + (data.keys_set || []).join(", "));
+  } catch (e) {
+    alert(" Failed to update keys: " + e);
+  }
+
+  configModal.style.display = "none";
+};
+
   </script>
 </body>
 </html>
