@@ -1,54 +1,7 @@
-﻿# ==========================
-# Speech Recognition Engines
-# ==========================
-pocketsphinx==5.0.0
-speechrecognition==3.10.0
-
-# ==========================
-# Audio Processing Libraries
-# ==========================
-pydub==0.25.1
-ffmpeg-python==0.2.0
-
-# ==========================
-# Text-to-Speech
-# ==========================
-gtts==2.4.0
-
-# ==========================
-# Web Frameworks & API
-# ==========================
-fastapi==0.110.0
-python-multipart==0.0.6
-uvicorn[standard]==0.24.0
-asgiref==3.7.2
-
-# ==========================
-# API Clients & Utilities
-# ==========================
-requests==2.32.3
-httpx==0.27.0
-assemblyai==0.22.0
-python-dotenv==1.0.0
-
-# Optional: For better audio format support
-ffmpeg-python==0.2.0
-
-# Development and Server
-uvicorn[standard]==0.24.0
-
-# System dependencies (install separately):
-# - ffmpeg (for audio conversion)
-# - portaudio (for microphone access)
-# 
-# On Ubuntu/Debian:
-# sudo apt-get update
-# sudo apt-get install ffmpeg portaudio19-dev python3-dev
-#
-# On macOS:
-# brew install ffmpeg portaudio
-#
-# On Windows:
-# Download and install ffmpeg from https://ffmpeg.org/download.html
-
-# Add ffmpeg to your PATH
+fastapi
+uvicorn
+requests
+python-multipart
+pydantic
+assemblyai
+google-generativeai
