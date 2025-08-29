@@ -17,11 +17,11 @@ An AI voice agent with the soul of **Captain Blackbeard**! ⚓ Powered by **Fast
 
 ## 📂 Project Structure
 
-.
-│
-├── captain.py # Backend — FastAPI server, LLM + Murf integration  
-├── captain3.html # Frontend — Pirate UI + PirateVoiceAgent JS  
-└── .env # (optional) Store API keys here    
+.  
+│  
+├── captain.py # Backend — FastAPI server, LLM + Murf integration    
+├── captain3.html # Frontend — Pirate UI + PirateVoiceAgent JS    
+└── .env # (optional) Store API keys here     
 
 ---
 
