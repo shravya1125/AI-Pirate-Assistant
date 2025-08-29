@@ -3,11 +3,11 @@
 Captain Blackbeard AI Voice Agent Server
 Complete conversational voice agent with pirate persona
 """
-import random
 
 import os
 import tempfile
 import logging
+import random
 import uuid
 import time
 import json
@@ -17,7 +17,6 @@ import aiohttp
 from typing import Dict, List, Optional, Any, Type
 from pathlib import Path as PathLib
 
-from dotenv import load_dotenv
 import google.generativeai as genai
 import assemblyai as aai
 import requests
@@ -27,20 +26,9 @@ from fastapi import FastAPI, UploadFile, Form, HTTPException, File, WebSocket, W
 from fastapi.responses import JSONResponse, FileResponse, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-
-# Audio processing
 from pydub import AudioSegment
 
-# Environment and API imports
-from dotenv import load_dotenv
-import google.generativeai as genai
-import assemblyai as aai
-
-# Load environment variables
-env_path = os.path.join(os.path.dirname(__file__), ".env")
-load_dotenv(dotenv_path=env_path, override=True)
-
-# ===== PYDANTIC MODELS =====
+# PYDANTIC MODELS
 from pydantic import BaseModel
 from enum import Enum
 
@@ -75,31 +63,13 @@ class ChatResponse(BaseModel):
     has_audio: bool = False
 
 # ===== CONFIGURATION =====
-def safe_env_get(key: str, required: bool = False, default: str = "") -> str:
-    """Safely get environment variable with error handling"""
-    value = os.getenv(key, default)
-    if required and (not value or value.strip() == "" or value.strip() == "your_api_key_here"):
-        logging.getLogger("voice_agent").warning(f"⚠️ Required environment variable {key} is missing or invalid")
-        return ""
-    return value
 
-# API Keys
-ASSEMBLYAI_API_KEY = safe_env_get("ASSEMBLYAI_API_KEY", required=True) 
-GEMINI_API_KEY = safe_env_get("GEMINI_API_KEY", required=True)  
-MURF_API_KEY = safe_env_get("MURF_API_KEY", required=True) 
-OPENWEATHER_API_KEY = safe_env_get("OPENWEATHER_API_KEY", required=True) 
-NEWS_API_KEY = safe_env_get("NEWS_API_KEY", required=True)
-
-# Configure APIs
-if GEMINI_API_KEY:
-    genai.configure(api_key=GEMINI_API_KEY)
-else:
-    logging.warning("GEMINI_API_KEY not found in .env file.")
-
-if ASSEMBLYAI_API_KEY:
-    aai.settings.api_key = ASSEMBLYAI_API_KEY
-else:
-    logging.warning("ASSEMBLYAI_API_KEY not found in .env file.")
+GEMINI_API_KEY = ""
+ASSEMBLYAI_API_KEY = ""
+GEMINI_API_KEY = ""
+MURF_API_KEY = ""
+OPENWEATHER_API_KEY = ""
+NEWS_API_KEY = ""
 
 # ===== LOGGING SETUP =====
 logging.basicConfig(
@@ -219,7 +189,6 @@ def build_pirate_conversation_prompt(session_id: str, new_message: str) -> str:
     
     prompt_parts = [PIRATE_SYSTEM_PROMPT, "\n=== RECENT VOYAGE LOG ==="]
     
-    # Add conversation history
     if history:
         for msg in history:
             role = msg.get("role", "user")
@@ -230,7 +199,6 @@ def build_pirate_conversation_prompt(session_id: str, new_message: str) -> str:
                 elif role == "assistant":
                     prompt_parts.append(f"Captain Blackbeard: {content}")
     
-    # Add current message
     prompt_parts.extend([
         f"\nCrew Member: {new_message}",
         "\nCaptain Blackbeard:"
@@ -257,8 +225,8 @@ async def get_pirate_response(prompt: str, session_id: str) -> tuple[bool, str, 
         response = model.generate_content(
             final_prompt,
             generation_config=genai.types.GenerationConfig(
-                temperature=0.8,       # still creative
-                max_output_tokens=120, # shorter responses
+                temperature=0.8,       
+                max_output_tokens=120, 
                 top_p=0.9
             )
         )
@@ -396,23 +364,16 @@ async def chat_with_captain(request: TextRequest):
         }, status_code=400)
     
     try:
-        # Log user message
         SHIP_MEMORY.log_message(session_id, {
             "role": "user",
             "content": message,
             "timestamp": time.time()
         })
-        
-        # Build conversation prompt
         conversation_prompt = build_pirate_conversation_prompt(session_id, message)
-        
-        # Get pirate response
         success, response_text, error = await get_pirate_response(conversation_prompt, session_id)
-        
         if not success:
             response_text = "Arrr! Something's amiss with me thinking cap! Try again, savvy?"
         
-        # Log assistant response
         SHIP_MEMORY.log_message(session_id, {
             "role": "assistant", 
             "content": response_text,
@@ -420,7 +381,6 @@ async def chat_with_captain(request: TextRequest):
             "error_type": error
         })
         
-        # Get recent messages for context
         recent_messages = SHIP_MEMORY.get_recent_voyage_log(session_id, 6)
         msg_models = []
         for m in recent_messages:
@@ -448,54 +408,66 @@ async def chat_with_captain(request: TextRequest):
 
 @app.post("/config/keys")
 async def update_keys(keys: Dict[str, str]):
+    required = ["gemini", "assemblyai", "murf", "weather", "news"]
+    missing = [k for k in required if not keys.get(k)]
+    if missing:
+        return JSONResponse(
+            {"error": f"Missing required keys: {', '.join(missing)}"},
+            status_code=400
+        )
+    
     global GEMINI_API_KEY, ASSEMBLYAI_API_KEY, MURF_API_KEY, OPENWEATHER_API_KEY, NEWS_API_KEY
-    if "gemini" in keys: 
-        GEMINI_API_KEY = keys["gemini"]; genai.configure(api_key=GEMINI_API_KEY)
-    if "assemblyai" in keys: 
-        ASSEMBLYAI_API_KEY = keys["assemblyai"]; aai.settings.api_key = ASSEMBLYAI_API_KEY
-    if "murf" in keys: 
-        MURF_API_KEY = keys["murf"]
-    if "weather" in keys: 
-        OPENWEATHER_API_KEY = keys["weather"]
-    if "news" in keys: 
-        NEWS_API_KEY = keys["news"]
+    
+    GEMINI_API_KEY = keys["gemini"]
+    genai.configure(api_key=GEMINI_API_KEY)
+
+    ASSEMBLYAI_API_KEY = keys["assemblyai"]
+    aai.settings.api_key = ASSEMBLYAI_API_KEY
+
+    MURF_API_KEY = keys["murf"]
+    OPENWEATHER_API_KEY = keys["weather"]
+    NEWS_API_KEY = keys["news"]
+
     return {"status": "updated", "keys_set": list(keys.keys())}
-
-
-
 
 # ===== WEATHER API ENDPOINT =====
 import requests
 import os
 from fastapi import Query 
 
-OPENWEATHER_API_KEY = os.getenv("OPENWEATHER_API_KEY", "")
+OPENWEATHER_API_KEY = ""
 
 @app.get("/skill/weather")
-async def get_weather(city: str = Query(...)):
+async def get_weather(city: str = Query(...), session_id: str = Query(None)):
     """Fetch current weather for a city, with pirate flair ⚓"""
     if not OPENWEATHER_API_KEY:
         return {"error": "Arrr! No weather API key be configured in me treasure chest."}
-    
+
     try:
-        
         clean_city = city.strip("?.!,; ")
-        
         url = f"http://api.openweathermap.org/data/2.5/weather?q={clean_city}&appid={OPENWEATHER_API_KEY}&units=metric"
         r = requests.get(url, timeout=5)
-        
+
         if r.status_code != 200:
             return {"error": f"Blimey! Could not fetch the skies over {clean_city}, matey."}
-        
+
         data = r.json()
         desc = data["weather"][0]["description"]
         temp = data["main"]["temp"]
-        
+
         pirate_msg = (
             f"🌦️ Ahoy! In {clean_city}, the weather be {desc}, "
             f"with the seas at {temp}°C. Batten down the hatches if needed, arrr!"
         )
-        
+
+        if session_id:
+            SHIP_MEMORY.log_message(session_id, {
+                "role": "assistant",
+                "content": pirate_msg,
+                "timestamp": time.time(),
+                "error_type": None
+            })
+
         return {
             "city": clean_city,
             "weather": desc,
@@ -506,16 +478,14 @@ async def get_weather(city: str = Query(...)):
         return {"error": f"Shiver me timbers! The weather service failed: {str(e)}"}
 
 
-
-NEWS_API_KEY = os.getenv("NEWS_API_KEY", "")
+NEWS_API_KEY = ""
 
 @app.get("/skill/news")
-async def get_news(topic: str = "technology"):
+async def get_news(topic: str = "technology", session_id: str = Query(None)):
     """Fetch top headlines or articles for a given topic"""
     if not NEWS_API_KEY:
         return {"error": "Arrr! No news API key be configured, matey."}
     try:
-        # Use 'everything' for flexible topics
         url = f"https://newsapi.org/v2/everything?q={topic}&sortBy=publishedAt&apiKey={NEWS_API_KEY}&language=en&pageSize=3"
         r = requests.get(url, timeout=5)
         if r.status_code != 200:
@@ -527,12 +497,18 @@ async def get_news(topic: str = "technology"):
             return {"message": f"Arrr! No fresh tales on {topic}, me hearty."}
 
         headlines = [a.get("title", "Mystery tale with no title") for a in articles[:3]]
-        pirate_news = "📰 Hear ye, matey! Fresh tales from the seas:\n- " + "\n- ".join(headlines)
+        pirate_news = "Hear ye, matey! Fresh tales :\n- " + "\n- ".join(headlines)
+        if session_id:
+            SHIP_MEMORY.log_message(session_id, {
+                "role": "assistant",
+                "content": pirate_news,
+                "timestamp": time.time(),
+                "error_type": None
+        })
         return {"news": pirate_news}
+
     except Exception as e:
         return {"error": f"Shiver me timbers! News service failed: {str(e)}"}
-
-
 
 @app.get("/skill/shanty")
 async def generate_sea_shanty():
@@ -554,7 +530,6 @@ async def voice_chat_with_captain(
 ):
     """Voice chat with Captain Blackbeard"""
     
-    # Validate audio file
     if not audio.content_type or not audio.content_type.startswith("audio/"):
         return JSONResponse({
             "error": "That don't sound like proper audio, matey!",
@@ -563,7 +538,7 @@ async def voice_chat_with_captain(
     
     tmp_path = None
     try:
-        # Save uploaded audio
+        
         with tempfile.NamedTemporaryFile(delete=False, suffix=".webm") as tmp:
             content = await audio.read()
             if len(content) == 0:
@@ -574,7 +549,6 @@ async def voice_chat_with_captain(
             tmp.write(content)
             tmp_path = tmp.name
         
-        # Transcribe speech
         stt_success, transcribed_text, stt_error = await transcribe_speech(tmp_path, session_id)
         
         if not stt_success:
@@ -584,21 +558,101 @@ async def voice_chat_with_captain(
                 "transcription_error": stt_error
             }, status_code=400)
         
-        # Log user message
         SHIP_MEMORY.log_message(session_id, {
             "role": "user",
             "content": transcribed_text,
             "timestamp": time.time()
         })
-        
-        # Get pirate response
+        lower = transcribed_text.lower()
+
+        if "weather" in lower:
+            import re
+            match = re.search(r"weather (in|at|of)?\s*(.*)", transcribed_text.lower())
+            city = match.group(2).strip() if match else transcribed_text.strip()
+
+            result = await get_weather(city=city, session_id=session_id)
+            pirate_msg = result.get("pirate_report") or result.get("error", "Arrr! No forecast today, matey!")
+
+
+            SHIP_MEMORY.log_message(session_id, {
+                "role": "assistant",
+                "content": pirate_msg,
+                "timestamp": time.time(),
+                "error_type": None
+            })
+
+            return {
+                "session_id": session_id,
+                "transcribed_text": transcribed_text,
+                "response": pirate_msg,
+                "message_count": len(SHIP_MEMORY.get_crew_messages(session_id)),
+                "recent_messages": SHIP_MEMORY.get_recent_voyage_log(session_id, 6),
+                "has_audio": False
+            }
+
+        # if "news" in lower:
+        #     result = await get_news(topic="world", session_id=session_id)
+        #     pirate_msg = result.get("news") or result.get("error", "Arrr! No tales be found!")
+
+        #     SHIP_MEMORY.log_message(session_id, {
+        #         "role": "assistant",
+        #         "content": pirate_msg,
+        #         "timestamp": time.time(),
+        #         "error_type": None
+        #     })
+
+        #     return {
+        #         "session_id": session_id,
+        #         "transcribed_text": transcribed_text,
+        #         "response": pirate_msg,
+        #         "message_count": len(SHIP_MEMORY.get_crew_messages(session_id)),
+        #         "recent_messages": SHIP_MEMORY.get_recent_voyage_log(session_id, 6),
+        #         "has_audio": False
+        #     }
+        # --- Skill intercept: News ---
+        if "news" in transcribed_text.lower():
+            topic = transcribed_text.lower().split("news")[-1].strip()
+            if not topic:
+                topic = "world"
+            try:
+                articles = await get_news(topic)
+                if articles:
+                    headlines = "\n".join([f"- {a}" for a in articles[:3]])
+                    response_text = f"📰 Hear ye, matey! Fresh tales from the seas: \n{headlines}"
+                else:
+                    response_text = f"Blimey! Could not fetch news on {topic}, matey."
+                
+                # Log assistant response and return early
+                SHIP_MEMORY.log_message(session_id, {
+                    "role": "assistant",
+                    "content": response_text,
+                    "timestamp": time.time()
+                })
+                tts_success, audio_data, tts_error = await generate_pirate_speech(response_text, "en-US-marcus", session_id)
+                return {
+                    "session_id": session_id,
+                    "transcribed_text": transcribed_text,
+                    "response": response_text,
+                    "message_count": len(SHIP_MEMORY.get_crew_messages(session_id)),
+                    "recent_messages": SHIP_MEMORY.get_recent_voyage_log(session_id, 6),
+                    "has_audio": tts_success,
+                    "audio_data": audio_data if tts_success else None,
+                    "errors": {
+                        "stt_error": stt_error,
+                        "llm_error": None,
+                        "tts_error": tts_error
+                    }
+                }
+            except Exception as e:
+                logger.error(f"[{session_id}] News fetch error: {str(e)}")
+                response_text = f"⚠️ Stormy seas! Couldn’t fetch the news about {topic}, matey."
+
+
         conversation_prompt = build_pirate_conversation_prompt(session_id, transcribed_text)
-        llm_success, response_text, llm_error = await get_pirate_response(conversation_prompt, session_id)
-        
+        llm_success, response_text, llm_error = await get_pirate_response(conversation_prompt, session_id)        
         if not llm_success:
             response_text = "Blast! Me thinking be all muddled! What was that again?"
         
-        # Log assistant response  
         SHIP_MEMORY.log_message(session_id, {
             "role": "assistant",
             "content": response_text, 
@@ -606,9 +660,7 @@ async def voice_chat_with_captain(
             "error_type": llm_error
         })
         
-        # Generate speech response
         tts_success, audio_data, tts_error = await generate_pirate_speech(response_text, "en-US-marcus", session_id)
-        
         recent_messages = SHIP_MEMORY.get_recent_voyage_log(session_id, 6)
         msg_models = []
         for m in recent_messages:
@@ -660,7 +712,6 @@ async def generate_audio_response(request: AudioRequest):
         if success and audio_data:
             
             if audio_data.startswith("data:audio") or len(audio_data) > 1000:
-                # Return as streaming response for large audio
                 audio_bytes = base64.b64decode(audio_data)
                 return StreamingResponse(
                     io.BytesIO(audio_bytes),
@@ -668,7 +719,6 @@ async def generate_audio_response(request: AudioRequest):
                     headers={"Content-Disposition": "attachment; filename=pirate_response.mp3"}
                 )
             else:
-                # Return URL or data directly
                 return JSONResponse({"audio_url": audio_data})
         else:
             return JSONResponse({
@@ -717,8 +767,6 @@ async def get_ship_statistics():
         }
     }
 
-# ===== ERROR HANDLERS =====
-
 @app.exception_handler(404)
 async def not_found_handler(request, exc):
     return JSONResponse({
@@ -733,7 +781,6 @@ async def internal_error_handler(request, exc):
         "message": "Internal server error"
     }, status_code=500)
 
-# ===== STARTUP MESSAGE =====
 if __name__ == "__main__":
     import uvicorn
     import io
@@ -741,26 +788,21 @@ if __name__ == "__main__":
     print(" AHOY! Starting Captain Blackbeard's Voice Agent Server...")
     print("  The most legendary AI pirate on the digital seas!")
     print()
-    print("   API Configuration Status:")
-    print(f"   - Gemini LLM: {'⚓ Ready' if GEMINI_API_KEY else '❌ Not configured'}")
-    print(f"   - AssemblyAI STT: {'⚓ Ready' if ASSEMBLYAI_API_KEY else '❌ Not configured'}")  
-    print(f"   - Murf TTS: {'⚓ Ready' if MURF_API_KEY else '❌ Not configured'}")
-    print()
     print("    Server will be sailing at: http://127.0.0.1:5000")
     print("    Health check: http://127.0.0.1:5000/health")
     print("    Ship stats: http://127.0.0.1:5000/ship/stats")
     print()
     print("    Features aboard this vessel:")
-    print("   ✅ Voice transcription (Speech-to-Text)")
-    print("   ✅ Pirate persona with Gemini LLM")
-    print("   ✅ Voice synthesis (Text-to-Speech)")
-    print("   ✅ Conversation memory management")
-    print("   ✅ Text and voice chat endpoints")
-    print("   ✅ Full pirate personality and vocabulary")
-    print("   ✅ Error handling with pirate flair")
+    print("    Voice transcription (Speech-to-Text)")
+    print("    Pirate persona with Gemini LLM")
+    print("    Voice synthesis (Text-to-Speech)")
+    print("    Conversation memory management")
+    print("    Text and voice chat endpoints")
+    print("    Full pirate personality and vocabulary")
+    print("    Error handling with pirate flair")
     print()
-    print("   Ready to help ye navigate the digital seas, matey! Arrr! 🏴‍☠️")
-    
+    print("   Ready to help ye navigate the digital seas, matey! Arrr!")
+
     uvicorn.run(
         app,
         host="0.0.0.0",
