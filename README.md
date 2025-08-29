@@ -23,10 +23,7 @@ An AI voice agent with the soul of **Captain Blackbeard**! ⚓ Powered by **Fast
 ├── captain3.html # Frontend — Pirate UI + PirateVoiceAgent JS  
 └── .env # (optional) Store API keys here    
 
-
 ---
-
-## 🔑 Requirements
 
 - Python **3.9+**  
 - API Keys:  
