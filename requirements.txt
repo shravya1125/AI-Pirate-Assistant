@@ -15,7 +15,7 @@ requests==2.32.3
 httpx==0.27.0
 assemblyai==0.22.0
 python-dotenv==1.0.0
-aiohttp==3.9.8
+aiohttp>=3.9.0,<4.0
 
 
 # Optional: For better audio format support
@@ -36,4 +36,5 @@ uvicorn[standard]==0.24.0
 #
 # On Windows:
 # Download and install ffmpeg from https://ffmpeg.org/download.html
+
 
