@@ -2,6 +2,7 @@
 pydantic
 assemblyai
 google-generativeai
+pydub==0.25.1
 
 pocketsphinx==5.0.0
 speechrecognition==3.10.0
@@ -36,5 +37,6 @@ uvicorn[standard]==0.24.0
 #
 # On Windows:
 # Download and install ffmpeg from https://ffmpeg.org/download.html
+
 
 
