@@ -364,29 +364,6 @@ async def health_check():
             "murf_tts": bool(MURF_API_KEY)
         }
     }
-# @app.post("/process-audio")
-# async def process_audio(file: UploadFile = File(...)):
-#     audio_bytes = await file.read()
-#     audio = AudioSegment.from_file(io.BytesIO(audio_bytes), format="wav")  # no pyaudio
-#     audio.export("temp.wav", format="wav")
-#     return JSONResponse({"message": "Audio processed!"})
-
-# @app.post("/process-audio")
-# async def process_audio(
-#     file: UploadFile = File(...),
-#     geminiKey: str = Form(...),
-#     murfKey: str = Form(...)
-# ):
-#     try:
-#         audio_bytes = await file.read()
-#         audio = AudioSegment.from_file(io.BytesIO(audio_bytes), format="wav")
-#         audio.export("temp.wav", format="wav")
-
-#         return JSONResponse({"message": "Audio processed!", "geminiKey": geminiKey, "murfKey": murfKey})
-
-#     except Exception as e:
-#         print("Error processing audio:", e)
-#         return JSONResponse({"error": str(e)}, status_code=500)
 
 @app.post("/process-audio")
 async def process_audio(
@@ -398,12 +375,10 @@ async def process_audio(
     newsKey: str = Form(None)
 ):
     try:
-        # Read audio
         audio_bytes = await file.read()
         audio = AudioSegment.from_file(io.BytesIO(audio_bytes), format="wav")
         audio.export("temp.wav", format="wav")
 
-        # Return keys + confirmation (for debugging)
         return JSONResponse({
             "message": "Audio processed!",
             "geminiKey": geminiKey,
@@ -657,26 +632,6 @@ async def voice_chat_with_captain(
                 "has_audio": False
             }
 
-        # if "news" in lower:
-        #     result = await get_news(topic="world", session_id=session_id)
-        #     pirate_msg = result.get("news") or result.get("error", "Arrr! No tales be found!")
-
-        #     SHIP_MEMORY.log_message(session_id, {
-        #         "role": "assistant",
-        #         "content": pirate_msg,
-        #         "timestamp": time.time(),
-        #         "error_type": None
-        #     })
-
-        #     return {
-        #         "session_id": session_id,
-        #         "transcribed_text": transcribed_text,
-        #         "response": pirate_msg,
-        #         "message_count": len(SHIP_MEMORY.get_crew_messages(session_id)),
-        #         "recent_messages": SHIP_MEMORY.get_recent_voyage_log(session_id, 6),
-        #         "has_audio": False
-        #     }
-        # --- Skill intercept: News ---
         if "news" in transcribed_text.lower():
             topic = transcribed_text.lower().split("news")[-1].strip()
             if not topic:
@@ -689,7 +644,6 @@ async def voice_chat_with_captain(
                 else:
                     response_text = f"Blimey! Could not fetch news on {topic}, matey."
                 
-                # Log assistant response and return early
                 SHIP_MEMORY.log_message(session_id, {
                     "role": "assistant",
                     "content": response_text,
