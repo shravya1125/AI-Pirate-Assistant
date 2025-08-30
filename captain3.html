@@ -429,57 +429,112 @@
         this.talkBtn.textContent = 'Speak to the Captain';
       }
 
+      // async onRecordingComplete() {
+      //   try {
+      //     this.updateStatus('connected', '🧭 Sending yer message to the Captain…');
+      //     const blob = new Blob(this.recordingChunks, { type: 'audio/webm' });
+      //     // const fd = new FormData();
+      //     // fd.append('audio', blob, 'voice_message.webm');
+      //     // fd.append('session_id', this.sessionId);
+      //     // const r = await fetch(`${this.serverUrl}/chat/voice`, { method: 'POST', body: fd });
+          
+      //     const formData = new FormData();
+      //     formData.append("file", blob, "recorded.wav");
+          
+      //     // const r = await fetch("/process-audio", { 
+      //     //   method: "POST", 
+      //     //   body: formData 
+      //     // });
+      //     const BASE_URL = "https://ai-pirate-assistant.onrender.com";
+
+      //     const r = await fetch(`${BASE_URL}/process-audio`, { 
+      //         method: "POST", 
+      //         body: formData 
+      //     });
+
+      //     if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      //     const data = await r.json();
+
+      //     if (data.error) {
+      //       this.updateStatus('error', data.error);
+      //       return;
+      //     }
+
+      //     if (data.response) {
+      //       this.appendMessage('assistant', data.response);
+      //     }
+      //     if (typeof data.message_count === 'number') {
+      //       this.messageCount = data.message_count;
+      //       this.messageCountEl.textContent = this.messageCount;
+      //     }
+
+      //     if (data.has_audio && data.audio_data) {
+      //       await this.playServerAudioData(data.audio_data);
+      //     } else if (data.response) {
+      //       await this.speakWithAPI(data.response);
+      //     }
+
+      //     this.updateStatus('success', '🏴‍☠️ Ready for yer next command, captain!');
+      //   } catch (err) {
+      //     console.error(err);
+      //     this.updateStatus('error', '⚠️ Rough seas delivering yer message. Try again!');
+      //   }
+      // }
+
       async onRecordingComplete() {
-        try {
-          this.updateStatus('connected', '🧭 Sending yer message to the Captain…');
-          const blob = new Blob(this.recordingChunks, { type: 'audio/webm' });
-          // const fd = new FormData();
-          // fd.append('audio', blob, 'voice_message.webm');
-          // fd.append('session_id', this.sessionId);
-          // const r = await fetch(`${this.serverUrl}/chat/voice`, { method: 'POST', body: fd });
-          
-          const formData = new FormData();
-          formData.append("file", blob, "recorded.wav");
-          
-          // const r = await fetch("/process-audio", { 
-          //   method: "POST", 
-          //   body: formData 
-          // });
-          const BASE_URL = "https://ai-pirate-assistant.onrender.com";
+  try {
+    const geminiKey = document.getElementById("geminiKey").value.trim();
+    const murfKey = document.getElementById("murfKey").value.trim();
 
-          const r = await fetch(`${BASE_URL}/process-audio`, { 
-              method: "POST", 
-              body: formData 
-          });
+    if (!geminiKey || !murfKey) {
+      alert("⚠️ Please enter your Gemini and Murf API keys before speaking to the Captain!");
+      return; 
+    }
 
-          if (!r.ok) throw new Error(`HTTP ${r.status}`);
-          const data = await r.json();
+    this.updateStatus('connected', '🧭 Sending yer message to the Captain…');
+    const blob = new Blob(this.recordingChunks, { type: 'audio/webm' });
 
-          if (data.error) {
-            this.updateStatus('error', data.error);
-            return;
-          }
+    const formData = new FormData();
+    formData.append("file", blob, "recorded.wav");
+    formData.append("geminiKey", geminiKey);
+    formData.append("murfKey", murfKey);
 
-          if (data.response) {
-            this.appendMessage('assistant', data.response);
-          }
-          if (typeof data.message_count === 'number') {
-            this.messageCount = data.message_count;
-            this.messageCountEl.textContent = this.messageCount;
-          }
+    const BASE_URL = "https://ai-pirate-assistant.onrender.com";
+    const r = await fetch(`${BASE_URL}/process-audio`, { 
+        method: "POST", 
+        body: formData 
+    });
 
-          if (data.has_audio && data.audio_data) {
-            await this.playServerAudioData(data.audio_data);
-          } else if (data.response) {
-            await this.speakWithAPI(data.response);
-          }
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const data = await r.json();
 
-          this.updateStatus('success', '🏴‍☠️ Ready for yer next command, captain!');
-        } catch (err) {
-          console.error(err);
-          this.updateStatus('error', '⚠️ Rough seas delivering yer message. Try again!');
-        }
-      }
+    if (data.error) {
+      this.updateStatus('error', data.error);
+      return;
+    }
+
+    if (data.response) {
+      this.appendMessage('assistant', data.response);
+    }
+
+    if (typeof data.message_count === 'number') {
+      this.messageCount = data.message_count;
+      this.messageCountEl.textContent = this.messageCount;
+    }
+
+    if (data.has_audio && data.audio_data) {
+      await this.playServerAudioData(data.audio_data);
+    } else if (data.response) {
+      await this.speakWithAPI(data.response);
+    }
+
+    this.updateStatus('success', '🏴‍☠️ Ready for yer next command, captain!');
+  } catch (err) {
+    console.error(err);
+    this.updateStatus('error', '⚠️ Rough seas delivering yer message. Try again!');
+  }
+}
+
 
       async playServerAudioData(audioData) {
         try {
