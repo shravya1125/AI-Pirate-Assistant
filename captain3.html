@@ -269,35 +269,6 @@
     <div class="footer">Built by <strong>a hearty developer</strong></div>
   </div>
 
-  <!-- Pirate Onboarding Modal -->
-<div id="pirateModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center hidden">
-  <div class="bg-white p-6 rounded-2xl shadow-lg max-w-md text-center">
-    <h2 class="text-2xl font-bold mb-4">⚓ Ahoy, Matey! ⚓</h2>
-    <p class="mb-4">Before we set sail, ye must hand over yer secret maps (API keys).
-      Without ‘em, the Captain be speechless and deaf to yer commands!</p>
-
-    <div class="flex flex-col gap-2">
-      <button id="btnKeys" class="bg-blue-600 text-white px-4 py-2 rounded-xl">☠️ Aye, I’ve got me keys</button>
-      <a href="https://docs.google.com" target="_blank" class="text-blue-500 underline">Show me how</a>
-    </div>
-  </div>
-</div>
-
-<!-- API Key Form -->
-<div id="keyConfig" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center hidden">
-  <div class="bg-white p-6 rounded-2xl shadow-lg max-w-md text-center">
-    <h2 class="text-2xl font-bold mb-4">🗺️ Enter Yer Treasure Maps</h2>
-
-    <input id="geminiKey" placeholder="Gemini API Key" class="border p-2 w-full mb-2 rounded"/>
-    <input id="assemblyKey" placeholder="AssemblyAI Key" class="border p-2 w-full mb-2 rounded"/>
-    <input id="murfKey" placeholder="Murf Key" class="border p-2 w-full mb-2 rounded"/>
-    <input id="weatherKey" placeholder="WeatherAPI Key" class="border p-2 w-full mb-2 rounded"/>
-    <input id="newsKey" placeholder="NewsAPI Key" class="border p-2 w-full mb-4 rounded"/>
-
-    <button id="saveKeys" class="bg-blue-600 text-white px-4 py-2 rounded-xl">💾 Save & Set Sail</button>
-  </div>
-</div>
-
 
   <script>
     class VoiceAgent {
@@ -324,44 +295,8 @@
         this.bindUI();
         this.updateStatus('connected', '🏴‍☠️ Ship is ready. Press “Set Sail”!');
         this.loadChatHistory();
-
-        this.keys = {};
       }
 
-      init() {
-    // Show modal on first load
-    window.addEventListener("load", () => {
-      const savedKeys = localStorage.getItem("pirateKeys");
-      if (!savedKeys) {
-        document.getElementById("pirateModal").classList.remove("hidden");
-      }
-    });
-
-    // Buttons
-    document.getElementById("btnKeys").addEventListener("click", () => {
-      document.getElementById("pirateModal").classList.add("hidden");
-      document.getElementById("keyConfig").classList.remove("hidden");
-    });
-
-    document.getElementById("saveKeys").addEventListener("click", () => {
-      this.keys = {
-        gemini: document.getElementById("geminiKey").value,
-        assembly: document.getElementById("assemblyKey").value,
-        murf: document.getElementById("murfKey").value,
-        weather: document.getElementById("weatherKey").value,
-        news: document.getElementById("newsKey").value
-      };
-
-      localStorage.setItem("pirateKeys", JSON.stringify(this.keys));
-      document.getElementById("keyConfig").classList.add("hidden");
-      alert("🏴‍☠️ The Captain’s ready, matey! Yer keys be safe in me chest.");
-    });
-  }
-
-  getPirateKeys() {
-    return JSON.parse(localStorage.getItem("pirateKeys") || "{}");
-  }
-}
 
       loadOrCreateSession() {
         let id = localStorage.getItem('pirate_session_id');
