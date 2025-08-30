@@ -4,6 +4,13 @@ Captain Blackbeard AI Voice Agent Server
 Complete conversational voice agent with pirate persona
 """
 
+import sys
+import types
+
+if sys.version_info >= (3, 13):
+    sys.modules['pyaudioop'] = types.ModuleType("pyaudioop")
+
+
 from fastapi import FastAPI, File, UploadFile
 from fastapi.responses import JSONResponse
 from pydub import AudioSegment
