@@ -4,6 +4,11 @@ Captain Blackbeard AI Voice Agent Server
 Complete conversational voice agent with pirate persona
 """
 
+from fastapi import FastAPI, File, UploadFile
+from fastapi.responses import JSONResponse
+from pydub import AudioSegment
+import io
+
 import os
 import tempfile
 import logging
@@ -350,6 +355,12 @@ async def health_check():
             "murf_tts": bool(MURF_API_KEY)
         }
     }
+@app.post("/process-audio")
+async def process_audio(file: UploadFile = File(...)):
+    audio_bytes = await file.read()
+    audio = AudioSegment.from_file(io.BytesIO(audio_bytes), format="wav")  # no pyaudio
+    audio.export("temp.wav", format="wav")
+    return JSONResponse({"message": "Audio processed!"})
 
 @app.post("/chat/text")
 async def chat_with_captain(request: TextRequest):
