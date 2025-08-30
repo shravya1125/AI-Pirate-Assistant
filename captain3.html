@@ -441,9 +441,15 @@
           const formData = new FormData();
           formData.append("file", blob, "recorded.wav");
           
-          const r = await fetch("/process-audio", { 
-            method: "POST", 
-            body: formData 
+          // const r = await fetch("/process-audio", { 
+          //   method: "POST", 
+          //   body: formData 
+          // });
+          const BASE_URL = "https://ai-pirate-assistant.onrender.com";
+
+          const r = await fetch(`${BASE_URL}/process-audio`, { 
+              method: "POST", 
+              body: formData 
           });
 
           if (!r.ok) throw new Error(`HTTP ${r.status}`);
