@@ -25,6 +25,8 @@ from pathlib import Path as PathLib
 import google.generativeai as genai
 import assemblyai as aai
 import requests
+import patch_pydub
+from pydub import AudioSegment
 
 # FastAPI and WebSocket imports
 from fastapi import FastAPI, UploadFile, Form, HTTPException, File, WebSocket, WebSocketDisconnect
