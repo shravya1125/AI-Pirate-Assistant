@@ -372,14 +372,18 @@ async def health_check():
 #     return JSONResponse({"message": "Audio processed!"})
 
 @app.post("/process-audio")
-async def process_audio(file: UploadFile = File(...)):
+async def process_audio(
+    file: UploadFile = File(...),
+    geminiKey: str = Form(...),
+    murfKey: str = Form(...)
+):
     try:
         audio_bytes = await file.read()
         audio = AudioSegment.from_file(io.BytesIO(audio_bytes), format="wav")
-        temp_path = "temp.wav"
-        audio.export(temp_path, format="wav")
-        return JSONResponse({"message": "Audio processed successfully"})
-    
+        audio.export("temp.wav", format="wav")
+
+        return JSONResponse({"message": "Audio processed!", "geminiKey": geminiKey, "murfKey": murfKey})
+
     except Exception as e:
         print("Error processing audio:", e)
         return JSONResponse({"error": str(e)}, status_code=500)
