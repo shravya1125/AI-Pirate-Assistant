@@ -371,18 +371,47 @@ async def health_check():
 #     audio.export("temp.wav", format="wav")
 #     return JSONResponse({"message": "Audio processed!"})
 
+# @app.post("/process-audio")
+# async def process_audio(
+#     file: UploadFile = File(...),
+#     geminiKey: str = Form(...),
+#     murfKey: str = Form(...)
+# ):
+#     try:
+#         audio_bytes = await file.read()
+#         audio = AudioSegment.from_file(io.BytesIO(audio_bytes), format="wav")
+#         audio.export("temp.wav", format="wav")
+
+#         return JSONResponse({"message": "Audio processed!", "geminiKey": geminiKey, "murfKey": murfKey})
+
+#     except Exception as e:
+#         print("Error processing audio:", e)
+#         return JSONResponse({"error": str(e)}, status_code=500)
+
 @app.post("/process-audio")
 async def process_audio(
     file: UploadFile = File(...),
     geminiKey: str = Form(...),
-    murfKey: str = Form(...)
+    assemblyKey: str = Form(None),
+    murfKey: str = Form(...),
+    weatherKey: str = Form(None),
+    newsKey: str = Form(None)
 ):
     try:
+        # Read audio
         audio_bytes = await file.read()
         audio = AudioSegment.from_file(io.BytesIO(audio_bytes), format="wav")
         audio.export("temp.wav", format="wav")
 
-        return JSONResponse({"message": "Audio processed!", "geminiKey": geminiKey, "murfKey": murfKey})
+        # Return keys + confirmation (for debugging)
+        return JSONResponse({
+            "message": "Audio processed!",
+            "geminiKey": geminiKey,
+            "assemblyKey": assemblyKey,
+            "murfKey": murfKey,
+            "weatherKey": weatherKey,
+            "newsKey": newsKey
+        })
 
     except Exception as e:
         print("Error processing audio:", e)
