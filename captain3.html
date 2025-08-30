@@ -429,66 +429,19 @@
         this.talkBtn.textContent = 'Speak to the Captain';
       }
 
-      // async onRecordingComplete() {
-      //   try {
-      //     this.updateStatus('connected', '🧭 Sending yer message to the Captain…');
-      //     const blob = new Blob(this.recordingChunks, { type: 'audio/webm' });
-      //     // const fd = new FormData();
-      //     // fd.append('audio', blob, 'voice_message.webm');
-      //     // fd.append('session_id', this.sessionId);
-      //     // const r = await fetch(`${this.serverUrl}/chat/voice`, { method: 'POST', body: fd });
-          
-      //     const formData = new FormData();
-      //     formData.append("file", blob, "recorded.wav");
-          
-      //     // const r = await fetch("/process-audio", { 
-      //     //   method: "POST", 
-      //     //   body: formData 
-      //     // });
-      //     const BASE_URL = "https://ai-pirate-assistant.onrender.com";
-
-      //     const r = await fetch(`${BASE_URL}/process-audio`, { 
-      //         method: "POST", 
-      //         body: formData 
-      //     });
-
-      //     if (!r.ok) throw new Error(`HTTP ${r.status}`);
-      //     const data = await r.json();
-
-      //     if (data.error) {
-      //       this.updateStatus('error', data.error);
-      //       return;
-      //     }
-
-      //     if (data.response) {
-      //       this.appendMessage('assistant', data.response);
-      //     }
-      //     if (typeof data.message_count === 'number') {
-      //       this.messageCount = data.message_count;
-      //       this.messageCountEl.textContent = this.messageCount;
-      //     }
-
-      //     if (data.has_audio && data.audio_data) {
-      //       await this.playServerAudioData(data.audio_data);
-      //     } else if (data.response) {
-      //       await this.speakWithAPI(data.response);
-      //     }
-
-      //     this.updateStatus('success', '🏴‍☠️ Ready for yer next command, captain!');
-      //   } catch (err) {
-      //     console.error(err);
-      //     this.updateStatus('error', '⚠️ Rough seas delivering yer message. Try again!');
-      //   }
-      // }
 
       async onRecordingComplete() {
   try {
+    
     const geminiKey = document.getElementById("geminiKey").value.trim();
+    const assemblyKey = document.getElementById("assemblyKey").value.trim();
     const murfKey = document.getElementById("murfKey").value.trim();
+    const weatherKey = document.getElementById("weatherKey").value.trim();
+    const newsKey = document.getElementById("newsKey").value.trim();
 
-    if (!geminiKey || !murfKey) {
-      alert("⚠️ Please enter your Gemini and Murf API keys before speaking to the Captain!");
-      return; 
+    if (!geminiKey || !assemblyKey || !murfKey) {
+      alert("⚠️ Please enter your Gemini, AssemblyAI, and Murf API keys before speaking to the Captain!");
+      return;
     }
 
     this.updateStatus('connected', '🧭 Sending yer message to the Captain…');
@@ -497,12 +450,16 @@
     const formData = new FormData();
     formData.append("file", blob, "recorded.wav");
     formData.append("geminiKey", geminiKey);
+    formData.append("assemblyKey", assemblyKey);
     formData.append("murfKey", murfKey);
+    formData.append("weatherKey", weatherKey);
+    formData.append("newsKey", newsKey);
 
-    const BASE_URL = "https://ai-pirate-assistant.onrender.com";
+    // Your Render backend
+    const BASE_URL = "https://ai-pirate-assistant.onrender.com"; 
     const r = await fetch(`${BASE_URL}/process-audio`, { 
-        method: "POST", 
-        body: formData 
+      method: "POST", 
+      body: formData 
     });
 
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
@@ -534,6 +491,60 @@
     this.updateStatus('error', '⚠️ Rough seas delivering yer message. Try again!');
   }
 }
+
+//       async onRecordingComplete() {
+//   try {
+//     const geminiKey = document.getElementById("geminiKey").value.trim();
+//     const murfKey = document.getElementById("murfKey").value.trim();
+
+//     if (!geminiKey || !murfKey) {
+//       alert("⚠️ Please enter your Gemini and Murf API keys before speaking to the Captain!");
+//       return; 
+//     }
+
+//     this.updateStatus('connected', '🧭 Sending yer message to the Captain…');
+//     const blob = new Blob(this.recordingChunks, { type: 'audio/webm' });
+
+//     const formData = new FormData();
+//     formData.append("file", blob, "recorded.wav");
+//     formData.append("geminiKey", geminiKey);
+//     formData.append("murfKey", murfKey);
+
+//     const BASE_URL = "https://ai-pirate-assistant.onrender.com";
+//     const r = await fetch(`${BASE_URL}/process-audio`, { 
+//         method: "POST", 
+//         body: formData 
+//     });
+
+//     if (!r.ok) throw new Error(`HTTP ${r.status}`);
+//     const data = await r.json();
+
+//     if (data.error) {
+//       this.updateStatus('error', data.error);
+//       return;
+//     }
+
+//     if (data.response) {
+//       this.appendMessage('assistant', data.response);
+//     }
+
+//     if (typeof data.message_count === 'number') {
+//       this.messageCount = data.message_count;
+//       this.messageCountEl.textContent = this.messageCount;
+//     }
+
+//     if (data.has_audio && data.audio_data) {
+//       await this.playServerAudioData(data.audio_data);
+//     } else if (data.response) {
+//       await this.speakWithAPI(data.response);
+//     }
+
+//     this.updateStatus('success', '🏴‍☠️ Ready for yer next command, captain!');
+//   } catch (err) {
+//     console.error(err);
+//     this.updateStatus('error', '⚠️ Rough seas delivering yer message. Try again!');
+//   }
+// }
 
 
       async playServerAudioData(audioData) {
@@ -724,30 +735,56 @@ function loadKeys() {
 configBtn.onclick = () => { loadKeys(); configModal.style.display = "flex"; };
 closeConfigBtn.onclick = () => { configModal.style.display = "none"; };
 
-saveKeysBtn.onclick = async () => {
-  const keys = {
-    gemini: document.getElementById("geminiKey").value,
-    assemblyai: document.getElementById("assemblyKey").value,
-    murf: document.getElementById("murfKey").value,
-    weather: document.getElementById("weatherKey").value,
-    news: document.getElementById("newsKey").value
-  };
+// 🔹 Define global vars at top of your script
+let geminiKey = "";
+let assemblyKey = "";
+let murfKey = "";
+let weatherKey = "";
+let newsKey = "";
 
-  for (const [k, v] of Object.entries(keys)) {
-    if (!v) {
-      alert(`Missing required API key: ${k}`);
-      return;
-    }
+// 🔹 Save Keys Button logic
+saveKeysBtn.onclick = () => {
+  geminiKey   = document.getElementById("geminiKey").value.trim();
+  assemblyKey = document.getElementById("assemblyKey").value.trim();
+  murfKey     = document.getElementById("murfKey").value.trim();
+  weatherKey  = document.getElementById("weatherKey").value.trim();
+  newsKey     = document.getElementById("newsKey").value.trim();
+
+  // Validation
+  if (!geminiKey || !assemblyKey || !murfKey) {
+    alert("⚠️ Missing required API keys. Gemini, AssemblyAI, and Murf are mandatory.");
+    return;
   }
 
-  await fetch("/config/keys", {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify(keys)
-  });
-
+  alert("✅ Keys saved for this session. They will reset if you reload.");
   document.getElementById("configModal").style.display = "none";
 };
+
+    
+// saveKeysBtn.onclick = async () => {
+//   const keys = {
+//     gemini: document.getElementById("geminiKey").value,
+//     assemblyai: document.getElementById("assemblyKey").value,
+//     murf: document.getElementById("murfKey").value,
+//     weather: document.getElementById("weatherKey").value,
+//     news: document.getElementById("newsKey").value
+//   };
+
+//   for (const [k, v] of Object.entries(keys)) {
+//     if (!v) {
+//       alert(`Missing required API key: ${k}`);
+//       return;
+//     }
+//   }
+
+//   await fetch("/config/keys", {
+//     method: "POST",
+//     headers: {"Content-Type": "application/json"},
+//     body: JSON.stringify(keys)
+//   });
+
+//   document.getElementById("configModal").style.display = "none";
+// };
 
   </script>
 </body>
