@@ -717,15 +717,18 @@ const configModal = document.getElementById("configModal");
 const closeConfigBtn = document.getElementById("closeConfigBtn");
 const saveKeysBtn = document.getElementById("saveKeysBtn");
 
-function loadKeys() {
-  document.getElementById("geminiKey").value = "";
-  document.getElementById("assemblyKey").value = "";
-  document.getElementById("murfKey").value = "";
-  document.getElementById("weatherKey").value = "";
-  document.getElementById("newsKey").value = "";
-}
+// function loadKeys() {
+//   document.getElementById("geminiKey").value = "";
+//   document.getElementById("assemblyKey").value = "";
+//   document.getElementById("murfKey").value = "";
+//   document.getElementById("weatherKey").value = "";
+//   document.getElementById("newsKey").value = "";
+// }
 
-configBtn.onclick = () => { loadKeys(); configModal.style.display = "flex"; };
+// configBtn.onclick = () => { loadKeys(); configModal.style.display = "flex"; };
+// closeConfigBtn.onclick = () => { configModal.style.display = "none"; };
+
+configBtn.onclick = () => { configModal.style.display = "flex"; };
 closeConfigBtn.onclick = () => { configModal.style.display = "none"; };
 let geminiKey = "";
 let assemblyKey = "";
@@ -748,6 +751,7 @@ let newsKey = "";
 //   alert("Keys saved for this session. They will reset if you reload.");
 //   document.getElementById("configModal").style.display = "none";
 // };
+
 
 saveKeysBtn.onclick = async () => {
   const geminiKey   = document.getElementById("geminiKey").value.trim();
@@ -776,6 +780,7 @@ saveKeysBtn.onclick = async () => {
     const data = await r.json();
     if (r.ok) {
       alert("Keys saved for this voyage, savvy! The ship's systems are now a-go.");
+      window.voiceAgent.keysSet = true; // Set a flag on the global agent object
       document.getElementById("configModal").style.display = "none";
     } else {
       alert(`Arrr! Failed to save keys: ${data.error}`);
@@ -784,7 +789,6 @@ saveKeysBtn.onclick = async () => {
     alert("Shiver me timbers! The connection to the server failed while saving keys.");
   }
 };
-
   </script>
 </body>
 </html>
