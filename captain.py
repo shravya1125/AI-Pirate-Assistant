@@ -709,7 +709,7 @@ async def voice_chat_with_captain(
         audio_data = None
         llm_error = None
         tts_error = None
-        skill_logged = False 
+        already_logged = False  # <--- NEW flag
 
         if "weather" in lower:
             import re
@@ -717,25 +717,28 @@ async def voice_chat_with_captain(
             city = match.group(2).strip() if match and match.group(2) else "the high seas"
             result = await get_weather(city=city, session_id=session_id)
             response_text = result.get("pirate_report") or result.get("error", "Arrr! No forecast today, matey!")
-            skill_logged = True 
+            already_logged = True  # logged inside get_weather
         
         elif "news" in lower:
             topic = lower.split("news")[-1].strip() or "technology"
             result = await get_news(topic=topic, session_id=session_id)
             response_text = result.get("news") or result.get("message") or result.get("error", "Blimey! Could not fetch news, matey.")
-            skill_logged = True 
+            already_logged = True  # logged inside get_news
 
         elif "shanty" in lower:
             result = await generate_sea_shanty()
             response_text = result.get("shanty") or "Arrr! Me voice be too hoarse for singin’, matey!"
+            already_logged = False  # not logged inside generate_sea_shanty
 
-        if not response_text:
+        else:
             conversation_prompt = build_pirate_conversation_prompt(session_id, transcribed_text)
             llm_success, response_text, llm_error = await get_pirate_response(conversation_prompt, session_id)
             if not llm_success:
                 response_text = "Blast! Me thinking be all muddled! What was that again?"
+            already_logged = False
 
-        if not skill_logged:
+        # ✅ only log if the skill didn’t already log
+        if not already_logged:
             SHIP_MEMORY.log_message(session_id, {
                 "role": "assistant",
                 "content": response_text, 
@@ -785,7 +788,6 @@ async def voice_chat_with_captain(
                 os.remove(tmp_path)
             except:
                 pass
-
 
 @app.post("/chat/audio-response")
 async def generate_audio_response(request: AudioRequest):
