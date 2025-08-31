@@ -418,15 +418,25 @@
         }
       }
 
+      // stopRecording() {
+      //   if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
+      //     this.mediaRecorder.stop();
+      //     this.mediaRecorder.stream.getTracks().forEach(t => t.stop());
+      //   }
+      //   this.isRecording = false;
+      //   this.talkBtn.classList.remove('active');
+      //   this.talkBtn.textContent = 'Speak to the Captain';
+      // }
+
       stopRecording() {
         if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
           this.mediaRecorder.stop();
-          this.mediaRecorder.stream.getTracks().forEach(t => t.stop());
         }
         this.isRecording = false;
         this.talkBtn.classList.remove('active');
         this.talkBtn.textContent = 'Speak to the Captain';
       }
+
 
 
 //       async onRecordingComplete() {
@@ -493,6 +503,7 @@
 
       async onRecordingComplete() {
         try {
+          this.mediaRecorder.stream.getTracks().forEach(t => t.stop());
           if (!window.voiceAgent.keysSet) {
             alert("⚠️ Please enter your API keys by clicking the 'Configure' button first!");
             this.updateStatus('error', '⚠️ Set sail with yer keys first!');
@@ -500,6 +511,8 @@
           }
           this.updateStatus('connected', '🧭 Sending yer message to the Captain…');
           const blob = new Blob(this.recordingChunks, { type: 'audio/webm' });
+          // const blob = new Blob(this.recordingChunks, { type: 'audio/webm;codecs=opus' });
+
           const formData = new FormData();
           formData.append("session_id", this.sessionId);
           formData.append("audio", blob, "recorded.webm");
