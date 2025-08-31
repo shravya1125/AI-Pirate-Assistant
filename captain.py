@@ -734,11 +734,20 @@ async def voice_chat_with_captain(
 ):
     """Voice chat with Captain Blackbeard"""
     
-    if not audio.content_type or not audio.content_type.startswith("audio/"):
+    # if not audio.content_type or not audio.content_type.startswith("audio/"):
+    #     return JSONResponse({
+    #         "error": "That don't sound like proper audio, matey!",
+    #         "session_id": session_id
+    #     }, status_code=400)
+
+    if not audio.content_type or not (
+        audio.content_type.startswith("audio/") or audio.content_type.startswith("video/")
+    ):
         return JSONResponse({
-            "error": "That don't sound like proper audio, matey!",
-            "session_id": session_id
+             "error": "That don't sound like proper audio, matey!",
+             "session_id": session_id
         }, status_code=400)
+
     
     tmp_path = None
     try:
