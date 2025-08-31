@@ -613,13 +613,6 @@ async def voice_chat_with_captain(
             if not llm_success:
                 response_text = "Blast! Me thinking be all muddled! What was that again?"
         
-        # SHIP_MEMORY.log_message(session_id, {
-        #     "role": "assistant",
-        #     "content": response_text, 
-        #     "timestamp": time.time(),
-        #     "error_type": llm_error
-        # })
-        # only log if skill didn’t already log (weather/news)
         if "weather" not in lower and "news" not in lower:
             SHIP_MEMORY.log_message(session_id, {
                 "role": "assistant",
