@@ -494,6 +494,11 @@
 
       async onRecordingComplete() {
         try {
+          if (!window.voiceAgent.keysSet) {
+            alert("⚠️ Please enter your API keys by clicking the 'Configure' button first!");
+            this.updateStatus('error', '⚠️ Set sail with yer keys first!');
+            return;
+          }
           this.updateStatus('connected', '🧭 Sending yer message to the Captain…');
           const blob = new Blob(this.recordingChunks, { type: 'audio/webm' });
           const formData = new FormData();
