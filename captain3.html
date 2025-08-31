@@ -266,52 +266,36 @@
 
     <audio id="ttsPlayer" controls autoplay hidden></audio>
 
-    <div class="footer">Built by <strong>a hearty developer</strong></div>
+    <div class="footer">Built by <strong>a hearty developer</strong><br>❤️Powered by Murf</div>
   </div>
 
 
   <script>
     class VoiceAgent {
       constructor() {
-        
         this.serverUrl = /^https?:\/\//.test(window.location.origin) ? window.location.origin : 'http://127.0.0.1:5000';
         this.sessionId = 'session_' + Math.random().toString(36).slice(2, 10);
         this.messageCount = 0;
-
         this.statusEl = document.getElementById('status');
         this.chatMessagesEl = document.getElementById('chatMessages');
         this.messageCountEl = document.getElementById('messageCount');
         this.audioEl = document.getElementById('ttsPlayer');
-
         this.convoBtn = document.getElementById('conversationBtn');
         this.talkBtn = document.getElementById('toggleBtn');
         this.clearBtn = document.getElementById('clearBtn');
-
         this.isRecording = false;
         this.mediaRecorder = null;
         this.recordingChunks = [];
-
         this.bindUI();
         this.updateStatus('connected', '🏴‍☠️ Ship is ready. Press “Set Sail”!');
         this.loadChatHistory();
       }
 
-
-      // loadOrCreateSession() {
-      //   let id = localStorage.getItem('pirate_session_id');
-      //   if (!id) {
-      //     id = 'session_' + Math.random().toString(36).slice(2, 10);
-      //     localStorage.setItem('pirate_session_id', id);
-      //   }
-      //   document.getElementById('sessionDisplay').textContent = id;
-      //   return id;
-      // }
-
       bindUI() {
         this.convoBtn.addEventListener('click', () => this.startConversation());
         this.talkBtn.addEventListener('click', () => this.toggleRecording());
         this.clearBtn.addEventListener('click', () => this.clearChatHistory());
-
+        
         window.addEventListener('keydown', (e) => {
           if (e.code === 'Space') {
             e.preventDefault();
@@ -351,7 +335,6 @@
         this.messageCount = Array.isArray(messages) ? messages.length : 0;
         this.messageCountEl.textContent = this.messageCount;
         }
-
 
       async loadChatHistory() {
         try {
@@ -418,16 +401,6 @@
         }
       }
 
-      // stopRecording() {
-      //   if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
-      //     this.mediaRecorder.stop();
-      //     this.mediaRecorder.stream.getTracks().forEach(t => t.stop());
-      //   }
-      //   this.isRecording = false;
-      //   this.talkBtn.classList.remove('active');
-      //   this.talkBtn.textContent = 'Speak to the Captain';
-      // }
-
       stopRecording() {
         if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
           this.mediaRecorder.stop();
@@ -436,70 +409,6 @@
         this.talkBtn.classList.remove('active');
         this.talkBtn.textContent = 'Speak to the Captain';
       }
-
-
-
-//       async onRecordingComplete() {
-//   try {
-    
-//     const geminiKey = document.getElementById("geminiKey").value.trim();
-//     const assemblyKey = document.getElementById("assemblyKey").value.trim();
-//     const murfKey = document.getElementById("murfKey").value.trim();
-//     const weatherKey = document.getElementById("weatherKey").value.trim();
-//     const newsKey = document.getElementById("newsKey").value.trim();
-
-//     if (!geminiKey || !assemblyKey || !murfKey) {
-//       alert("⚠️ Please enter your Gemini, AssemblyAI, and Murf API keys before speaking to the Captain!");
-//       return;
-//     }
-
-//     this.updateStatus('connected', '🧭 Sending yer message to the Captain…');
-//     const blob = new Blob(this.recordingChunks, { type: 'audio/webm' });
-
-//     const formData = new FormData();
-//     formData.append("file", blob, "recorded.wav");
-//     formData.append("geminiKey", geminiKey);
-//     formData.append("assemblyKey", assemblyKey);
-//     formData.append("murfKey", murfKey);
-//     formData.append("weatherKey", weatherKey);
-//     formData.append("newsKey", newsKey);
-
-//     // Your Render backend
-//     const BASE_URL = "https://ai-pirate-assistant.onrender.com"; 
-//     const r = await fetch(`${BASE_URL}/process-audio`, { 
-//       method: "POST", 
-//       body: formData 
-//     });
-
-//     if (!r.ok) throw new Error(`HTTP ${r.status}`);
-//     const data = await r.json();
-
-//     if (data.error) {
-//       this.updateStatus('error', data.error);
-//       return;
-//     }
-
-//     if (data.response) {
-//       this.appendMessage('assistant', data.response);
-//     }
-
-//     if (typeof data.message_count === 'number') {
-//       this.messageCount = data.message_count;
-//       this.messageCountEl.textContent = this.messageCount;
-//     }
-
-//     if (data.has_audio && data.audio_data) {
-//       await this.playServerAudioData(data.audio_data);
-//     } else if (data.response) {
-//       await this.speakWithAPI(data.response);
-//     }
-
-//     this.updateStatus('success', '🏴‍☠️ Ready for yer next command, captain!');
-//   } catch (err) {
-//     console.error(err);
-//     this.updateStatus('error', '⚠️ Rough seas delivering yer message. Try again!');
-//   }
-// }
 
       async onRecordingComplete() {
         try {
@@ -511,17 +420,14 @@
           }
           this.updateStatus('connected', '🧭 Sending yer message to the Captain…');
           const blob = new Blob(this.recordingChunks, { type: 'audio/webm' });
-          // const blob = new Blob(this.recordingChunks, { type: 'audio/webm;codecs=opus' });
-
           const formData = new FormData();
           formData.append("session_id", this.sessionId);
           formData.append("audio", blob, "recorded.webm");
-
           const r = await fetch(`${this.serverUrl}/chat/voice`, { 
             method: "POST", 
             body: formData 
           });
-
+          
           if (!r.ok) throw new Error(`HTTP ${r.status}`);
           const data = await r.json();
 
@@ -637,79 +543,79 @@
         }
       }
 
-async fetchWeather(city) {
-  try {
-    const url = new URL(`${this.serverUrl}/skill/weather`);
-    url.searchParams.append('city', city);
-    url.searchParams.append('session_id', this.sessionId);
-    const r = await fetch(url);
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+// async fetchWeather(city) {
+//   try {
+//     const url = new URL(`${this.serverUrl}/skill/weather`);
+//     url.searchParams.append('city', city);
+//     url.searchParams.append('session_id', this.sessionId);
+//     const r = await fetch(url);
+//     if (!r.ok) throw new Error(`HTTP ${r.status}`);
 
-    const data = await r.json();
+//     const data = await r.json();
 
-    if (data.error) {
-      this.appendMessage('assistant', `Arrr! Couldn’t fetch weather for ${city}.`);
-    } else {
-      const msg = `🌦️ The weather in ${data.city} be ${data.weather}, with a temperature of ${data.temperature}.`;
-      this.appendMessage('assistant', msg);
-      await this.speakWithAPI(msg);
-    }
+//     if (data.error) {
+//       this.appendMessage('assistant', `Arrr! Couldn’t fetch weather for ${city}.`);
+//     } else {
+//       const msg = `🌦️ The weather in ${data.city} be ${data.weather}, with a temperature of ${data.temperature}.`;
+//       this.appendMessage('assistant', msg);
+//       await this.speakWithAPI(msg);
+//     }
 
-  } catch (err) {
-    console.error("Weather fetch failed:", err);
-    this.appendMessage('assistant', "⚠️ Stormy seas! Couldn’t fetch the weather.");
-  }
-}
+//   } catch (err) {
+//     console.error("Weather fetch failed:", err);
+//     this.appendMessage('assistant', "⚠️ Stormy seas! Couldn’t fetch the weather.");
+//   }
+// }
 
-async fetchShanty() {
-  try {
-    const r = await fetch(`${this.serverUrl}/skill/shanty`);
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    const data = await r.json();
+// async fetchShanty() {
+//   try {
+//     const r = await fetch(`${this.serverUrl}/skill/shanty`);
+//     if (!r.ok) throw new Error(`HTTP ${r.status}`);
+//     const data = await r.json();
 
-    if (data.shanty) {
-      this.appendMessage('assistant', data.shanty);
-      await this.speakWithAPI(data.shanty);
-    } else {
-      this.appendMessage('assistant', "Arrr! Me voice be too hoarse for singin’, matey!");
-    }
+//     if (data.shanty) {
+//       this.appendMessage('assistant', data.shanty);
+//       await this.speakWithAPI(data.shanty);
+//     } else {
+//       this.appendMessage('assistant', "Arrr! Me voice be too hoarse for singin’, matey!");
+//     }
 
-  } catch (err) {
-    console.error("Shanty fetch failed:", err);
-    this.appendMessage('assistant', "Blast! The seas stole me song!");
-  }
-}
+//   } catch (err) {
+//     console.error("Shanty fetch failed:", err);
+//     this.appendMessage('assistant', "Blast! The seas stole me song!");
+//   }
+// }
 
-async fetchNews(topic) {
-  try {
-    const url = new URL(`${this.serverUrl}/skill/news`);
-    url.searchParams.append('topic', topic);
-    url.searchParams.append('session_id', this.sessionId);
-    const r = await fetch(url);
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+// async fetchNews(topic) {
+//   try {
+//     const url = new URL(`${this.serverUrl}/skill/news`);
+//     url.searchParams.append('topic', topic);
+//     url.searchParams.append('session_id', this.sessionId);
+//     const r = await fetch(url);
+//     if (!r.ok) throw new Error(`HTTP ${r.status}`);
 
-    const data = await r.json();
+//     const data = await r.json();
 
-    if (data.news) {
-      this.appendMessage('assistant', data.news);
-      await this.speakWithAPI(data.news);
-    } else if (data.message) {
-      this.appendMessage('assistant', data.message);
-      await this.speakWithAPI(data.message);
-    } else {
-      this.appendMessage('assistant', `Arrr! Couldn’t fetch the news on ${topic}, matey.`);
-    }
-    await fetch(`${this.serverUrl}/chat/text`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ message: `[SkillResult] ${msg}`, session_id: this.sessionId })
-    });
+//     if (data.news) {
+//       this.appendMessage('assistant', data.news);
+//       await this.speakWithAPI(data.news);
+//     } else if (data.message) {
+//       this.appendMessage('assistant', data.message);
+//       await this.speakWithAPI(data.message);
+//     } else {
+//       this.appendMessage('assistant', `Arrr! Couldn’t fetch the news on ${topic}, matey.`);
+//     }
+//     await fetch(`${this.serverUrl}/chat/text`, {
+//     method: "POST",
+//     headers: { "Content-Type": "application/json" },
+//     body: JSON.stringify({ message: `[SkillResult] ${msg}`, session_id: this.sessionId })
+//     });
 
-  } catch (err) {
-    console.error("News fetch failed:", err);
-    this.appendMessage('assistant', "⚠️ Stormy seas! Couldn’t fetch the news.");
-  }
-}
+//   } catch (err) {
+//     console.error("News fetch failed:", err);
+//     this.appendMessage('assistant', "⚠️ Stormy seas! Couldn’t fetch the news.");
+//   }
+// }
 
       escapeHtml(s) {
         return String(s)
@@ -723,23 +629,10 @@ async fetchNews(topic) {
     
     window.voiceAgent = new VoiceAgent();
 
-// --- CONFIG UI HANDLING ---
 const configBtn = document.getElementById("configBtn");
 const configModal = document.getElementById("configModal");
 const closeConfigBtn = document.getElementById("closeConfigBtn");
 const saveKeysBtn = document.getElementById("saveKeysBtn");
-
-// function loadKeys() {
-//   document.getElementById("geminiKey").value = "";
-//   document.getElementById("assemblyKey").value = "";
-//   document.getElementById("murfKey").value = "";
-//   document.getElementById("weatherKey").value = "";
-//   document.getElementById("newsKey").value = "";
-// }
-
-// configBtn.onclick = () => { loadKeys(); configModal.style.display = "flex"; };
-// closeConfigBtn.onclick = () => { configModal.style.display = "none"; };
-
 configBtn.onclick = () => { configModal.style.display = "flex"; };
 closeConfigBtn.onclick = () => { configModal.style.display = "none"; };
 let geminiKey = "";
@@ -747,23 +640,6 @@ let assemblyKey = "";
 let murfKey = "";
 let weatherKey = "";
 let newsKey = "";
-
-// saveKeysBtn.onclick = () => {
-//   geminiKey   = document.getElementById("geminiKey").value.trim();
-//   assemblyKey = document.getElementById("assemblyKey").value.trim();
-//   murfKey     = document.getElementById("murfKey").value.trim();
-//   weatherKey  = document.getElementById("weatherKey").value.trim();
-//   newsKey     = document.getElementById("newsKey").value.trim();
-
-//   if (!geminiKey || !assemblyKey || !murfKey) {
-//     alert("⚠️ Missing required API keys. Gemini, AssemblyAI, and Murf are mandatory.");
-//     return;
-//   }
-
-//   alert("Keys saved for this session. They will reset if you reload.");
-//   document.getElementById("configModal").style.display = "none";
-// };
-
 
 saveKeysBtn.onclick = async () => {
   const geminiKey   = document.getElementById("geminiKey").value.trim();
@@ -792,7 +668,7 @@ saveKeysBtn.onclick = async () => {
     const data = await r.json();
     if (r.ok) {
       alert("Keys saved for this voyage, savvy! The ship's systems are now a-go.");
-      window.voiceAgent.keysSet = true; // Set a flag on the global agent object
+      window.voiceAgent.keysSet = true; 
       document.getElementById("configModal").style.display = "none";
     } else {
       alert(`Arrr! Failed to save keys: ${data.error}`);
