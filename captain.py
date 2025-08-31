@@ -77,8 +77,6 @@ class ChatResponse(BaseModel):
     has_audio: bool = False
 
 # ===== CONFIGURATION =====
-
-GEMINI_API_KEY = ""
 ASSEMBLYAI_API_KEY = ""
 GEMINI_API_KEY = ""
 MURF_API_KEY = ""
@@ -450,7 +448,7 @@ async def chat_with_captain(request: TextRequest):
 
 @app.post("/config/keys")
 async def update_keys(keys: Dict[str, str]):
-    required = ["gemini", "assemblyai", "murf", "weather", "news"]
+    required = ["gemini", "assemblyai", "murf"]
     missing = [k for k in required if not keys.get(k)]
     if missing:
         return JSONResponse(
@@ -459,18 +457,27 @@ async def update_keys(keys: Dict[str, str]):
         )
     
     global GEMINI_API_KEY, ASSEMBLYAI_API_KEY, MURF_API_KEY, OPENWEATHER_API_KEY, NEWS_API_KEY
+
+   # Set the global keys from the request body
+    GEMINI_API_KEY = keys.get("gemini", "")
+    ASSEMBLYAI_API_KEY = keys.get("assemblyai", "")
+    MURF_API_KEY = keys.get("murf", "")
+    OPENWEATHER_API_KEY = keys.get("weather", "")
+    NEWS_API_KEY = keys.get("news", "")
     
-    GEMINI_API_KEY = keys["gemini"]
-    genai.configure(api_key=GEMINI_API_KEY)
+    # GEMINI_API_KEY = keys["gemini"]
+    # genai.configure(api_key=GEMINI_API_KEY)
 
-    ASSEMBLYAI_API_KEY = keys["assemblyai"]
-    aai.settings.api_key = ASSEMBLYAI_API_KEY
+    # ASSEMBLYAI_API_KEY = keys["assemblyai"]
+    # aai.settings.api_key = ASSEMBLYAI_API_KEY
 
-    MURF_API_KEY = keys["murf"]
-    OPENWEATHER_API_KEY = keys["weather"]
-    NEWS_API_KEY = keys["news"]
+    # MURF_API_KEY = keys["murf"]
+    # OPENWEATHER_API_KEY = keys["weather"]
+    # NEWS_API_KEY = keys["news"]
 
-    return {"status": "updated", "keys_set": list(keys.keys())}
+    # return {"status": "updated", "keys_set": list(keys.keys())}
+    return {"status": "updated", "keys_set": [k for k, v in keys.items() if v]}
+
 
 # ===== WEATHER API ENDPOINT =====
 import requests
@@ -565,6 +572,161 @@ async def generate_sea_shanty():
     return {"shanty": random.choice(shanties)}
 
 
+# @app.post("/chat/voice")
+# async def voice_chat_with_captain(
+#     session_id: str = Form(...),
+#     audio: UploadFile = File(...)
+# ):
+#     """Voice chat with Captain Blackbeard"""
+    
+#     if not audio.content_type or not audio.content_type.startswith("audio/"):
+#         return JSONResponse({
+#             "error": "That don't sound like proper audio, matey!",
+#             "session_id": session_id
+#         }, status_code=400)
+    
+#     tmp_path = None
+#     try:
+        
+#         with tempfile.NamedTemporaryFile(delete=False, suffix=".webm") as tmp:
+#             content = await audio.read()
+#             if len(content) == 0:
+#                 return JSONResponse({
+#                     "error": "Empty bottle! No message heard!",
+#                     "session_id": session_id
+#                 }, status_code=400)
+#             tmp.write(content)
+#             tmp_path = tmp.name
+        
+#         stt_success, transcribed_text, stt_error = await transcribe_speech(tmp_path, session_id)
+        
+#         if not stt_success:
+#             return JSONResponse({
+#                 "error": transcribed_text,
+#                 "session_id": session_id,
+#                 "transcription_error": stt_error
+#             }, status_code=400)
+        
+#         SHIP_MEMORY.log_message(session_id, {
+#             "role": "user",
+#             "content": transcribed_text,
+#             "timestamp": time.time()
+#         })
+#         lower = transcribed_text.lower()
+
+#         if "weather" in lower:
+#             import re
+#             match = re.search(r"weather (in|at|of)?\s*(.*)", transcribed_text.lower())
+#             city = match.group(2).strip() if match else transcribed_text.strip()
+
+#             result = await get_weather(city=city, session_id=session_id)
+#             pirate_msg = result.get("pirate_report") or result.get("error", "Arrr! No forecast today, matey!")
+
+
+#             SHIP_MEMORY.log_message(session_id, {
+#                 "role": "assistant",
+#                 "content": pirate_msg,
+#                 "timestamp": time.time(),
+#                 "error_type": None
+#             })
+
+#             return {
+#                 "session_id": session_id,
+#                 "transcribed_text": transcribed_text,
+#                 "response": pirate_msg,
+#                 "message_count": len(SHIP_MEMORY.get_crew_messages(session_id)),
+#                 "recent_messages": SHIP_MEMORY.get_recent_voyage_log(session_id, 6),
+#                 "has_audio": False
+#             }
+
+#         if "news" in transcribed_text.lower():
+#             topic = transcribed_text.lower().split("news")[-1].strip()
+#             if not topic:
+#                 topic = "world"
+#             try:
+#                 articles = await get_news(topic)
+#                 if articles:
+#                     headlines = "\n".join([f"- {a}" for a in articles[:3]])
+#                     response_text = f"📰 Hear ye, matey! Fresh tales from the seas: \n{headlines}"
+#                 else:
+#                     response_text = f"Blimey! Could not fetch news on {topic}, matey."
+                
+#                 SHIP_MEMORY.log_message(session_id, {
+#                     "role": "assistant",
+#                     "content": response_text,
+#                     "timestamp": time.time()
+#                 })
+#                 tts_success, audio_data, tts_error = await generate_pirate_speech(response_text, "en-US-marcus", session_id)
+#                 return {
+#                     "session_id": session_id,
+#                     "transcribed_text": transcribed_text,
+#                     "response": response_text,
+#                     "message_count": len(SHIP_MEMORY.get_crew_messages(session_id)),
+#                     "recent_messages": SHIP_MEMORY.get_recent_voyage_log(session_id, 6),
+#                     "has_audio": tts_success,
+#                     "audio_data": audio_data if tts_success else None,
+#                     "errors": {
+#                         "stt_error": stt_error,
+#                         "llm_error": None,
+#                         "tts_error": tts_error
+#                     }
+#                 }
+#             except Exception as e:
+#                 logger.error(f"[{session_id}] News fetch error: {str(e)}")
+#                 response_text = f"⚠️ Stormy seas! Couldn’t fetch the news about {topic}, matey."
+
+
+#         conversation_prompt = build_pirate_conversation_prompt(session_id, transcribed_text)
+#         llm_success, response_text, llm_error = await get_pirate_response(conversation_prompt, session_id)        
+#         if not llm_success:
+#             response_text = "Blast! Me thinking be all muddled! What was that again?"
+        
+#         SHIP_MEMORY.log_message(session_id, {
+#             "role": "assistant",
+#             "content": response_text, 
+#             "timestamp": time.time(),
+#             "error_type": llm_error
+#         })
+        
+#         tts_success, audio_data, tts_error = await generate_pirate_speech(response_text, "en-US-marcus", session_id)
+#         recent_messages = SHIP_MEMORY.get_recent_voyage_log(session_id, 6)
+#         msg_models = []
+#         for m in recent_messages:
+#             msg_models.append(ChatMessage(
+#                 role=m.get("role", "user"),
+#                 content=m.get("content", ""),
+#                 timestamp=m.get("timestamp", time.time()),
+#                 error_type=m.get("error_type")
+#             ))
+        
+#         return {
+#             "session_id": session_id,
+#             "transcribed_text": transcribed_text,
+#             "response": response_text,
+#             "message_count": len(SHIP_MEMORY.get_crew_messages(session_id)),
+#             "recent_messages": [m.dict() for m in msg_models],
+#             "has_audio": tts_success,
+#             "audio_data": audio_data if tts_success else None,
+#             "errors": {
+#                 "stt_error": stt_error,
+#                 "llm_error": llm_error, 
+#                 "tts_error": tts_error
+#             }
+#         }
+        
+#     except Exception as e:
+#         logger.error(f"[{session_id}] Voice chat error: {str(e)}")
+#         return JSONResponse({
+#             "error": "Arrr! The seas be too rough for voice messages right now!",
+#             "session_id": session_id
+#         }, status_code=500)
+#     finally:
+#         if tmp_path and os.path.exists(tmp_path):
+#             try:
+#                 os.remove(tmp_path)
+#             except:
+#                 pass
+
 @app.post("/chat/voice")
 async def voice_chat_with_captain(
     session_id: str = Form(...),
@@ -580,7 +742,6 @@ async def voice_chat_with_captain(
     
     tmp_path = None
     try:
-        
         with tempfile.NamedTemporaryFile(delete=False, suffix=".webm") as tmp:
             content = await audio.read()
             if len(content) == 0:
@@ -605,74 +766,37 @@ async def voice_chat_with_captain(
             "content": transcribed_text,
             "timestamp": time.time()
         })
+        
+        # --- Skill Handling (Weather & News) ---
         lower = transcribed_text.lower()
+        response_text = ""
+        has_audio = False
+        audio_data = None
+        llm_error = None
+        tts_error = None
 
         if "weather" in lower:
             import re
-            match = re.search(r"weather (in|at|of)?\s*(.*)", transcribed_text.lower())
-            city = match.group(2).strip() if match else transcribed_text.strip()
-
+            match = re.search(r"weather (in|at|of)?\s*(.*)", lower)
+            city = match.group(2).strip() if match and match.group(2) else "the high seas" # Default city
             result = await get_weather(city=city, session_id=session_id)
-            pirate_msg = result.get("pirate_report") or result.get("error", "Arrr! No forecast today, matey!")
+            response_text = result.get("pirate_report") or result.get("error", "Arrr! No forecast today, matey!")
+        
+        elif "news" in lower:
+            topic = lower.split("news")[-1].strip() or "technology"
+            result = await get_news(topic=topic, session_id=session_id)
+            response_text = result.get("news") or result.get("message") or result.get("error", "Blimey! Could not fetch news, matey.")
 
+        elif "shanty" in lower:
+            result = await generate_sea_shanty()
+            response_text = result.get("shanty") or "Arrr! Me voice be too hoarse for singin’, matey!"
 
-            SHIP_MEMORY.log_message(session_id, {
-                "role": "assistant",
-                "content": pirate_msg,
-                "timestamp": time.time(),
-                "error_type": None
-            })
-
-            return {
-                "session_id": session_id,
-                "transcribed_text": transcribed_text,
-                "response": pirate_msg,
-                "message_count": len(SHIP_MEMORY.get_crew_messages(session_id)),
-                "recent_messages": SHIP_MEMORY.get_recent_voyage_log(session_id, 6),
-                "has_audio": False
-            }
-
-        if "news" in transcribed_text.lower():
-            topic = transcribed_text.lower().split("news")[-1].strip()
-            if not topic:
-                topic = "world"
-            try:
-                articles = await get_news(topic)
-                if articles:
-                    headlines = "\n".join([f"- {a}" for a in articles[:3]])
-                    response_text = f"📰 Hear ye, matey! Fresh tales from the seas: \n{headlines}"
-                else:
-                    response_text = f"Blimey! Could not fetch news on {topic}, matey."
-                
-                SHIP_MEMORY.log_message(session_id, {
-                    "role": "assistant",
-                    "content": response_text,
-                    "timestamp": time.time()
-                })
-                tts_success, audio_data, tts_error = await generate_pirate_speech(response_text, "en-US-marcus", session_id)
-                return {
-                    "session_id": session_id,
-                    "transcribed_text": transcribed_text,
-                    "response": response_text,
-                    "message_count": len(SHIP_MEMORY.get_crew_messages(session_id)),
-                    "recent_messages": SHIP_MEMORY.get_recent_voyage_log(session_id, 6),
-                    "has_audio": tts_success,
-                    "audio_data": audio_data if tts_success else None,
-                    "errors": {
-                        "stt_error": stt_error,
-                        "llm_error": None,
-                        "tts_error": tts_error
-                    }
-                }
-            except Exception as e:
-                logger.error(f"[{session_id}] News fetch error: {str(e)}")
-                response_text = f"⚠️ Stormy seas! Couldn’t fetch the news about {topic}, matey."
-
-
-        conversation_prompt = build_pirate_conversation_prompt(session_id, transcribed_text)
-        llm_success, response_text, llm_error = await get_pirate_response(conversation_prompt, session_id)        
-        if not llm_success:
-            response_text = "Blast! Me thinking be all muddled! What was that again?"
+        # --- General LLM Conversation if no skill is triggered ---
+        if not response_text:
+            conversation_prompt = build_pirate_conversation_prompt(session_id, transcribed_text)
+            llm_success, response_text, llm_error = await get_pirate_response(conversation_prompt, session_id)
+            if not llm_success:
+                response_text = "Blast! Me thinking be all muddled! What was that again?"
         
         SHIP_MEMORY.log_message(session_id, {
             "role": "assistant",
@@ -681,7 +805,11 @@ async def voice_chat_with_captain(
             "error_type": llm_error
         })
         
+        # --- TTS Generation ---
         tts_success, audio_data, tts_error = await generate_pirate_speech(response_text, "en-US-marcus", session_id)
+        has_audio = tts_success
+        
+        # --- Build and Return Response ---
         recent_messages = SHIP_MEMORY.get_recent_voyage_log(session_id, 6)
         msg_models = []
         for m in recent_messages:
@@ -698,8 +826,8 @@ async def voice_chat_with_captain(
             "response": response_text,
             "message_count": len(SHIP_MEMORY.get_crew_messages(session_id)),
             "recent_messages": [m.dict() for m in msg_models],
-            "has_audio": tts_success,
-            "audio_data": audio_data if tts_success else None,
+            "has_audio": has_audio,
+            "audio_data": audio_data if has_audio else None,
             "errors": {
                 "stt_error": stt_error,
                 "llm_error": llm_error, 
