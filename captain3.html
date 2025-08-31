@@ -430,67 +430,111 @@
       }
 
 
-      async onRecordingComplete() {
-  try {
+//       async onRecordingComplete() {
+//   try {
     
-    const geminiKey = document.getElementById("geminiKey").value.trim();
-    const assemblyKey = document.getElementById("assemblyKey").value.trim();
-    const murfKey = document.getElementById("murfKey").value.trim();
-    const weatherKey = document.getElementById("weatherKey").value.trim();
-    const newsKey = document.getElementById("newsKey").value.trim();
+//     const geminiKey = document.getElementById("geminiKey").value.trim();
+//     const assemblyKey = document.getElementById("assemblyKey").value.trim();
+//     const murfKey = document.getElementById("murfKey").value.trim();
+//     const weatherKey = document.getElementById("weatherKey").value.trim();
+//     const newsKey = document.getElementById("newsKey").value.trim();
 
-    if (!geminiKey || !assemblyKey || !murfKey) {
-      alert("⚠️ Please enter your Gemini, AssemblyAI, and Murf API keys before speaking to the Captain!");
-      return;
-    }
+//     if (!geminiKey || !assemblyKey || !murfKey) {
+//       alert("⚠️ Please enter your Gemini, AssemblyAI, and Murf API keys before speaking to the Captain!");
+//       return;
+//     }
 
-    this.updateStatus('connected', '🧭 Sending yer message to the Captain…');
-    const blob = new Blob(this.recordingChunks, { type: 'audio/webm' });
+//     this.updateStatus('connected', '🧭 Sending yer message to the Captain…');
+//     const blob = new Blob(this.recordingChunks, { type: 'audio/webm' });
 
-    const formData = new FormData();
-    formData.append("file", blob, "recorded.wav");
-    formData.append("geminiKey", geminiKey);
-    formData.append("assemblyKey", assemblyKey);
-    formData.append("murfKey", murfKey);
-    formData.append("weatherKey", weatherKey);
-    formData.append("newsKey", newsKey);
+//     const formData = new FormData();
+//     formData.append("file", blob, "recorded.wav");
+//     formData.append("geminiKey", geminiKey);
+//     formData.append("assemblyKey", assemblyKey);
+//     formData.append("murfKey", murfKey);
+//     formData.append("weatherKey", weatherKey);
+//     formData.append("newsKey", newsKey);
 
-    // Your Render backend
-    const BASE_URL = "https://ai-pirate-assistant.onrender.com"; 
-    const r = await fetch(`${BASE_URL}/process-audio`, { 
-      method: "POST", 
-      body: formData 
-    });
+//     // Your Render backend
+//     const BASE_URL = "https://ai-pirate-assistant.onrender.com"; 
+//     const r = await fetch(`${BASE_URL}/process-audio`, { 
+//       method: "POST", 
+//       body: formData 
+//     });
 
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    const data = await r.json();
+//     if (!r.ok) throw new Error(`HTTP ${r.status}`);
+//     const data = await r.json();
 
-    if (data.error) {
-      this.updateStatus('error', data.error);
-      return;
-    }
+//     if (data.error) {
+//       this.updateStatus('error', data.error);
+//       return;
+//     }
 
-    if (data.response) {
-      this.appendMessage('assistant', data.response);
-    }
+//     if (data.response) {
+//       this.appendMessage('assistant', data.response);
+//     }
 
-    if (typeof data.message_count === 'number') {
-      this.messageCount = data.message_count;
-      this.messageCountEl.textContent = this.messageCount;
-    }
+//     if (typeof data.message_count === 'number') {
+//       this.messageCount = data.message_count;
+//       this.messageCountEl.textContent = this.messageCount;
+//     }
 
-    if (data.has_audio && data.audio_data) {
-      await this.playServerAudioData(data.audio_data);
-    } else if (data.response) {
-      await this.speakWithAPI(data.response);
-    }
+//     if (data.has_audio && data.audio_data) {
+//       await this.playServerAudioData(data.audio_data);
+//     } else if (data.response) {
+//       await this.speakWithAPI(data.response);
+//     }
 
-    this.updateStatus('success', '🏴‍☠️ Ready for yer next command, captain!');
-  } catch (err) {
-    console.error(err);
-    this.updateStatus('error', '⚠️ Rough seas delivering yer message. Try again!');
-  }
-}
+//     this.updateStatus('success', '🏴‍☠️ Ready for yer next command, captain!');
+//   } catch (err) {
+//     console.error(err);
+//     this.updateStatus('error', '⚠️ Rough seas delivering yer message. Try again!');
+//   }
+// }
+
+      async onRecordingComplete() {
+        try {
+          this.updateStatus('connected', '🧭 Sending yer message to the Captain…');
+          const blob = new Blob(this.recordingChunks, { type: 'audio/webm' });
+          const formData = new FormData();
+          formData.append("session_id", this.sessionId);
+          formData.append("audio", blob, "recorded.webm");
+
+          const r = await fetch(`${this.serverUrl}/chat/voice`, { 
+            method: "POST", 
+            body: formData 
+          });
+
+          if (!r.ok) throw new Error(`HTTP ${r.status}`);
+          const data = await r.json();
+
+          if (data.error) {
+            this.updateStatus('error', data.error);
+            this.appendMessage('assistant', data.error);
+            return;
+          }
+
+          if (data.transcribed_text) {
+            this.appendMessage('user', data.transcribed_text);
+          }
+          if (data.response) {
+            this.appendMessage('assistant', data.response);
+          }
+
+          this.updateHistoryFromServer(data.recent_messages);
+
+          if (data.has_audio && data.audio_data) {
+            await this.playServerAudioData(data.audio_data);
+          } else if (data.response) {
+            await this.speakWithAPI(data.response);
+          }
+
+          this.updateStatus('success', '🏴‍☠️ Ready for yer next command, captain!');
+        } catch (err) {
+          console.error(err);
+          this.updateStatus('error', '⚠️ Rough seas delivering yer message. Try again!');
+        }
+      }
 
       async playServerAudioData(audioData) {
         try {
@@ -684,20 +728,56 @@ let murfKey = "";
 let weatherKey = "";
 let newsKey = "";
 
-saveKeysBtn.onclick = () => {
-  geminiKey   = document.getElementById("geminiKey").value.trim();
-  assemblyKey = document.getElementById("assemblyKey").value.trim();
-  murfKey     = document.getElementById("murfKey").value.trim();
-  weatherKey  = document.getElementById("weatherKey").value.trim();
-  newsKey     = document.getElementById("newsKey").value.trim();
+// saveKeysBtn.onclick = () => {
+//   geminiKey   = document.getElementById("geminiKey").value.trim();
+//   assemblyKey = document.getElementById("assemblyKey").value.trim();
+//   murfKey     = document.getElementById("murfKey").value.trim();
+//   weatherKey  = document.getElementById("weatherKey").value.trim();
+//   newsKey     = document.getElementById("newsKey").value.trim();
+
+//   if (!geminiKey || !assemblyKey || !murfKey) {
+//     alert("⚠️ Missing required API keys. Gemini, AssemblyAI, and Murf are mandatory.");
+//     return;
+//   }
+
+//   alert("Keys saved for this session. They will reset if you reload.");
+//   document.getElementById("configModal").style.display = "none";
+// };
+
+saveKeysBtn.onclick = async () => {
+  const geminiKey   = document.getElementById("geminiKey").value.trim();
+  const assemblyKey = document.getElementById("assemblyKey").value.trim();
+  const murfKey     = document.getElementById("murfKey").value.trim();
+  const weatherKey  = document.getElementById("weatherKey").value.trim();
+  const newsKey     = document.getElementById("newsKey").value.trim();
 
   if (!geminiKey || !assemblyKey || !murfKey) {
     alert("⚠️ Missing required API keys. Gemini, AssemblyAI, and Murf are mandatory.");
     return;
   }
-
-  alert("Keys saved for this session. They will reset if you reload.");
-  document.getElementById("configModal").style.display = "none";
+  
+  try {
+    const r = await fetch(`${window.voiceAgent.serverUrl}/config/keys`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        gemini: geminiKey,
+        assemblyai: assemblyKey,
+        murf: murfKey,
+        weather: weatherKey,
+        news: newsKey
+      })
+    });
+    const data = await r.json();
+    if (r.ok) {
+      alert("Keys saved for this voyage, savvy! The ship's systems are now a-go.");
+      document.getElementById("configModal").style.display = "none";
+    } else {
+      alert(`Arrr! Failed to save keys: ${data.error}`);
+    }
+  } catch (e) {
+    alert("Shiver me timbers! The connection to the server failed while saving keys.");
+  }
 };
 
   </script>
