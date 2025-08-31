@@ -311,10 +311,16 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-if os.path.exists("static"):
-    app.mount("/static", StaticFiles(directory="static"), name="static")
     
+def make_shanty():
+    shanties = [
+        "🎵 Yo ho ho, we code till night, chasing bugs by lantern light! 🎵",
+        "🎵 Shiver me timbers, the AI be grand, guiding our ship with a coder’s hand! 🎵",
+        "🎵 Heave ho matey, let’s set sail, with datasets vast and models that scale! 🎵",
+        "🎵 Hoist the sails and man the oars, our code be smoother than ocean shores! 🎵",
+        "🎵 Arrr, no storm can bring us down, we debug with a coder’s crown! 🎵"
+    ]
+    return {"shanty": random.choice(shanties)}
 
 @app.get("/")
 async def serve_frontend():
@@ -531,16 +537,8 @@ async def get_news(topic: str = "technology", session_id: str = Query(None)):
         return {"error": f"Shiver me timbers! News service failed: {str(e)}"}
 
 @app.get("/skill/shanty")
-async def generate_sea_shanty():
-    """Generate a short pirate sea shanty"""
-    shanties = [
-        "🎵 Yo ho ho, we code till night, chasing bugs by lantern light! 🎵",
-        "🎵 Shiver me timbers, the AI be grand, guiding our ship with a coder’s hand! 🎵",
-        "🎵 Heave ho matey, let’s set sail, with datasets vast and models that scale! 🎵",
-        "🎵 Hoist the sails and man the oars, our code be smoother than ocean shores! 🎵",
-        "🎵 Arrr, no storm can bring us down, we debug with a coder’s crown! 🎵"
-    ]
-    return {"shanty": random.choice(shanties)}
+async def shanty_endpoint():
+    return make_shanty()
 
 @app.post("/chat/voice")
 async def voice_chat_with_captain(
@@ -603,9 +601,9 @@ async def voice_chat_with_captain(
             result = await get_news(topic=topic, session_id=session_id)
             response_text = result.get("news") or result.get("message") or result.get("error", "Blimey! Could not fetch news, matey.")
 
-        elif "shanty" in lower:
-            result = await generate_sea_shanty()
-            response_text = result.get("shanty") or "Arrr! Me voice be too hoarse for singin’, matey!"
+        elif "shanty" in lower or "sing" in lower or "song" in lower:
+            result = make_shanty()
+            response_text = result["shanty"]
 
         if not response_text:
             conversation_prompt = build_pirate_conversation_prompt(session_id, transcribed_text)
