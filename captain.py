@@ -446,6 +446,7 @@ async def chat_with_captain(request: TextRequest):
             "session_id": session_id
         }, status_code=500)
 
+
 @app.post("/config/keys")
 async def update_keys(keys: Dict[str, str]):
     required = ["gemini", "assemblyai", "murf"]
@@ -458,25 +459,20 @@ async def update_keys(keys: Dict[str, str]):
     
     global GEMINI_API_KEY, ASSEMBLYAI_API_KEY, MURF_API_KEY, OPENWEATHER_API_KEY, NEWS_API_KEY
 
-   # Set the global keys from the request body
     GEMINI_API_KEY = keys.get("gemini", "")
     ASSEMBLYAI_API_KEY = keys.get("assemblyai", "")
     MURF_API_KEY = keys.get("murf", "")
     OPENWEATHER_API_KEY = keys.get("weather", "")
     NEWS_API_KEY = keys.get("news", "")
-    
-    # GEMINI_API_KEY = keys["gemini"]
-    # genai.configure(api_key=GEMINI_API_KEY)
 
-    # ASSEMBLYAI_API_KEY = keys["assemblyai"]
-    # aai.settings.api_key = ASSEMBLYAI_API_KEY
+    # 🔑 Apply keys to SDKs immediately
+    if GEMINI_API_KEY:
+        genai.configure(api_key=GEMINI_API_KEY)
+    if ASSEMBLYAI_API_KEY:
+        aai.settings.api_key = ASSEMBLYAI_API_KEY
 
-    # MURF_API_KEY = keys["murf"]
-    # OPENWEATHER_API_KEY = keys["weather"]
-    # NEWS_API_KEY = keys["news"]
-
-    # return {"status": "updated", "keys_set": list(keys.keys())}
     return {"status": "updated", "keys_set": [k for k, v in keys.items() if v]}
+
 
 
 # ===== WEATHER API ENDPOINT =====
