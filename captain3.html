@@ -275,8 +275,7 @@
       constructor() {
         
         this.serverUrl = /^https?:\/\//.test(window.location.origin) ? window.location.origin : 'http://127.0.0.1:5000';
-
-        this.sessionId = this.loadOrCreateSession();
+        this.sessionId = 'session_' + Math.random().toString(36).slice(2, 10);
         this.messageCount = 0;
 
         this.statusEl = document.getElementById('status');
@@ -298,15 +297,15 @@
       }
 
 
-      loadOrCreateSession() {
-        let id = localStorage.getItem('pirate_session_id');
-        if (!id) {
-          id = 'session_' + Math.random().toString(36).slice(2, 10);
-          localStorage.setItem('pirate_session_id', id);
-        }
-        document.getElementById('sessionDisplay').textContent = id;
-        return id;
-      }
+      // loadOrCreateSession() {
+      //   let id = localStorage.getItem('pirate_session_id');
+      //   if (!id) {
+      //     id = 'session_' + Math.random().toString(36).slice(2, 10);
+      //     localStorage.setItem('pirate_session_id', id);
+      //   }
+      //   document.getElementById('sessionDisplay').textContent = id;
+      //   return id;
+      // }
 
       bindUI() {
         this.convoBtn.addEventListener('click', () => this.startConversation());
