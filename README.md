@@ -9,7 +9,6 @@
   <img src="https://img.shields.io/badge/Murf%20AI-TTS-purple.svg" />
   <img src="https://img.shields.io/badge/AssemblyAI-FF6F61" />
   <img src="https://img.shields.io/badge/Gemini%20LLM-green.svg" />
-  <img src="https://img.shields.io/badge/WebSockets-4A90E2?;logoColor=white)" />
   <img src="https://img.shields.io/badge/Deployed%20on-Render-46E3B7?;logoColor=black)" />
 
 </p>  
@@ -41,8 +40,7 @@ It comprises:
 
 ## 🚀 Demo  
 
-Try it live here:  
-👉 [AI Pirate Assistant on Render](https://ai-pirate-assistant.onrender.com/)  
+Try it live here:  👉 [AI Pirate Assistant on Render](https://ai-pirate-assistant.onrender.com/)  
 
 ⚠️ **Note:** You must enter your own API keys in the **Config modal** before using. Keys are **not saved** and will be cleared once the session ends.  
 
@@ -66,7 +64,7 @@ Try it live here:
 
 AI-Pirate-Assistant/  
 ├── captain.py      # FastAPI backend logic  
-├── captain.html    # Frontend pirate-themed UI  
+├── captain3.html    # Frontend pirate-themed UI  
 └── README.md       # Project documentation    
 
 
@@ -117,18 +115,10 @@ Config Modal
 <img width="1366" height="768" alt="Screenshot (129)" src="https://github.com/user-attachments/assets/3cffdb5f-9d74-4663-a7c4-76ac4d5c46d0" />
 
 
-## 🤝 Contributing
+## 🏆 Murf AI 30-Day Challenge
 
-Contributions, issues, and feature requests are welcome!  
-Feel free to open a PR or start a discussion.  
+Built as part of the Murf AI 30-Day AI Voice Agents Challenge.
 
-## 🌟 Acknowledgements    
+I completed the challenge through daily project/task submissions and received a certificate and challenge merchandise.
 
-Captain Blackbeard was crafted as part of my learning & exploration journey. 🚀  
-Special appreciation to the 30 Days of AI Voice Agents Challenge, which inspired and pushed me to bring this project to life. 🏴‍☠️  
-
----
-
-
-⚓ “Arrr, may yer code sail smoothly and yer bugs walk the plank!” 🏴‍☠️
 
