@@ -1,4 +1,5 @@
-# 🏴‍☠️ Captain Blackbeard – AI Voice Assistant
+
+# 🏴‍☠️ AI Pirate Assistant
 
 <p align="center">
   <img src="https://img.shields.io/badge/Python-3.10+-blue.svg?logo=python&amp;logoColor=white" />
@@ -13,19 +14,9 @@
 
 </p>  
 
-
-
-##  📖 Overview  
-
-**Captain Blackbeard** (a.k.a. **AI-Pirate-Assistant**) is a voice-powered AI assistant with a pirate's swagger. It:
-- **Listens** to your voice commands via browser.
-- Uses **Gemini LLM** to craft intelligent, pirate-flavored responses.
-- Speaks back using **Murf AI** for natural TTS.
-- Keeps your API keys purely session-based—nothing is persistently stored.
-
-It comprises:
-- FastAPI backend.
-- Pirate-themed frontend.  
+A voice-enabled AI assistant that combines speech recognition,
+LLM-powered conversation, and text-to-speech to provide an
+interactive browser-based assistant.
 
 
 ## ⚡ Features
@@ -57,7 +48,7 @@ Try it live here:  👉 [AI Pirate Assistant on Render](https://ai-pirate-assist
   - Murf AI (Text-to-Speech)  
   - Weather API  
   - News API  
-- **Deployment**: Render   
+
 
 
 ## 📂 Project Structure  
@@ -95,16 +86,16 @@ uvicorn captain:app --host 0.0.0.0 --port 8000 --reload
 - Enter your Gemini LLM and Murf AI API keys in the config modal.  
 - Click Speak to Captain, speak into your mic, and get responses with authentic pirate flair.     
 
+## 🚀 Deployment
 
-## 🎮 How to Use  
+The application is deployed using Render.  
 
-1. Open the app (local or Render link).  
-2. Enter your API keys in the Config modal.  
-3. Speak into the mic 🎤 – your voice is transcribed.  
-4. Captain Blackbeard (AI) responds with text + voice 🔊.  
-5. Keys disappear after session ends – no storage.  
 
----
+## 🏆 Murf AI 30-Day Challenge
+
+Built as part of the Murf AI 30-Day AI Voice Agents Challenge.
+
+The development process and daily challenge submissions were documented on LinkedIn.
 
 ## 📸 Screenshots  
 
@@ -115,10 +106,6 @@ Config Modal
 <img width="1366" height="768" alt="Screenshot (129)" src="https://github.com/user-attachments/assets/3cffdb5f-9d74-4663-a7c4-76ac4d5c46d0" />
 
 
-## 🏆 Murf AI 30-Day Challenge
+## 👩‍💻 Author
 
-Built as part of the Murf AI 30-Day AI Voice Agents Challenge.
-
-I completed the challenge through daily project/task submissions and received a certificate and challenge merchandise.
-
-
+Shreya Sati
